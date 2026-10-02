@@ -382,6 +382,29 @@
       orders = orders.filter((o) => o.id !== id);
       write(K.orders, orders);
     },
+    /* the shared store accepted this order */
+    markShared(id) {
+      const o = ORDERS.byId(id);
+      if (o && !o.shared) {
+        o.shared = true;
+        write(K.orders, orders);
+      }
+      return o || null;
+    },
+    /* pull orders placed on other devices into this dashboard */
+    mergeCloud(list) {
+      let added = 0;
+      (list || []).forEach((co) => {
+        if (!co || !co.id || orders.some((o) => o.id === co.id)) return;
+        orders.push(Object.assign({}, co, { shared: true }));
+        added++;
+      });
+      if (added) {
+        orders.sort((a, b) => (b.placedAt || 0) - (a.placedAt || 0));
+        write(K.orders, orders);
+      }
+      return added;
+    },
     stats() {
       const live = orders.filter((o) => o.status !== 'cancelled' && o.status !== 'refunded');
       const revenue = live.reduce((n, o) => n + o.total, 0);

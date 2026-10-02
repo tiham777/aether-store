@@ -1163,6 +1163,15 @@
         </form>
       </section>
 
+      <section class="acard">
+        <div class="acard__head"><h2>Shared data (cloud)</h2><span class="xs muted" data-shared-status>Checking…</span></div>
+        <p class="xs muted">Orders placed online are mirrored to a shared store so this dashboard sees them from any device. Set <span class="mono">UPSTASH_REDIS_REST_URL</span> and <span class="mono">UPSTASH_REDIS_REST_TOKEN</span> in your Vercel project to enable it — until then everything stays in this browser.</p>
+        <form class="row row-3" data-shared-form novalidate>
+          <input class="input" name="key" placeholder="Admin key (only if AETHER_ADMIN_KEY is set)" style="flex:1" autocomplete="off">
+          <button class="abtn abtn--primary" type="submit">Sync orders</button>
+        </form>
+      </section>
+
       <section class="acard danger-zone">
         <div class="acard__head"><h2>Danger zone</h2></div>
         <div class="stack stack-3">
@@ -1245,6 +1254,44 @@
       UI.toast({ title: 'Announcements restored', sub: 'Factory copy is back.' });
       AETHER.render();
     });
+
+    const sharedForm = root.querySelector('[data-shared-form]');
+    const sharedStatus = root.querySelector('[data-shared-status]');
+    if (sharedForm && sharedStatus) {
+      const KEY_LS = 'aether.apikey.v1';
+      const savedKey = (() => {
+        try {
+          return localStorage.getItem(KEY_LS) || '';
+        } catch (e) {
+          return '';
+        }
+      })();
+      sharedForm.elements.key.value = savedKey;
+      const labels = {
+        live: 'Connected — shared store reachable',
+        locked: 'Connected — admin key required',
+        unconfigured: 'Not configured — set the Upstash env vars on Vercel',
+        off: 'Not configured — running on local storage',
+      };
+      (window.API ? API.probe() : Promise.resolve('off')).then((state) => {
+        sharedStatus.textContent = labels[state] || labels.off;
+      });
+      sharedForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const key = String(sharedForm.elements.key.value || '').trim();
+        try {
+          localStorage.setItem(KEY_LS, key);
+        } catch (err) {}
+        const list = await API.pullOrders(key);
+        if (!list) return void UI.toast({ title: 'Sync failed', sub: 'The shared store is unreachable — check the env vars.' });
+        const added = Orders.mergeCloud(list);
+        UI.toast({
+          title: 'Synced',
+          sub: added ? `${added} new order${added === 1 ? '' : 's'} pulled from the shared store.` : 'Already up to date.',
+        });
+        AETHER.render();
+      });
+    }
 
     root.querySelector('[data-loaddemo]').addEventListener('click', () =>
       confirmModal(

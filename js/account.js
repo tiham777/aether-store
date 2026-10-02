@@ -604,6 +604,34 @@
     </div>`;
   }
 
+  const FLOW = ['paid', 'packed', 'shipped', 'delivered'];
+
+  function orderSteps(o) {
+    const last = (o.history || []).slice(-1)[0];
+    if (o.status === 'cancelled' || o.status === 'refunded') {
+      return `<div class="osteps osteps--dead">
+        <span class="st st--${o.status}">${STATUS_LABEL[o.status] || o.status}</span>
+        <span class="xs muted">Updated ${fmtTime(last ? last.at : o.placedAt)}</span>
+      </div>`;
+    }
+    const idx = FLOW.indexOf(o.status);
+    const dateOf = (s) => {
+      const h = (o.history || []).find((x) => x.status === s);
+      return h ? fmtDate(h.at) : '';
+    };
+    return `<ol class="osteps">
+      ${FLOW.map((s, i) => {
+        const cls = i < idx ? 'is-done' : i === idx ? 'is-now' : '';
+        const when = dateOf(s) || (i <= idx ? '…' : '');
+        return `<li class="ostep ${cls}">
+          <span class="ostep__dot">${i < idx ? icon('check') : ''}</span>
+          <span class="ostep__t">${STATUS_LABEL[s] || s}</span>
+          <span class="ostep__d">${when}</span>
+        </li>`;
+      }).join('')}
+    </ol>`;
+  }
+
   function panelOrders(u, orders, active) {
     const rows = orders.length
       ? orders
@@ -648,6 +676,7 @@
                   <div><span class="muted">Tax</span><span>${money(o.tax)}</span></div>
                   <div class="strong"><span>Total</span><span>${money(o.total)}</span></div>
                 </div>
+                ${orderSteps(o)}
                 <ul class="otimeline">
                   ${(o.history || [{ status: o.status, at: o.placedAt }])
                     .map(

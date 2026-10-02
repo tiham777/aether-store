@@ -426,12 +426,52 @@
         </div>
       </div>
 
+      <div class="filters" role="group" aria-label="Refine products">
+        <div class="filters__set">
+          <span class="filters__label">Price</span>
+          ${[
+                ['', 'Any'],
+                ['0-100', 'Under $100'],
+                ['100-250', '$100 – $250'],
+                ['250-', '$250+'],
+              ]
+                .map(
+                  ([v, l]) =>
+                    `<button class="pill${(params.price || '') === v ? ' is-active' : ''}" data-fprice="${v}" aria-pressed="${
+                      (params.price || '') === v
+                    }">${l}</button>`
+                )
+                .join('')}
+        </div>
+        <div class="filters__set">
+          <span class="filters__label">Rating</span>
+          ${[
+                ['', 'Any'],
+                ['4.5', '4.5+'],
+                ['4', '4+'],
+              ]
+                .map(
+                  ([v, l]) =>
+                    `<button class="pill${(params.rating || '') === v ? ' is-active' : ''}" data-frating="${v}" aria-pressed="${
+                      (params.rating || '') === v
+                    }">${l}</button>`
+                )
+                .join('')}
+        </div>
+        <div class="filters__set">
+          <span class="filters__label">Availability</span>
+          <button class="pill${params.stock === '1' ? ' is-active' : ''}" data-fstock="1" aria-pressed="${
+            params.stock === '1'
+          }">In stock only</button>
+        </div>
+      </div>
+
       <div class="grid-products grid-products--4" data-grid></div>
       <div class="empty-state" data-empty hidden>
         <div class="cart-empty__icon">${icon('search')}</div>
-        <h3 class="h3">Nothing here yet</h3>
-        <p class="muted">That category is between releases — try the full collection.</p>
-        <a class="btn btn--primary btn--sm" href="#/shop">Show everything ${icon('arrowRight')}</a>
+        <h3 class="h3">Nothing matches those filters</h3>
+        <p class="muted">Try a wider price range, or clear everything and start again.</p>
+        <a class="btn btn--primary btn--sm" href="#/shop">Clear all filters ${icon('arrowRight')}</a>
       </div>
       <div style="height:clamp(60px,8vw,110px)"></div>
     </div>
@@ -447,8 +487,20 @@
         const empty = root.querySelector('[data-empty]');
         const countEl = root.querySelector('[data-shopcount]');
 
+        const priceMatch = (cents) => {
+          const range = params.price || '';
+          if (!range) return true;
+          const [a, b] = range.split('-');
+          const lo = Number(a) * 100 || 0;
+          const hi = b ? Number(b) * 100 : Infinity;
+          return cents >= lo && cents < hi;
+        };
+        const minRating = parseFloat(params.rating) || 0;
+        const inStock = params.stock === '1';
+
         const paint = () => {
           let list = active === 'all' ? DATA.products.slice() : inCat(active);
+          list = list.filter((x) => priceMatch(x.price) && x.rating >= minRating && (!inStock || x.stock > 0));
           if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
           if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
           if (sort === 'rating') list.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
@@ -465,6 +517,27 @@
             location.hash = btn.getAttribute('data-filter') === 'all' ? '#/shop' : `#/shop?cat=${btn.getAttribute('data-filter')}`;
           })
         );
+
+        const setFilter = (key, val) => {
+          const q = new URLSearchParams();
+          if (active !== 'all') q.set('cat', active);
+          const price = key === 'price' ? val : params.price || '';
+          const rating = key === 'rating' ? val : params.rating || '';
+          const stock = key === 'stock' ? (params.stock === '1' ? '' : '1') : params.stock || '';
+          if (price) q.set('price', price);
+          if (rating) q.set('rating', rating);
+          if (stock) q.set('stock', stock);
+          const qs = q.toString();
+          location.hash = '#/shop' + (qs ? '?' + qs : '');
+        };
+        root.querySelectorAll('[data-fprice]').forEach((b) =>
+          b.addEventListener('click', () => setFilter('price', b.getAttribute('data-fprice')))
+        );
+        root.querySelectorAll('[data-frating]').forEach((b) =>
+          b.addEventListener('click', () => setFilter('rating', b.getAttribute('data-frating')))
+        );
+        const stockBtn = root.querySelector('[data-fstock]');
+        if (stockBtn) stockBtn.addEventListener('click', () => setFilter('stock', '1'));
         const sortEl = root.querySelector('[data-sort]');
         sortEl.addEventListener('change', () => {
           sort = sortEl.value;
@@ -627,24 +700,39 @@
           <span class="eyebrow" data-reveal>Reviews</span>
           <h2 class="h2" data-reveal style="--d:70ms">${p.rating.toFixed(1)} out of 5 <span class="accent">— ${p.reviews} owners.</span></h2>
         </div>
-        <span class="row row-3" data-reveal>${stars(p.rating)}<span class="small muted">Verified purchases only</span></span>
+        <span class="row row-3" data-reveal>${stars(p.rating)}<span class="small muted">Owners only · purchases verified</span></span>
       </div>
-      <div class="review-grid">
-        ${DATA.reviews
-          .map(
-            (r, i) => `
-          <article class="review" data-reveal style="--d:${i * 80}ms">
-            <div class="review__top">
-              <span class="review__who"><span class="avatar">${r.initials}</span><span><span class="review__name">${
-              r.name
-            }</span><br><span class="review__date">${r.date}</span></span></span>
-              ${stars(r.rating)}
-            </div>
-            <p class="review__text">${esc(r.text)}</p>
-            <span class="review__verified">${icon('check')} Verified purchase</span>
-          </article>`
-          )
-          .join('')}
+      <div class="review-grid" data-review-grid>${reviewCards(Reviews.forProduct(p.id))}</div>
+
+      <div class="review-write" data-review-write>
+        <div class="review-write__head">
+          <h3 class="h3">Write a review</h3>
+          <span class="xs muted">${
+            window.Auth && Auth.current()
+              ? `Signed in as ${esc(Auth.current().name)}`
+              : 'Sign in to share how it’s holding up'
+          }</span>
+        </div>
+        <form class="review-write__form" data-review-form novalidate>
+          <div class="rrating" role="radiogroup" aria-label="Your rating">
+            ${[1, 2, 3, 4, 5]
+              .map(
+                (n) =>
+                  `<button type="button" class="rrating__star${n <= 5 ? ' is-on' : ''}" data-rate="${n}" role="radio" aria-checked="${
+                    n === 5
+                  }" aria-label="${n} star${n > 1 ? 's' : ''}">${icon('star')}</button>`
+              )
+              .join('')}
+          </div>
+          <label class="field">
+            <span class="sr-only">Your review</span>
+            <textarea class="input textarea" name="text" rows="3" maxlength="500" placeholder="How is it holding up after a few weeks?" required></textarea>
+          </label>
+          <div class="row row-3 wrap">
+            <button class="btn btn--primary btn--sm" type="submit">Post review</button>
+            <span class="xs muted">Verified purchases get a badge.</span>
+          </div>
+        </form>
       </div>
     </section>
 
@@ -665,6 +753,7 @@
         bindGallery(root, p);
         bindAccordions(root);
         bindPdpBuy(root, p);
+        bindReviews(root, p);
         const cd = root.querySelector('[data-countdown]');
         if (cd) tickCountdown(cd);
         injectProductLd(p);
@@ -704,6 +793,129 @@
     } catch (e) {
       /* structured data is progressive enhancement */
     }
+  }
+
+  /* --------------------------- per-product reviews ------------------------ */
+
+  function fmtWhen(ts) {
+    return new Date(ts || Date.now()).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function reviewCards(list) {
+    if (!list.length) {
+      return `<div class="review-empty">${icon('star')}<p>No written reviews yet — yours would be the first.</p></div>`;
+    }
+    return list
+      .map(
+        (r, i) => `
+      <article class="review" data-reveal style="--d:${Math.min(i, 4) * 80}ms">
+        <div class="review__top">
+          <span class="review__who"><span class="avatar">${esc(r.initials || '?')}</span><span><span class="review__name">${esc(
+            r.name
+          )}</span><br><span class="review__date">${fmtWhen(r.at)}</span></span></span>
+          ${stars(r.rating)}
+        </div>
+        <p class="review__text">${esc(r.text)}</p>
+        ${
+          r.verified
+            ? `<span class="review__verified">${icon('check')} Verified purchase</span>`
+            : `<span class="xs muted">Owner review</span>`
+        }
+      </article>`
+      )
+      .join('');
+  }
+
+  function bindReviews(root, p) {
+    const grid = root.querySelector('[data-review-grid]');
+    const form = root.querySelector('[data-review-form]');
+    if (!grid || !form) return;
+
+    const repaint = () => {
+      grid.innerHTML = reviewCards(Reviews.forProduct(p.id));
+      grid.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-in'));
+    };
+
+    /* pull shared reviews when the backend is configured */
+    if (window.API) {
+      API.pullReviews(p.id)
+        .then((cloud) => {
+          if (cloud && Reviews.mergeCloud(cloud)) repaint();
+        })
+        .catch(() => {});
+    }
+
+    const ratingEl = form.querySelector('.rrating');
+    let rating = 5;
+    const paintStars = () => {
+      ratingEl.querySelectorAll('[data-rate]').forEach((x) => {
+        const n = Number(x.getAttribute('data-rate'));
+        x.classList.toggle('is-on', n <= rating);
+        x.setAttribute('aria-checked', String(n === rating));
+      });
+    };
+    ratingEl.querySelectorAll('[data-rate]').forEach((b) =>
+      b.addEventListener('click', () => {
+        rating = Number(b.getAttribute('data-rate'));
+        paintStars();
+      })
+    );
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = window.Auth ? Auth.current() : null;
+      if (!u) {
+        UI.toast({
+          title: 'Sign in to review',
+          sub: 'Owners with an account can post reviews.',
+          action: { label: 'Sign in', href: '#/login?next=' + encodeURIComponent('/product/' + p.id) },
+        });
+        return;
+      }
+      const ta = form.querySelector('[name="text"]');
+      const text = ta.value.trim();
+      if (text.length < 10) {
+        UI.toast({ title: 'A few more words', sub: 'Reviews need at least 10 characters.' });
+        ta.focus();
+        return;
+      }
+      if (Reviews.forProduct(p.id).some((r) => r.userId === u.id)) {
+        UI.toast({ title: 'You already reviewed this', sub: 'One review per owner keeps things honest.' });
+        return;
+      }
+      const purchased = window.Orders
+        ? Orders.forUser(u).some((o) => (o.items || []).some((it) => (it.productId || it.id) === p.id))
+        : false;
+      const rec = Reviews.add({
+        productId: p.id,
+        userId: u.id,
+        name: u.name,
+        initials: (u.name || '?')
+          .split(/\s+/)
+          .map((w) => w[0])
+          .join('')
+          .slice(0, 2)
+          .toUpperCase(),
+        rating,
+        text,
+        verified: purchased,
+      });
+      ta.value = '';
+      rating = 5;
+      paintStars();
+      repaint();
+      UI.toast({
+        title: 'Review posted',
+        sub: purchased ? 'Thanks — marked as a verified purchase.' : 'Thanks for sharing with future owners.',
+      });
+      if (window.API) {
+        API.pushReview(rec)
+          .then((r) => {
+            if (r.shared) Reviews.markShared(rec.id);
+          })
+          .catch(() => {});
+      }
+    });
   }
 
   function bindGallery(root, p) {
@@ -1181,6 +1393,15 @@
       };
       const saved = window.Orders ? Orders.place(order) : order;
       window.__lastOrder = saved;
+      /* best-effort: mirror the order into the shared store so the admin
+         dashboard sees it from any device (falls back to local-only) */
+      if (window.API) {
+        API.placeOrder(saved)
+          .then((r) => {
+            if (r.shared && window.Orders) Orders.markShared(saved.id);
+          })
+          .catch(() => {});
+      }
       Store.clear();
       location.hash = '#/order-confirmed?id=' + encodeURIComponent(saved.id);
     });

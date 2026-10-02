@@ -206,4 +206,49 @@
   };
 
   window.Store = Store;
+
+  /* ------------------------------- reviews ------------------------------- */
+  /* Written per-product reviews. Local-first; merges with the shared store
+     when the backend is configured (see js/api.js). */
+  const REVIEWS_KEY = 'aether.reviews.v1';
+  let reviews = read(REVIEWS_KEY, null);
+  if (!Array.isArray(reviews)) reviews = [];
+  const rvId = () => 'rv_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  const Reviews = {
+    all() {
+      return reviews.slice().sort((a, b) => (b.at || 0) - (a.at || 0));
+    },
+    forProduct(id) {
+      return Reviews.all().filter((r) => r.productId === id);
+    },
+    add(rec) {
+      const full = Object.assign({ id: rvId(), at: Date.now() }, rec);
+      reviews.push(full);
+      write(REVIEWS_KEY, reviews);
+      return full;
+    },
+    markShared(id) {
+      const r = reviews.find((x) => x.id === id);
+      if (r && !r.shared) {
+        r.shared = true;
+        write(REVIEWS_KEY, reviews);
+      }
+    },
+    mergeCloud(list) {
+      let added = 0;
+      (list || []).forEach((r) => {
+        if (r && r.id && r.productId && !reviews.some((x) => x.id === r.id)) {
+          reviews.push(r);
+          added++;
+        }
+      });
+      if (added) {
+        reviews.sort((a, b) => (b.at || 0) - (a.at || 0));
+        write(REVIEWS_KEY, reviews);
+      }
+      return added;
+    },
+  };
+  window.Reviews = Reviews;
 })();
