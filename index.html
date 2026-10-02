@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" data-theme="aether">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>AETHER — Considered objects for modern life</title>
+    <meta name="description" content="A deliberately small line of audio, workspace and everyday essentials — designed in Copenhagen, built to be repaired, kept for decades.">
+    <meta name="theme-color" content="#faf9f7">
+    <meta name="color-scheme" content="light">
+    <meta property="og:title" content="AETHER — Considered objects for modern life">
+    <meta property="og:description" content="A deliberately small product line. Repairable by design, quiet by default, warrantied for years.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="assets/fonts/inter-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="assets/fonts/inter-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/admin.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#app">Skip to content</a>
+
+    <!-- announcement -->
+    <div class="topbar" role="region" aria-label="Announcements">
+      <div class="topbar__viewport">
+        <div class="topbar__track">
+          <div class="topbar__group">
+            <span class="topbar__item"><b>Free express shipping</b> on orders over $150</span>
+            <span class="topbar__item">60-night trial on everything</span>
+            <span class="topbar__item">2-year warranty · parts stocked 7 years</span>
+            <span class="topbar__item">New: <b>Halo Series 02</b> has landed</span>
+            <span class="topbar__item">Duties included to 92 countries</span>
+          </div>
+          <div class="topbar__group" aria-hidden="true">
+            <span class="topbar__item"><b>Free express shipping</b> on orders over $150</span>
+            <span class="topbar__item">60-night trial on everything</span>
+            <span class="topbar__item">2-year warranty · parts stocked 7 years</span>
+            <span class="topbar__item">New: <b>Halo Series 02</b> has landed</span>
+            <span class="topbar__item">Duties included to 92 countries</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- header -->
+    <header class="header">
+      <div class="container header__inner">
+        <a class="brand" href="#/" aria-label="AETHER — home">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#ffffff" d="M12 3.4 20.7 20.6H16.4L12 11.9 7.6 20.6H3.3z"></path>
+              <circle cx="12" cy="16.6" r="1.8" fill="#cf5b34"></circle>
+            </svg>
+          </span>
+          <span class="brand__word">Aether</span>
+        </a>
+
+        <nav class="nav" aria-label="Primary">
+          <a class="nav__link" data-nav="shop" href="#/shop">Shop</a>
+          <a class="nav__link" href="#/shop?cat=audio">Audio</a>
+          <a class="nav__link" href="#/shop?cat=workspace">Workspace</a>
+          <a class="nav__link" href="#/shop?cat=everyday">Everyday</a>
+          <a class="nav__link" data-nav="journal" href="#/journal">Journal</a>
+        </nav>
+
+        <div class="header__actions">
+          <button class="search-trigger" data-open-search aria-label="Search (⌘K)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            <span>Search</span>
+            <kbd>⌘K</kbd>
+          </button>
+          <button class="icon-btn" data-account aria-label="Account">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </button>
+          <button class="cart-btn" data-open-cart aria-label="Open bag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <path d="M3 6h18"></path>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span class="cart-btn__label">Bag</span>
+            <span class="cart-btn__count" data-cart-count style="display: none">0</span>
+          </button>
+          <button class="icon-btn burger" data-open-menu aria-label="Open menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+              <path d="M3 6h18M3 12h18M3 18h18"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="app" tabindex="-1"></main>
+
+    <!-- footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer__grid">
+          <div class="footer__brand">
+            <a class="brand" href="#/" aria-label="AETHER — home">
+              <span class="brand__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#ffffff" d="M12 3.4 20.7 20.6H16.4L12 11.9 7.6 20.6H3.3z"></path>
+                  <circle cx="12" cy="16.6" r="1.8" fill="#cf5b34"></circle>
+                </svg>
+              </span>
+              <span class="brand__word">Aether</span>
+            </a>
+            <p class="footer__tag">Considered objects for modern life. Designed in Copenhagen, assembled in Poland and Japan, repaired wherever you are.</p>
+            <form class="footer__news" data-newsfoot novalidate>
+              <input class="input" type="email" name="email" placeholder="Email for studio notes" aria-label="Email address" autocomplete="email" required>
+              <button class="btn btn--light" type="submit">Join</button>
+            </form>
+            <p class="xs" data-news-note style="color:rgba(244,243,241,.5)">One letter a month. Get 10% off your first order.</p>
+          </div>
+
+          <div class="footer__col">
+            <h4>Shop</h4>
+            <ul>
+              <li><a href="#/shop">All products</a></li>
+              <li><a href="#/shop?cat=audio">Audio</a></li>
+              <li><a href="#/shop?cat=workspace">Workspace</a></li>
+              <li><a href="#/shop?cat=everyday">Everyday</a></li>
+              <li><a href="#/shop?sort=new">New arrivals</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#/about">Our story</a></li>
+              <li><a href="#/journal">Journal</a></li>
+              <li><a href="#/about?to=repair">Materials &amp; repair</a></li>
+              <li><a href="#/about">Stockists</a></li>
+              <li><a href="#/about">Careers</a></li>
+            </ul>
+          </div>
+
+          <div class="footer__col">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="#/account?tab=orders">Order status</a></li>
+              <li><a href="#/about?to=contact">Shipping &amp; returns</a></li>
+              <li><a href="#/about?to=repair">Warranty</a></li>
+              <li><a href="#/about?to=repair">Repairs &amp; parts</a></li>
+              <li><a href="#/about?to=contact">Contact a human</a></li>
+              <li data-admin-link hidden><a href="#/admin">Admin dashboard</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer__bottom">
+          <span>© 2026 AETHER ApS · CVR 41 20 88 03 · Copenhagen</span>
+          <div class="footer__pay" aria-label="Accepted payment methods">
+            <span>VISA</span><span>MASTERCARD</span><span>AMEX</span><span>PAYPAL</span><span>APPLE PAY</span><span>KLARNA</span>
+          </div>
+          <span class="row row-3" style="gap:14px">
+            <a href="#/about">Privacy</a>
+            <a href="#/about">Terms</a>
+            <a href="#/about">Accessibility</a>
+          </span>
+        </div>
+
+        <span class="footer__wordmark" aria-hidden="true">Aether</span>
+      </div>
+    </footer>
+
+    <!-- mobile menu -->
+    <div class="menu" data-layer="menu" aria-hidden="true">
+      <div class="menu__scrim" data-close-menu></div>
+      <div class="menu__panel" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="menu__head">
+          <span class="brand">
+            <span class="brand__mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path fill="#ffffff" d="M12 3.4 20.7 20.6H16.4L12 11.9 7.6 20.6H3.3z"></path><circle cx="12" cy="16.6" r="1.8" fill="#cf5b34"></circle></svg>
+            </span>
+            <span class="brand__word">Aether</span>
+          </span>
+          <button class="icon-btn" data-close-menu aria-label="Close menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <nav class="menu__links" aria-label="Mobile">
+          <a class="menu__link" href="#/shop" data-close-menu>Shop all <span class="mono" data-menu-count="all">12</span></a>
+          <a class="menu__link" href="#/shop?cat=audio" data-close-menu>Audio <span class="mono" data-menu-count="audio">03</span></a>
+          <a class="menu__link" href="#/shop?cat=workspace" data-close-menu>Workspace <span class="mono" data-menu-count="workspace">04</span></a>
+          <a class="menu__link" href="#/shop?cat=everyday" data-close-menu>Everyday <span class="mono" data-menu-count="everyday">05</span></a>
+          <a class="menu__link" href="#/journal" data-close-menu>Journal <span class="mono" data-menu-count="journal">03</span></a>
+          <a class="menu__link" href="#/account" data-close-menu>Account</a>
+          <a class="menu__link" href="#/admin" data-close-menu data-admin-link hidden>Admin <span class="mono">◆</span></a>
+        </nav>
+
+        <div class="menu__meta">
+          <span class="mono">Customer care</span>
+          <a href="mailto:hello@aether.studio">hello@aether.studio</a>
+          <span>+45 33 12 44 08 · Mon–Fri 09–17 CET</span>
+          <span class="row row-3" style="gap:8px;margin-top:6px">
+            <span class="chip chip--light">Instagram</span>
+            <span class="chip chip--light">Are.na</span>
+            <span class="chip chip--light">LinkedIn</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- search -->
+    <div class="search" data-layer="search" aria-hidden="true">
+      <div class="search__scrim" data-close-search></div>
+      <div class="search__panel" role="dialog" aria-modal="true" aria-label="Search products">
+        <div class="search__bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input class="search__input" type="search" placeholder="Search headphones, keyboard, watch…" aria-label="Search" autocomplete="off" spellcheck="false">
+          <span class="search__esc">ESC</span>
+        </div>
+        <div class="search__body" role="listbox" aria-label="Search results"></div>
+      </div>
+    </div>
+
+    <!-- cart -->
+    <div class="scrim" aria-hidden="true"></div>
+    <aside class="drawer" data-layer="cart" aria-label="Shopping bag">
+      <div class="drawer__head">
+        <h2 class="drawer__title" data-cart-title>Your bag <span>· 0 items</span></h2>
+        <button class="icon-btn" data-close-cart aria-label="Close bag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="progress">
+        <p class="progress__text" data-progress-text></p>
+        <div class="progress__track"><div class="progress__fill" data-progress-fill style="width: 0%"></div></div>
+      </div>
+      <div class="drawer__body"></div>
+      <div class="drawer__foot"></div>
+    </aside>
+
+    <!-- toasts -->
+    <div class="toasts" aria-live="polite" aria-atomic="false"></div>
+
+    <button class="back-top" aria-label="Back to top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 19V5"></path>
+        <path d="m5 12 7-7 7 7"></path>
+      </svg>
+    </button>
+
+    <script src="js/data.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/views.js"></script>
+    <script src="js/account.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

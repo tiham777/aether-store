@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="prism-shades">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f2ef"/><stop offset="1" stop-color="#e6e3dd"/></linearGradient>
+<radialGradient id="glow" cx="50%" cy="24%" r="62%"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="dk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3c3c41"/><stop offset=".55" stop-color="#26262a"/><stop offset="1" stop-color="#151518"/></linearGradient>
+<linearGradient id="dkh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a4a50"/><stop offset="1" stop-color="#1a1a1e"/></linearGradient>
+<linearGradient id="mt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efece5"/><stop offset=".5" stop-color="#c8c2b6"/><stop offset="1" stop-color="#98917f"/></linearGradient>
+<linearGradient id="mt2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9d4c9"/><stop offset="1" stop-color="#8f8878"/></linearGradient>
+<radialGradient id="sh" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#0b0b0c" stop-opacity=".46"/><stop offset=".65" stop-color="#0b0b0c" stop-opacity=".16"/><stop offset="1" stop-color="#0b0b0c" stop-opacity="0"/></radialGradient>
+<radialGradient id="face" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#31313a"/><stop offset="1" stop-color="#0c0c10"/></radialGradient>
+<linearGradient id="lens" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d3f45"/><stop offset=".5" stop-color="#15161a"/><stop offset="1" stop-color="#26272d"/></linearGradient>
+<filter id="b24" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter>
+<filter id="b10" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<rect width="800" height="1000" fill="url(#glow)"/>
+<ellipse cx="400" cy="836" rx="250" ry="42" fill="url(#sh)"/>
+
+  <ellipse cx="400" cy="726" rx="230" ry="34" fill="url(#sh)" opacity=".8"/>
+  <path d="M 246 470 q -46 24 -66 62" stroke="url(#mt2)" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path d="M 554 470 q 46 24 66 62" stroke="url(#mt2)" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path d="M 392 470 q 8 -22 16 0 q -8 16 -16 0 z" fill="url(#mt2)"/>
+  
+  <g transform="translate(232 452) ">
+    <path d="M 0 0 h 132 q 34 0 40 40 l 6 46 q 6 56 -46 84 q -52 28 -104 0 q -50 -30 -42 -86 l 8 -46 q 6 -40 40 -40 z" fill="url(#lens)"/>
+    <path d="M 0 0 h 132 q 34 0 40 40 l 6 46 q 6 56 -46 84 q -52 28 -104 0 q -50 -30 -42 -86 l 8 -46 q 6 -40 40 -40 z" fill="none" stroke="url(#mt2)" stroke-width="9"/>
+    <path d="M 24 34 q 34 -18 74 -6" stroke="#fff" stroke-opacity=".3" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M 30 120 q 30 22 66 24" stroke="#fff" stroke-opacity=".12" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <g transform="translate(568 452) scale(-1 1)">
+    <path d="M 0 0 h 132 q 34 0 40 40 l 6 46 q 6 56 -46 84 q -52 28 -104 0 q -50 -30 -42 -86 l 8 -46 q 6 -40 40 -40 z" fill="url(#lens)"/>
+    <path d="M 0 0 h 132 q 34 0 40 40 l 6 46 q 6 56 -46 84 q -52 28 -104 0 q -50 -30 -42 -86 l 8 -46 q 6 -40 40 -40 z" fill="none" stroke="url(#mt2)" stroke-width="9"/>
+    <path d="M 24 34 q 34 -18 74 -6" stroke="#fff" stroke-opacity=".3" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M 30 120 q 30 22 66 24" stroke="#fff" stroke-opacity=".12" stroke-width="10" fill="none" stroke-linecap="round"/>
+  </g>
+  <path d="M 372 476 q 28 -22 56 0" stroke="url(#mt2)" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M 372 476 q 28 -22 56 0" stroke="#fff" stroke-opacity=".35" stroke-width="5" fill="none" stroke-linecap="round"/>
+<rect width="800" height="1000" filter="url(#grain)" opacity=".055" style="mix-blend-mode:multiply"/>
+</svg>

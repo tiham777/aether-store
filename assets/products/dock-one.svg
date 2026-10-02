@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="dock-one">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2f1ee"/><stop offset="1" stop-color="#e5e2db"/></linearGradient>
+<radialGradient id="glow" cx="50%" cy="24%" r="62%"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="dk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3c3c41"/><stop offset=".55" stop-color="#26262a"/><stop offset="1" stop-color="#151518"/></linearGradient>
+<linearGradient id="dkh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a4a50"/><stop offset="1" stop-color="#1a1a1e"/></linearGradient>
+<linearGradient id="mt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efece5"/><stop offset=".5" stop-color="#c8c2b6"/><stop offset="1" stop-color="#98917f"/></linearGradient>
+<linearGradient id="mt2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9d4c9"/><stop offset="1" stop-color="#8f8878"/></linearGradient>
+<radialGradient id="sh" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#0b0b0c" stop-opacity=".46"/><stop offset=".65" stop-color="#0b0b0c" stop-opacity=".16"/><stop offset="1" stop-color="#0b0b0c" stop-opacity="0"/></radialGradient>
+<radialGradient id="face" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#31313a"/><stop offset="1" stop-color="#0c0c10"/></radialGradient>
+<linearGradient id="lens" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d3f45"/><stop offset=".5" stop-color="#15161a"/><stop offset="1" stop-color="#26272d"/></linearGradient>
+<filter id="b24" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="24"/></filter>
+<filter id="b10" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+</defs>
+<rect width="800" height="1000" fill="url(#bg)"/>
+<rect width="800" height="1000" fill="url(#glow)"/>
+<ellipse cx="400" cy="836" rx="250" ry="42" fill="url(#sh)"/>
+
+  <ellipse cx="400" cy="812" rx="200" ry="30" fill="url(#sh)" opacity=".8"/>
+  <rect x="250" y="742" width="300" height="52" rx="26" fill="url(#dk)"/>
+  <rect x="250" y="742" width="300" height="52" rx="26" fill="none" stroke="#fff" stroke-opacity=".16"/>
+  <g transform="rotate(-14 400 620)">
+    <rect x="326" y="452" width="148" height="304" rx="30" fill="url(#dkh)"/>
+    <rect x="326" y="452" width="148" height="304" rx="30" fill="none" stroke="#fff" stroke-opacity=".16"/>
+    <rect x="344" y="472" width="112" height="266" rx="22" fill="#0d0d10"/>
+    <rect x="356" y="486" width="88" height="238" rx="16" fill="#16161a"/>
+    <path d="M 372 500 v 210" stroke="#fff" stroke-opacity=".16" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="400" cy="536" r="34" fill="none" stroke="#cf5b34" stroke-width="7" opacity=".9"/>
+    <circle cx="400" cy="536" r="9" fill="#cf5b34"/>
+  </g>
+  <rect x="286" y="766" width="128" height="10" rx="5" fill="url(#mt2)" opacity=".7"/>
+  <path d="M 556 792 q 76 8 76 -40" stroke="#d8d3c8" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <circle cx="632" cy="742" r="13" fill="url(#mt2)"/>
+<rect width="800" height="1000" filter="url(#grain)" opacity=".055" style="mix-blend-mode:multiply"/>
+</svg>

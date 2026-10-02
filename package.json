@@ -1,0 +1,11 @@
+{
+  "name": "aether-storefront",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AETHER — static e-commerce storefront (dependency-free HTML/CSS/vanilla JS)",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "renders": "node tools/gen-renders.mjs",
+    "serve": "node tools/serve.mjs"
+  }
+}
