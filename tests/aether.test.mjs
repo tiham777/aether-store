@@ -106,9 +106,18 @@ describe('pricing', () => {
 /* ---------------------------------- auth ---------------------------------- */
 
 describe('auth', () => {
-  test('seeded demo accounts sign in; bad credentials fail', () => {
+  test('the store ships clean; demo data signs in only when loaded', () => {
     const c = boot();
+    assert.equal(c.Orders.all().length, 0, 'no fake orders on a fresh install');
+    assert.equal(c.Auth.login('marta', 'Demo1234').ok, false, 'no demo customers until loaded');
+    assert.ok(c.Auth.login('admin', 'Password8989$$').ok, 'admin always exists');
+    c.DemoData.load(); // location.reload() is stubbed — seed applies in place
     assert.equal(c.Auth.login('marta', 'Demo1234').ok, true);
+  });
+
+  test('bad credentials fail', () => {
+    const c = boot();
+    assert.equal(c.Auth.login('marta', 'Demo1234').ok, false);
     assert.equal(c.Auth.login('marta', 'wrong').ok, false);
     assert.equal(c.Auth.login('ghost', 'whatever').ok, false);
     assert.equal(c.Auth.login('admin', 'Password8989$$').ok, true);
@@ -116,6 +125,7 @@ describe('auth', () => {
 
   test('register rejects duplicate usernames', () => {
     const c = boot();
+    c.DemoData.load();
     const res = c.Auth.register({
       name: 'Copy Cat',
       username: 'marta',
@@ -129,6 +139,7 @@ describe('auth', () => {
 
   test('expired sessions are rejected', () => {
     const c = boot();
+    c.DemoData.load();
     assert.equal(c.Auth.login('kenji', 'Demo1234').ok, true);
     assert.ok(c.Auth.current());
     const kenji = c.Auth.listUsers().find((u) => u.username === 'kenji');
@@ -183,11 +194,48 @@ describe('login throttle', () => {
 
   test('a successful login clears the failure record', () => {
     const c = boot();
+    c.DemoData.load();
     const t = Date.now();
     c.Auth.throttle.fail('marta', t);
     c.Auth.throttle.fail('marta', t);
     assert.equal(c.Auth.login('marta', 'Demo1234').ok, true);
     assert.equal(c.Auth.throttle.peek('marta', t).fails, 0);
+  });
+});
+
+/* --------------------------- demo-data policy ---------------------------- */
+
+describe('demo-data policy', () => {
+  test('a fresh install ships with zero fake orders, customers and subscribers', () => {
+    const c = boot();
+    assert.equal(c.Orders.all().length, 0);
+    assert.equal(c.Auth.listUsers().filter((u) => /^u_demo/.test(u.id)).length, 0);
+    assert.equal(c.Subs.all().length, 0);
+    assert.ok(c.Auth.listUsers().some((u) => u.username === 'admin'), 'admin account is always created');
+    assert.ok(c.localStorage.getItem('aether.demoPurged.v1'), 'clean-once flag is written');
+  });
+
+  test('browsers that already have the old seed are purged exactly once', () => {
+    const storage = new Map();
+    const a = boot(storage);
+    a.DemoData.load(); // old deployment behaviour: demo dataset present
+    assert.ok(a.Orders.all().length >= 10);
+    assert.ok(a.Auth.listUsers().some((u) => u.username === 'marta'));
+    assert.equal(a.Subs.all().length, 5);
+
+    // migration: flag absent (pre-purge browser) → next boot cleans up
+    storage.delete('aether.demoPurged.v1');
+    const b = boot(storage);
+    assert.equal(b.Orders.all().length, 0, 'demo orders removed');
+    assert.ok(!b.Auth.listUsers().some((u) => u.username === 'marta'), 'demo customers removed');
+    assert.equal(b.Subs.all().length, 0, 'demo subscribers removed');
+    assert.ok(b.Auth.login('admin', 'Password8989$$').ok, 'admin survives the purge');
+
+    // flag now set → a real order added afterwards is never touched
+    const real = { id: 'AET-2026-777777', email: 'real@buyer.com', name: 'Real Buyer', placedAt: Date.now(), items: [] };
+    b.Orders.place(real);
+    const c = boot(storage);
+    assert.ok(c.Orders.byId('AET-2026-777777'), 'real orders survive boots after the purge');
   });
 });
 

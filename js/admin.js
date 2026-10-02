@@ -1167,6 +1167,10 @@
         <div class="acard__head"><h2>Danger zone</h2></div>
         <div class="stack stack-3">
           <div class="row row-4 wrap" style="justify-content:space-between;gap:10px">
+            <span class="small">Load the demo dataset — fake customers, orders and subscribers for testing</span>
+            <button class="abtn" data-loaddemo>Load demo data</button>
+          </div>
+          <div class="row row-4 wrap" style="justify-content:space-between;gap:10px">
             <span class="small">Reset catalogue to factory defaults (${DATA.products.length} products)</span>
             <button class="abtn abtn--danger" data-resetcat>Reset catalogue</button>
           </div>
@@ -1242,6 +1246,14 @@
       AETHER.render();
     });
 
+    root.querySelector('[data-loaddemo]').addEventListener('click', () =>
+      confirmModal(
+        'Load demo data?',
+        'Adds fake customers, orders and subscribers for testing. Real data you have entered is kept.',
+        'Load demo data',
+        () => window.DemoData && DemoData.load()
+      )
+    );
     root.querySelector('[data-resetcat]').addEventListener('click', () =>
       confirmModal('Reset catalogue?', 'Every product edit and creation will be discarded.', 'Reset catalogue', () => Catalog.reset(), true)
     );

@@ -40,8 +40,17 @@ npm run renders        # regenerate the SVG product render set
 | Role     | Username | Password           |
 |----------|----------|--------------------|
 | Admin    | `admin`  | `Password8989$$`   |
-| Customer | `marta`  | `Demo1234`         |
 
-> This is a presentation-grade demo: credentials are verified in the browser.
-> A real deployment must verify passwords server-side (bcrypt/argon2 over HTTPS)
-> and never ship the hash seed.
+The deployed store ships **clean** — no fake orders, customers or subscribers.
+For testing, load the demo dataset from **Admin → Settings → Danger zone →
+Load demo data** (adds demo customers such as `marta` / `Demo1234`, sample
+orders and subscribers); *Erase everything* removes it again.
+
+> **Data lives in the browser.** This is a static site: orders, accounts and
+> catalogue edits are stored in each visitor's localStorage — private to that
+> browser and device. Sharing orders across visitors/devices requires a
+> backend (e.g. Vercel functions + a hosted key-value store).
+>
+> Demo auth is presentation-grade: credentials are verified in the browser.
+> A real deployment must verify passwords server-side (bcrypt/argon2 over
+> HTTPS) and never ship the hash seed.

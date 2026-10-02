@@ -564,6 +564,14 @@
 
   /* ------------------------------ demo seed ----------------------------- */
 
+  const DEMO_SUBS = [
+    ['sofia.brandt@example.com', 'footer'],
+    ['lucas.moreau@example.com', 'newsletter'],
+    ['nina.petrova@example.com', 'footer'],
+    ['devon.clark@example.com', 'journal'],
+    ['yuki.tanaka@example.com', 'footer'],
+  ];
+
   function seedDemo() {
     const day = 864e5;
     const now = Date.now();
@@ -659,13 +667,7 @@
     orders = orders.concat(demoOrders.filter((o) => !orders.some((x) => x.id === o.id)));
     write(K.orders, orders);
 
-    const demoSubs = [
-      ['sofia.brandt@example.com', 'footer'],
-      ['lucas.moreau@example.com', 'newsletter'],
-      ['nina.petrova@example.com', 'footer'],
-      ['devon.clark@example.com', 'journal'],
-      ['yuki.tanaka@example.com', 'footer'],
-    ];
+    const demoSubs = DEMO_SUBS;
     demoSubs.forEach(([email, source], i) => {
       if (!subs.some((s) => s.email === email))
         subs.push({ email, source, at: now - (i * 3 + 2) * day });
@@ -673,13 +675,57 @@
     write(K.subs, subs);
   }
 
+  /* --------------------------- demo-data policy -------------------------- */
+  /* The deployed store ships clean: no fake orders, customers or subscribers.
+     Browsers that already received the old seed get a one-time purge; the
+     dataset can be loaded again on demand from admin → Settings. */
+
+  const CLEAN_FLAG = 'aether.demoPurged.v1';
+
+  function purgeDemoData() {
+    if (read(CLEAN_FLAG, null)) return;
+    let touched = false;
+
+    const demoUsers = users.filter((u) => /^u_demo\d+$/.test(u.id));
+    const demoIds = new Set(demoUsers.map((u) => u.id));
+    const demoEmails = new Set(demoUsers.map((u) => lower(u.email)));
+    demoEmails.add('elena.ruiz@example.com'); /* seeded guest buyer */
+    if (demoUsers.length) {
+      users = users.filter((u) => !demoIds.has(u.id));
+      touched = true;
+    }
+
+    const seedOrderIds = new Set();
+    for (let i = 1; i <= 10; i++) seedOrderIds.add('AET-2026-' + (100000 + i));
+    const ordersBefore = orders.length;
+    orders = orders.filter((o) => {
+      const byDemoUser = o.userId && demoIds.has(o.userId);
+      const byDemoEmail = demoEmails.has(lower(o.email));
+      const seededId = seedOrderIds.has(o.id) && byDemoEmail;
+      return !(byDemoUser || byDemoEmail || seededId);
+    });
+    if (orders.length !== ordersBefore) touched = true;
+
+    const demoSubSet = new Set(DEMO_SUBS.map(([email]) => email));
+    const subsBefore = subs.length;
+    subs = subs.filter((s) => !demoSubSet.has(lower(s.email)));
+    if (subs.length !== subsBefore) touched = true;
+
+    const s = session();
+    if (s && demoIds.has(s.userId)) del(K.session);
+
+    if (touched) {
+      persistUsers();
+      write(K.orders, orders);
+      write(K.subs, subs);
+    }
+    write(CLEAN_FLAG, 1);
+  }
+
   /* --------------------------------- boot -------------------------------- */
 
   ensureAdmin();
-  if (!read(K.seeded, null)) {
-    seedDemo();
-    write(K.seeded, 1);
-  }
+  purgeDemoData();
   CATALOG.hydrate(); /* seed + admin overlay + stock floor */
   /* hydrate settings (topbar announcements, pricing) if previously saved */
   if (read(K.settings, null)) applySettings(currentSettings());
@@ -706,6 +752,17 @@
     throttle: THROTTLE,
     lockMessage,
     storageKeys: K,
+  };
+  window.DemoData = {
+    load() {
+      seedDemo();
+      location.reload();
+    },
+    purge() {
+      del(CLEAN_FLAG);
+      purgeDemoData();
+      location.reload();
+    },
   };
   window.Orders = ORDERS;
   window.Catalog = CATALOG;
