@@ -615,16 +615,19 @@
       </div>`;
     }
     const idx = FLOW.indexOf(o.status);
+    /* delivered is a finished state — the last step is complete, not "now" */
+    const finished = o.status === 'delivered';
     const dateOf = (s) => {
       const h = (o.history || []).find((x) => x.status === s);
       return h ? fmtDate(h.at) : '';
     };
     return `<ol class="osteps">
       ${FLOW.map((s, i) => {
-        const cls = i < idx ? 'is-done' : i === idx ? 'is-now' : '';
+        const done = i < idx || (finished && i === idx);
+        const cls = done ? 'is-done' : i === idx ? 'is-now' : '';
         const when = dateOf(s) || (i <= idx ? '…' : '');
         return `<li class="ostep ${cls}">
-          <span class="ostep__dot">${i < idx ? icon('check') : ''}</span>
+          <span class="ostep__dot">${done ? icon('check') : ''}</span>
           <span class="ostep__t">${STATUS_LABEL[s] || s}</span>
           <span class="ostep__d">${when}</span>
         </li>`;
