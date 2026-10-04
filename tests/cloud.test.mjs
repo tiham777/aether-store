@@ -129,6 +129,18 @@ function boot(backing, { config, loader } = {}) {
   for (const s of SOURCES) runInContext(s.code, sandbox, { filename: s.filename });
 
   if (config) Object.assign(sandbox.FIREBASE_CONFIG, config);
+  else
+    Object.assign(sandbox.FIREBASE_CONFIG, {
+      /* the shipped config file may carry real credentials — tests are
+         hermetic: default to "no config" unless a test opts in */
+      apiKey: '',
+      authDomain: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: '',
+      measurementId: '',
+    });
   if (loader) sandbox.Cloud.__setLoader(loader);
   booted.push(sandbox);
   return sandbox;
