@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — app shell: router, reveal, motion, boot
+   Arena — app shell: router, reveal, motion, boot
    ========================================================================= */
 (function () {
   'use strict';
@@ -30,11 +30,11 @@
     const image = raster ? SITE + '/' + view.image : DEFAULT_OG;
     setMeta('meta[name="description"]', desc);
     setMeta('meta[name="robots"]', noindex ? 'noindex, nofollow' : 'index, follow');
-    setMeta('meta[property="og:title"]', view.title || 'AETHER');
+    setMeta('meta[property="og:title"]', view.title || 'Arena');
     setMeta('meta[property="og:description"]', desc);
     setMeta('meta[property="og:url"]', canonical);
     setMeta('meta[property="og:image"]', image);
-    setMeta('meta[name="twitter:title"]', view.title || 'AETHER');
+    setMeta('meta[name="twitter:title"]', view.title || 'Arena');
     setMeta('meta[name="twitter:description"]', desc);
     setMeta('meta[name="twitter:image"]', image);
     const link = document.head.querySelector('link[rel="canonical"]');
@@ -58,7 +58,7 @@
       if (location.hash !== hash) location.hash = hash;
     }, 30);
     return {
-      title: 'Redirecting — AETHER',
+      title: 'Redirecting — Arena',
       html: '<div class="container"><p class="muted" style="padding-block:70px">Redirecting…</p></div>',
     };
   }
@@ -109,8 +109,8 @@
 
   function renderFailure(host, err) {
     if (!host) return;
-    console.error('[aether] render failed:', err);
-    document.title = 'Something came loose — AETHER';
+    console.error('[arena] render failed:', err);
+    document.title = 'Something came loose — Arena';
     document.body.classList.remove('is-admin');
     host.innerHTML = `
       <div class="container">
@@ -159,7 +159,7 @@
       host.classList.add('page-enter');
       host.setAttribute('tabindex', '-1');
 
-      document.title = view.title || 'AETHER';
+      document.title = view.title || 'Arena';
       syncHead(parts, view);
       document.body.classList.toggle('is-admin', parts[0] === 'admin');
       if (view.mount) view.mount(host);
@@ -472,5 +472,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  window.AETHER = { render, get route() { return parseHash(); } };
+  window.Arena = { render, get route() { return parseHash(); } };
 })();

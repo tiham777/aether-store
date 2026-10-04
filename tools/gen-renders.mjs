@@ -1,4 +1,4 @@
-// Generates the AETHER product render set: 800x1000 studio-style SVG objects.
+// Generates the Arena product render set: 800x1000 studio-style SVG objects.
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const W = 800;

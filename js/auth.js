@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — accounts, orders, catalogue & settings (localStorage)
+   Arena — accounts, orders, catalogue & settings (localStorage)
 
    Static-site demo auth: credentials are verified in the browser, so this
    is presentation-grade only. A real deployment must verify passwords
@@ -102,7 +102,7 @@
       id: uid('u'),
       name: 'Studio Admin',
       username: 'admin',
-      email: 'admin@aether.studio',
+      email: 'admin@arena.studio',
       phone: '',
       role: 'admin',
       banned: false,
@@ -207,7 +207,7 @@
       THROTTLE.fail(id, now);
       return { ok: false, error: 'That password doesn’t match.' };
     }
-    if (u.banned) return { ok: false, error: 'This account has been suspended. Contact hello@aether.studio.' };
+    if (u.banned) return { ok: false, error: 'This account has been suspended. Contact hello@arena.studio.' };
     THROTTLE.clear(id);
     startSession(u.id);
     return { ok: true, user: u };
@@ -611,7 +611,7 @@
   const DEFAULT_ANNOUNCEMENTS = [
     '*Free shipping* on orders over $150',
     '60-night trial on everything',
-    '10% off *your first order* with code AETHER10',
+    '10% off *your first order* with code ARENA10',
   ];
 
   function currentSettings() {
@@ -778,7 +778,7 @@
         items,
         subtotal,
         discount,
-        promo: discount ? 'AETHER10' : null,
+        promo: discount ? 'ARENA10' : null,
         shipping,
         tax,
         total: subtotal - discount + shipping + tax,

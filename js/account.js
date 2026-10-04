@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — auth pages & member account centre
+   Arena — auth pages & member account centre
    ========================================================================= */
 (function () {
   'use strict';
@@ -125,7 +125,7 @@
 
     return {
       html,
-      title: 'Sign in — AETHER',
+      title: 'Sign in — Arena',
       mount(root) {
         if (Auth.current()) {
           location.hash = '#' + next;
@@ -261,7 +261,7 @@
 
     return {
       html,
-      title: 'Create account — AETHER',
+      title: 'Create account — Arena',
       mount(root) {
         if (Auth.current()) {
           location.hash = '#' + next;
@@ -347,7 +347,7 @@
 
   function forbidden() {
     return {
-      title: 'Admins only — AETHER',
+      title: 'Admins only — Arena',
       html: `${crumbsLocal([{ label: '403' }])}
       <div class="container"><div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
         <div class="cart-empty__icon">${icon('lock')}</div>
@@ -380,7 +380,7 @@
     const u = Auth.current();
     if (!u) {
       return {
-        title: 'Sign in — AETHER',
+        title: 'Sign in — Arena',
         html: `<div class="container"><p class="muted" style="padding-block:70px">Redirecting to sign in…</p></div>`,
         mount() {
           location.hash = '#/login?next=%2Faccount';
@@ -441,7 +441,7 @@
 
     return {
       html,
-      title: 'My account — AETHER',
+      title: 'My account — Arena',
       mount(root) {
         /* -------- tabs -------- */
         const panels = root.querySelectorAll('[data-panel]');
@@ -550,7 +550,7 @@
               title: `Order ${id} cancelled`,
               sub: 'Nothing was charged. Any pre-auth drops within 3–5 days.',
             });
-            AETHER.render();
+            Arena.render();
           });
         });
 
@@ -629,7 +629,7 @@
 
       <div class="acct-stats">
         <div class="acct-stat"><b data-count="${orderCount}">0</b><span>orders placed</span></div>
-        <div class="acct-stat"><b data-count="${Math.round(spent / 100)}" data-prefix="$">$0</b><span>spent with AETHER</span></div>
+        <div class="acct-stat"><b data-count="${Math.round(spent / 100)}" data-prefix="$">$0</b><span>spent with Arena</span></div>
         <div class="acct-stat"><b data-count="${wished}">0</b><span>objects saved</span></div>
       </div>
 

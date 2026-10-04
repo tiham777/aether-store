@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — views: home, shop, product, checkout, confirmation
+   Arena — views: home, shop, product, checkout, confirmation
    ========================================================================= */
 (function () {
   'use strict';
@@ -103,7 +103,7 @@
     const hero = byId('halo-one') || DATA.products[0];
     if (!hero) {
       return {
-        title: 'AETHER — Considered objects for modern life',
+        title: 'Arena — Considered objects for modern life',
         html: `<div class="container"><div class="empty-state" style="margin-block:clamp(40px,8vw,110px)">
           <div class="cart-empty__icon">${icon('package')}</div>
           <h1 class="h2">The shelves are bare. <span class="accent">On purpose.</span></h1>
@@ -143,7 +143,7 @@
           <div class="hero__trust" data-reveal style="--d:310ms">
             <span class="hero__trust-item">${stars(5)} <b>4.9</b> from ${num(reviewTotal())} reviews</span>
             <span class="hero__trust-item">${icon('truck')} Free shipping over $150 · 60-night returns</span>
-            <span class="hero__trust-item" style="color:var(--accent-ink)">${icon('sparkle')} 10% off your first order with code AETHER10</span>
+            <span class="hero__trust-item" style="color:var(--accent-ink)">${icon('sparkle')} 10% off your first order with code ARENA10</span>
           </div>
         </div>
 
@@ -209,7 +209,7 @@
     <section class="section container" id="story">
       <div class="split">
         <div class="split__media" data-reveal="left">
-          <img src="assets/img/stairs.jpg" alt="Concrete stairwell in the AETHER studio building" loading="lazy" width="1400" height="1600">
+          <img src="assets/img/stairs.jpg" alt="Concrete stairwell in the Arena studio building" loading="lazy" width="1400" height="1600">
           <span class="split__tag">Studio no. 4, Copenhagen</span>
         </div>
         <div class="split__copy">
@@ -339,7 +339,7 @@
 
     return {
       html,
-      title: 'AETHER — Considered objects for modern life',
+      title: 'Arena — Considered objects for modern life',
       mount() {
         bindNewsletter();
         bindSpotlight();
@@ -532,8 +532,8 @@
 
     return {
       html,
-      title: query ? `Search: ${query} — AETHER` : active === 'all' ? 'Shop all — AETHER' : `${catName(active)} — AETHER`,
-      desc: `Browse all ${count()} AETHER products: audio, workspace and everyday carry, with a 60-night trial and free shipping over $150.`,
+      title: query ? `Search: ${query} — Arena` : active === 'all' ? 'Shop all — Arena' : `${catName(active)} — Arena`,
+      desc: `Browse all ${count()} Arena products: audio, workspace and everyday carry, with a 60-night trial and free shipping over $150.`,
       mount(root) {
         let sort = 'featured';
         const grid = root.querySelector('[data-grid]');
@@ -869,7 +869,7 @@
 
     return {
       html,
-      title: `${p.name} — ${p.tagline} · AETHER`,
+      title: `${p.name} — ${p.tagline} · Arena`,
       desc: `${p.name}: ${p.tagline}. ${p.blurb}`,
       image: shareImg,
       mount(root) {
@@ -900,7 +900,7 @@
         description: p.blurb,
         image: p.image,
         sku: p.id,
-        brand: { '@type': 'Brand', name: 'AETHER' },
+        brand: { '@type': 'Brand', name: 'Arena' },
         aggregateRating: {
           '@type': 'AggregateRating',
           ratingValue: String(p.rating),
@@ -1239,7 +1239,7 @@
   function checkout() {
     if (!Store.items.length) {
       return {
-        title: 'Your bag is empty — AETHER',
+        title: 'Your bag is empty — Arena',
         html: `
         ${crumbs([{ label: 'Checkout', href: '#/checkout' }])}
         <div class="container">
@@ -1399,7 +1399,7 @@
 
     return {
       html,
-      title: 'Checkout — AETHER',
+      title: 'Checkout — Arena',
       mount(root) {
         bindCheckout(root);
       },
@@ -1625,7 +1625,7 @@
     const o = fromStore || window.__lastOrder;
     if (!o) {
       return {
-        title: 'Order status — AETHER',
+        title: 'Order status — Arena',
         html: `${crumbs([{ label: 'Order', href: '#/order-confirmed' }])}
         <div class="container"><div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
           <div class="cart-empty__icon">${icon('package')}</div>
@@ -1695,7 +1695,7 @@
 
     return {
       html,
-      title: `Order ${o.id} confirmed — AETHER`,
+      title: `Order ${o.id} confirmed — Arena`,
       mount(root) {
         const t = root.querySelector('[data-track]');
         if (t) t.addEventListener('click', () => (location.hash = '#/track?id=' + encodeURIComponent(o.id)));
@@ -1826,8 +1826,8 @@
 
     return {
       html,
-      title: 'Track your order — AETHER',
-      desc: 'Look up an AETHER order with your order number and email, and follow its status live.',
+      title: 'Track your order — Arena',
+      desc: 'Look up an Arena order with your order number and email, and follow its status live.',
       mount(root) {
         const form = root.querySelector('[data-track-form]');
         const body = root.querySelector('[data-track-body]');
@@ -1903,7 +1903,7 @@
 
   function notFound() {
     return {
-      title: 'Page not found — AETHER',
+      title: 'Page not found — Arena',
       noindex: true,
       html: `
       <div class="container">
@@ -1967,7 +1967,7 @@
     ${newsletterSection()}
     ${perkRow()}`;
 
-    return { html, title: 'Journal — AETHER', desc: 'Notes from the AETHER studio: repair stories, materials, and why we only release twice a year.', mount(root) { bindNewsletter(root); } };
+    return { html, title: 'Journal — Arena', desc: 'Notes from the Arena studio: repair stories, materials, and why we only release twice a year.', mount(root) { bindNewsletter(root); } };
   }
 
   /* ================================ ABOUT ================================ */
@@ -1979,7 +1979,7 @@
       <div class="page-head__inner">
         <div class="page-head__row">
           <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be <span class="accent">kept.</span></h1>
-          <p class="lede" data-reveal style="--d:120ms;max-width:44ch">AETHER began with one frustrating question: why does everything electronic eventually become rubbish?</p>
+          <p class="lede" data-reveal style="--d:120ms;max-width:44ch">Arena began with one frustrating question: why does everything electronic eventually become rubbish?</p>
         </div>
       </div>
     </header>
@@ -2035,8 +2035,8 @@
       ${sectionHead({ title: 'Humans, not <span class="accent">tickets.</span>' })}
       <div class="feature-row">
         ${[
-          ['mail', 'Customer care', 'hello@aether.studio · replies within one business day, written by the people who pack the boxes.', '+45 33 12 44 08'],
-          ['sparkle', 'Press & partnerships', 'For samples, reviews and wholesale: press@aether.studio. High-resolution assets on request.', 'Press kit →'],
+          ['mail', 'Customer care', 'hello@arena.studio · replies within one business day, written by the people who pack the boxes.', '+45 33 12 44 08'],
+          ['sparkle', 'Press & partnerships', 'For samples, reviews and wholesale: press@arena.studio. High-resolution assets on request.', 'Press kit →'],
           ['globe', 'Studio visits', 'Strandgade 14, Copenhagen. Thursdays 10–16, by appointment, coffee included.', 'Book a visit →'],
         ]
           .map(
@@ -2059,7 +2059,7 @@
             'lock',
             'Privacy',
             'We keep only what an order needs: name, address, email and what you bought. Card numbers never touch our servers. Order records stay for seven years because Danish tax law requires it. No ad trackers, no reselling data.',
-            'privacy@aether.studio',
+            'privacy@arena.studio',
           ],
           [
             'shield',
@@ -2070,8 +2070,8 @@
           [
             'user',
             'Accessibility',
-            'Built to WCAG 2.2 AA: full keyboard control, screen-reader labels, AA contrast and reduced-motion support. If you hit a barrier, write accessibility@aether.studio and we will fix it within one business day.',
-            'accessibility@aether.studio',
+            'Built to WCAG 2.2 AA: full keyboard control, screen-reader labels, AA contrast and reduced-motion support. If you hit a barrier, write accessibility@arena.studio and we will fix it within one business day.',
+            'accessibility@arena.studio',
           ],
         ]
           .map(
@@ -2091,8 +2091,8 @@
 
     return {
       html,
-      title: 'Our story — AETHER',
-      desc: 'Why AETHER exists, how the objects are drawn, built and repaired, and how to reach the Copenhagen studio.',
+      title: 'Our story — Arena',
+      desc: 'Why Arena exists, how the objects are drawn, built and repaired, and how to reach the Copenhagen studio.',
       mount(root) {
         bindNewsletter(root);
       },

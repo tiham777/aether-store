@@ -1,4 +1,4 @@
-# AETHER — storefront
+# Arena — storefront
 
 A static e-commerce storefront for a fictional Copenhagen object brand.
 Dependency-free: plain HTML, CSS and vanilla JS with a hash router — no build step,

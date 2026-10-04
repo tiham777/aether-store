@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — Firebase configuration (Cloud Firestore, free Spark plan)
+   Arena — Firebase configuration (Cloud Firestore, free Spark plan)
 
    Filled in from the Firebase console. These web-config values are public
    by design — access is governed by firestore.rules, not by secrecy.

@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — Firebase (Cloud Firestore) sync layer
+   Arena — Firebase (Cloud Firestore) sync layer
 
    Best-effort bridge to Firebase, imported lazily from the gstatic CDN as
    ES modules — no build step, no npm, no server. Every call fails safe:
@@ -300,7 +300,7 @@
     try {
       fn(arg);
     } catch (e) {
-      console.warn('[aether] cloud handler failed:', e);
+      console.warn('[arena] cloud handler failed:', e);
     }
   }
 

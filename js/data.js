@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — catalogue & site content
+   Arena — catalogue & site content
    ========================================================================= */
 (function () {
   'use strict';
@@ -711,7 +711,7 @@
     },
     {
       text:
-        'Everything about AETHER feels deliberate — the packaging, the weight, the way the case closes. Nothing is loud, and nothing is cheap.',
+        'Everything about Arena feels deliberate — the packaging, the weight, the way the case closes. Nothing is loud, and nothing is cheap.',
       name: 'Yuki Tanaka',
       role: 'Creative director, Kyoto',
       initials: 'YT',
@@ -722,7 +722,7 @@
   const journal = [
     {
       title: 'Designed to be repaired, not replaced',
-      excerpt: 'Why every AETHER product opens with a single driver — and what that changes about the way we design.',
+      excerpt: 'Why every Arena product opens with a single driver — and what that changes about the way we design.',
       date: '12 Mar 2026',
       read: '6 min',
       image: 'assets/img/desk-flatlay.jpg',
@@ -783,7 +783,7 @@
       initials: 'MT',
       date: '1 month ago',
       rating: 5,
-      text: 'Third product from AETHER. The consistency is the point — everything feels like it came from the same hand.',
+      text: 'Third product from Arena. The consistency is the point — everything feels like it came from the same hand.',
     },
     {
       name: 'Elena P.',
@@ -795,7 +795,7 @@
   ];
 
   window.DATA = {
-    brand: 'AETHER',
+    brand: 'Arena',
     categories,
     products,
     press,
@@ -808,6 +808,6 @@
     freeShipThreshold: 15000,
     expressFee: 1800,
     taxRate: 0.08,
-    promoCodes: { AETHER10: 0.1, WELCOME15: 0.15, FIRST10: 0.1 },
+    promoCodes: { ARENA10: 0.1, WELCOME15: 0.15, FIRST10: 0.1 },
   };
 })();

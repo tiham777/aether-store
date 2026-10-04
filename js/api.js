@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — shared-store client
+   Arena — shared-store client
 
    Best-effort bridge to the serverless API (api/*.js). Every call fails
    safe: when the backend is absent or unconfigured the site keeps working

@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — state: cart, wishlist, pricing, events
+   Arena — state: cart, wishlist, pricing, events
    ========================================================================= */
 (function () {
   'use strict';
@@ -7,6 +7,9 @@
   const CART_KEY = 'aether.cart.v1';
   const WISH_KEY = 'aether.wish.v1';
   const PROMO_KEY = 'aether.promo.v1';
+  /* carts saved under the old brand stored its first-order code verbatim */
+  const LEGACY_PROMO = { AETHER10: 'ARENA10' };
+  const migratePromo = (code) => (code && LEGACY_PROMO[code]) || code || null;
 
   const fmtWhole = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -42,7 +45,7 @@
 
   state.items = read(CART_KEY, []);
   state.wishlist = read(WISH_KEY, []);
-  state.promo = read(PROMO_KEY, null);
+  state.promo = migratePromo(read(PROMO_KEY, null));
 
   function emit(type) {
     listeners.forEach((fn) => fn(type));
@@ -198,7 +201,8 @@
       return state.promo;
     },
     applyPromo(code) {
-      const clean = String(code || '').trim().toUpperCase();
+      const raw = String(code || '').trim().toUpperCase();
+      const clean = LEGACY_PROMO[raw] || raw;
       if (!DATA.promoCodes[clean]) return false;
       state.promo = clean;
       persist();
@@ -232,7 +236,7 @@
     resync() {
       state.items = read(CART_KEY, []) || [];
       state.wishlist = read(WISH_KEY, []) || [];
-      state.promo = read(PROMO_KEY, null);
+      state.promo = migratePromo(read(PROMO_KEY, null));
       emit('change');
       emit('wish');
     },

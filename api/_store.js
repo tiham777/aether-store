@@ -1,4 +1,4 @@
-/* Shared helpers for AETHER Vercel functions — Upstash Redis over REST.
+/* Shared helpers for Arena Vercel functions — Upstash Redis over REST.
    No dependencies: plain fetch, so the functions bundle as-is. */
 
 const KEY_ENV = 'AETHER_ADMIN_KEY';

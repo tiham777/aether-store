@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — admin dashboard (role-gated)
+   Arena — admin dashboard (role-gated)
    ========================================================================= */
 (function () {
   'use strict';
@@ -143,7 +143,7 @@
   function admin(tab, params) {
     if (!Auth.current()) {
       return {
-        title: 'Sign in — AETHER',
+        title: 'Sign in — Arena',
         html: `<div class="container"><p class="muted" style="padding-block:70px">Redirecting to sign in…</p></div>`,
         mount() {
           location.hash = '#/login?next=%2Fadmin' + (tab ? '%2F' + tab : '');
@@ -179,7 +179,7 @@
           <span class="brand__mark" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path fill="#ffffff" d="M12 3.4 20.7 20.6H16.4L12 11.9 7.6 20.6H3.3z"></path><circle cx="12" cy="16.6" r="1.8" fill="#cf5b34"></circle></svg>
           </span>
-          <b>Aether</b><span class="tag">Admin</span>
+          <b>Arena</b><span class="tag">Admin</span>
         </a>
         <nav class="admin__nav" aria-label="Admin">
           ${TABS.map(([id, label, ic]) => {
@@ -215,7 +215,7 @@
 
     return {
       html,
-      title: `${title} — AETHER Admin`,
+      title: `${title} — Arena Admin`,
       mount(root) {
         bindModalGlobal();
         if (tab === 'products') mountProducts(root);
@@ -595,7 +595,7 @@
           rating: Math.round(rating * 10) / 10,
           badge: String(f.get('badge') || '') || null,
           tagline: String(f.get('tagline') || '').trim() || name,
-          blurb: String(f.get('blurb') || '').trim() || `${name}. Part of the AETHER line.`,
+          blurb: String(f.get('blurb') || '').trim() || `${name}. Part of the Arena line.`,
           colors: colorList.length ? colorList : [{ name: 'Graphite', hex: '#2b2b30' }],
           image: String(f.get('image')),
         };
@@ -613,7 +613,7 @@
           UI.toast({ title: 'Product created', sub: `${name} is now live in the shop.` });
         }
         closeModal();
-        AETHER.render();
+        Arena.render();
       });
     };
 
@@ -638,7 +638,7 @@
             () => {
               Catalog.remove(id);
               UI.toast({ title: 'Product deleted', sub: `${p.name} was removed.` });
-              AETHER.render();
+              Arena.render();
             },
             true
           );
@@ -954,7 +954,7 @@
     const toastRes = (res, okTitle) => {
       if (res.ok) {
         UI.toast({ title: okTitle, sub: 'Account updated.' });
-        AETHER.render();
+        Arena.render();
       } else {
         UI.toast({ title: 'Not allowed', sub: res.error });
       }
@@ -1083,7 +1083,7 @@
       b.addEventListener('click', () => {
         Subs.remove(b.getAttribute('data-sdel'));
         UI.toast({ title: 'Subscriber removed', sub: 'They won’t get studio notes.' });
-        AETHER.render();
+        Arena.render();
       })
     );
     const csvBtn = root.querySelector('[data-csv]');
@@ -1097,7 +1097,7 @@
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'aether-subscribers.csv';
+          a.download = 'arena-subscribers.csv';
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -1219,7 +1219,7 @@
       s.promoCodes[code] = pct / 100;
       Settings.save({ promoCodes: s.promoCodes });
       UI.toast({ title: `${code} is live`, sub: `${pct}% off, live at checkout.` });
-      AETHER.render();
+      Arena.render();
     });
     root.querySelectorAll('[data-promodel]').forEach((b) =>
       b.addEventListener('click', () => {
@@ -1227,7 +1227,7 @@
         delete s.promoCodes[b.getAttribute('data-promodel')];
         Settings.save({ promoCodes: s.promoCodes });
         UI.toast({ title: 'Code removed', sub: 'It no longer validates at checkout.' });
-        AETHER.render();
+        Arena.render();
       })
     );
 
@@ -1239,20 +1239,20 @@
       const s = Settings.get();
       s.announcements.push(text.slice(0, 90));
       Settings.save({ announcements: s.announcements });
-      AETHER.render();
+      Arena.render();
     });
     root.querySelectorAll('[data-andel]').forEach((b) =>
       b.addEventListener('click', () => {
         const s = Settings.get();
         s.announcements.splice(Number(b.getAttribute('data-andel')), 1);
         Settings.save({ announcements: s.announcements });
-        AETHER.render();
+        Arena.render();
       })
     );
     root.querySelector('[data-anreset]').addEventListener('click', () => {
       Settings.save({ announcements: Settings.defaults.slice() });
       UI.toast({ title: 'Announcements restored', sub: 'Factory copy is back.' });
-      AETHER.render();
+      Arena.render();
     });
 
     const sharedForm = root.querySelector('[data-shared-form]');
@@ -1313,7 +1313,7 @@
             : 'Already up to date.',
         });
         probe();
-        AETHER.render();
+        Arena.render();
       });
     }
 

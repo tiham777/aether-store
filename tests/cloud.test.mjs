@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — Firebase cloud-layer tests
+   Arena — Firebase cloud-layer tests
 
    Boots the real js/data.js, js/store.js, js/auth.js, js/firebase-config.js
    and js/cloud.js in a vm with a mocked localStorage and an in-memory

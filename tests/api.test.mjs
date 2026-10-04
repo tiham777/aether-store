@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — shared-store API tests
+   Arena — shared-store API tests
 
    Exercises the real Vercel handlers with mock req/res and a stubbed
    Upstash fetch, plus the local Reviews module from js/store.js.

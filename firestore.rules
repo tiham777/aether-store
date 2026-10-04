@@ -1,6 +1,6 @@
 rules_version = '2';
 
-/* AETHER — Firestore rules for the shared order store.
+/* Arena — Firestore rules for the shared order store.
  *
  * Publish from the Firebase console (Firestore → Rules) or run
  * `firebase deploy --only firestore:rules`.

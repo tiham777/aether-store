@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — UI layer: icons, cards, drawer, search, menu, toasts
+   Arena — UI layer: icons, cards, drawer, search, menu, toasts
    ========================================================================= */
 (function () {
   'use strict';

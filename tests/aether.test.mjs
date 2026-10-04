@@ -1,5 +1,5 @@
 /* =========================================================================
-   AETHER — data-layer tests (node --test, no dependencies)
+   Arena — data-layer tests (node --test, no dependencies)
 
    Boots the real browser scripts (data/store/auth) inside a vm context with
    a mocked localStorage, so the exact shipped code is exercised. "Reload"
