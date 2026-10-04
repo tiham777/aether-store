@@ -114,25 +114,25 @@
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__grid">
         <div class="hero__copy">
-          <span class="eyebrow" data-reveal>New — Halo Series 02</span>
-          <h1 class="display hero__title" data-reveal style="--d:70ms">Considered objects for <span class="accent">modern</span> life.</h1>
-          <p class="lede" data-reveal style="--d:150ms">A deliberately small line of audio, workspace and everyday essentials — designed in Copenhagen, built to be repaired, and kept for decades.</p>
+          <span class="eyebrow" data-reveal>Copenhagen · ${count()} objects — that's all we make</span>
+          <h1 class="display hero__title" data-reveal style="--d:70ms">Buy it for life. <span class="accent">Actually.</span></h1>
+          <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods drawn to be opened with a single driver — parts stocked for seven years, repairs at cost for the original owner, and two releases a year, never twenty.</p>
           <div class="hero__actions" data-reveal style="--d:230ms">
             <a class="btn btn--primary btn--lg" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
             <a class="btn btn--ghost btn--lg" href="#/product/${hero.id}">Meet ${hero.name}</a>
           </div>
           <div class="hero__trust" data-reveal style="--d:310ms">
             <span class="hero__trust-item">${stars(5)} <b>4.9</b> from ${num(reviewTotal())} reviews</span>
-            <span class="hero__trust-item">${icon('truck')} Free express over $150</span>
-            <span class="hero__trust-item">${icon('refresh')} 60-night trial</span>
+            <span class="hero__trust-item">${icon('truck')} Free express over $150 · 60-night returns</span>
+            <span class="hero__trust-item" style="color:var(--accent)">${icon('sparkle')} 10% off your first order — code AETHER10</span>
           </div>
         </div>
 
         <div class="hero__art" data-reveal="scale" style="--d:140ms" data-parallax>
           <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)} — ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
           <div class="float-card float-card--tl">
-            <span class="float-card__icon">${icon('award')}</span>
-            <span class="float-card__text"><span class="float-card__k">Editor’s choice</span><span class="float-card__v">WIRED · 2026</span></span>
+            <span class="float-card__icon">${icon('wrench')}</span>
+            <span class="float-card__text"><span class="float-card__k">Repairable</span><span class="float-card__v">Parts stocked 7+ years</span></span>
           </div>
           <div class="float-card float-card--br">
             <span class="float-card__icon float-card__icon--accent">${icon('truck')}</span>
@@ -140,15 +140,19 @@
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="press" aria-label="Featured in">
+    </section>    <section class="press" aria-label="What every order includes">
       <div class="press__viewport">
         <div class="press__track">
           ${[0, 1]
             .map(
-              (k) =>
-                `<div class="press__group"${k ? ' aria-hidden="true"' : ''}>${DATA.press
+              (k) => `<div class="press__group"${k ? ' aria-hidden="true"' : ''}>${[
+                  '60 nights to decide',
+                  'Free express over $150',
+                  'Duties paid to 92 countries',
+                  'Parts stocked for 7 years',
+                  'Repairs at cost, for as long as you own it',
+                  'Two releases a year — no drop hype',
+                ]
                   .map((n) => `<span class="press__item">${n}</span>`)
                   .join('')}</div>`
             )
@@ -220,7 +224,7 @@
           <div class="stats" data-reveal style="--d:250ms">
             <div class="stat"><span class="stat__n" data-count="${count()}">0</span><span class="stat__l">products in the entire line</span></div>
             <div class="stat"><span class="stat__n" data-count="4.9" data-decimals="1">0</span><span class="stat__l">average across ${num(reviewTotal())} reviews</span></div>
-            <div class="stat"><span class="stat__n" data-count="97" data-suffix="%">0</span><span class="stat__l">would buy from AETHER again</span></div>
+            <div class="stat"><span class="stat__n" data-count="7" data-suffix="+">0</span><span class="stat__l">years of parts stocked after launch</span></div>
           </div>
           <a class="link" href="#/shop" data-reveal style="--d:310ms">Start with the best sellers ${icon('arrowRight')}</a>
         </div>

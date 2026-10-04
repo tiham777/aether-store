@@ -612,7 +612,7 @@
     '*Free express shipping* on orders over $150',
     '60-night trial on everything',
     '2-year warranty · parts stocked 7 years',
-    'New: *Halo Series 02* has landed',
+    '10% off *your first order* — code AETHER10',
     'Duties included to 92 countries',
   ];
 
