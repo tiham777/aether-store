@@ -302,7 +302,7 @@
 
     <div class="agrid-2">
       <section class="acard">
-        <div class="acard__head"><h2>Revenue — last 14 days</h2><span class="xs">hover a bar for the day</span></div>
+        <div class="acard__head"><h2>Revenue · last 14 days</h2><span class="xs">hover a bar for the day</span></div>
         <div class="achart" role="img" aria-label="Daily revenue for the last 14 days">
           ${days
             .map((d) => {
@@ -515,7 +515,7 @@
           <input class="input" name="tagline" value="${esc(d(p && p.tagline))}" placeholder="Reference over-ear headphones"></label>
         <label class="field span-2"><span class="field__label">Blurb</span>
           <textarea class="input" name="blurb" placeholder="One paragraph describing the object.">${esc(d(p && p.blurb))}</textarea></label>
-        <label class="field span-2"><span class="field__label">Colours <span class="muted" style="font-weight:400">— “Name #hex, Name #hex”</span></span>
+        <label class="field span-2"><span class="field__label">Colours<span class="muted" style="font-weight:400">: “Name #hex, Name #hex”</span></span>
           <input class="input" name="colors" value="${esc(colors)}"></label>
         <label class="field span-2"><span class="field__label">Image</span>
           <select class="select" name="image">
@@ -595,7 +595,7 @@
           rating: Math.round(rating * 10) / 10,
           badge: String(f.get('badge') || '') || null,
           tagline: String(f.get('tagline') || '').trim() || name,
-          blurb: String(f.get('blurb') || '').trim() || `${name} — part of the AETHER line.`,
+          blurb: String(f.get('blurb') || '').trim() || `${name}. Part of the AETHER line.`,
           colors: colorList.length ? colorList : [{ name: 'Graphite', hex: '#2b2b30' }],
           image: String(f.get('image')),
         };
@@ -1074,7 +1074,7 @@
               )
               .join('')}
           </tbody></table></div>`
-        : `<section class="acard"><div class="aempty">${icon('mail')}<p>No subscribers yet — footer signups will appear here.</p></div></section>`
+        : `<section class="acard"><div class="aempty">${icon('mail')}<p>No subscribers yet. Footer signups will appear here.</p></div></section>`
     }`;
   }
 
@@ -1165,7 +1165,7 @@
 
       <section class="acard">
         <div class="acard__head"><h2>Shared data (Firebase)</h2><span class="xs muted" data-shared-status>Checking…</span></div>
-        <p class="xs muted">Orders are mirrored to Cloud Firestore — free Spark tier — so this dashboard sees them from any device, and customers can follow status changes live at <span class="mono">#/track</span>. Paste your <span class="mono">firebaseConfig</span> into <span class="mono">js/firebase-config.js</span> and publish <span class="mono">firestore.rules</span> to turn it on; until then everything stays in this browser.</p>
+        <p class="xs muted">Orders are mirrored to Cloud Firestore (free Spark tier), so this dashboard sees them from any device, and customers can follow status changes live at <span class="mono">#/track</span>. Paste your <span class="mono">firebaseConfig</span> into <span class="mono">js/firebase-config.js</span> and publish <span class="mono">firestore.rules</span> to turn it on; until then everything stays in this browser.</p>
         <form class="row row-3" data-shared-form novalidate>
           <input class="input" name="key" placeholder="Legacy API key (only if the Upstash bridge is used)" style="flex:1" autocomplete="off">
           <button class="abtn abtn--primary" type="submit">Sync orders</button>
@@ -1176,7 +1176,7 @@
         <div class="acard__head"><h2>Danger zone</h2></div>
         <div class="stack stack-3">
           <div class="row row-4 wrap" style="justify-content:space-between;gap:10px">
-            <span class="small">Load the demo dataset — fake customers, orders and subscribers for testing</span>
+            <span class="small">Load the demo dataset: fake customers, orders and subscribers for testing</span>
             <button class="abtn" data-loaddemo>Load demo data</button>
           </div>
           <div class="row row-4 wrap" style="justify-content:space-between;gap:10px">
@@ -1184,7 +1184,7 @@
             <button class="abtn abtn--danger" data-resetcat>Reset catalogue</button>
           </div>
           <div class="row row-4 wrap" style="justify-content:space-between;gap:10px">
-            <span class="small">Erase all demo data — accounts, orders, subscribers, settings</span>
+            <span class="small">Erase all demo data: accounts, orders, subscribers, settings</span>
             <button class="abtn abtn--danger" data-resetall>Erase everything</button>
           </div>
         </div>
@@ -1218,7 +1218,7 @@
       const s = Settings.get();
       s.promoCodes[code] = pct / 100;
       Settings.save({ promoCodes: s.promoCodes });
-      UI.toast({ title: `${code} is live`, sub: `${pct}% off — works at checkout now.` });
+      UI.toast({ title: `${code} is live`, sub: `${pct}% off, live at checkout.` });
       AETHER.render();
     });
     root.querySelectorAll('[data-promodel]').forEach((b) =>

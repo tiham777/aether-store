@@ -145,6 +145,10 @@ ul, ol { list-style: none; padding: 0; }
 }
 .skip-link:focus { top: 12px; }
 
+/* route changes move focus here so screen readers land on the new page;
+   an outline around the whole page after every navigation would be noise */
+#app:focus { outline: none; }
+
 /* ------------------------------ typography ------------------------------ */
 
 h1, h2, h3, h4 {

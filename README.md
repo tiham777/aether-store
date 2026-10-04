@@ -1,6 +1,6 @@
 # AETHER — storefront
 
-A world-class static e-commerce storefront for a fictional Copenhagen object brand.
+A static e-commerce storefront for a fictional Copenhagen object brand.
 Dependency-free: plain HTML, CSS and vanilla JS with a hash router — no build step,
 no framework, no node_modules.
 
@@ -16,7 +16,11 @@ no framework, no node_modules.
   sync, brute-force login throttling, and a router error boundary; optional
   **Firebase (Cloud Firestore)** sync for orders and reviews, with an offline
   write queue and live status listeners
-- **Self-hosted fonts** (Inter + Instrument Serif), authored SVG product renders
+- **Self-hosted fonts** (Schibsted Grotesk + Instrument Serif), authored SVG product renders
+- **Production hygiene** — per-route titles, descriptions and canonical URLs,
+  `noindex` on account/admin/checkout, Open Graph + Twitter cards, JSON-LD
+  (Organization, WebSite, Product), `robots.txt`, `sitemap.xml`, PWA manifest,
+  and security + cache headers in `vercel.json`
 
 ## Run locally
 

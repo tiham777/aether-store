@@ -106,7 +106,7 @@
         title: 'AETHER — Considered objects for modern life',
         html: `<div class="container"><div class="empty-state" style="margin-block:clamp(40px,8vw,110px)">
           <div class="cart-empty__icon">${icon('package')}</div>
-          <h1 class="h2">The shelves are bare <span class="accent">— on purpose.</span></h1>
+          <h1 class="h2">The shelves are bare. <span class="accent">On purpose.</span></h1>
           <p class="muted" style="max-width:44ch">Every object is back in the studio for a restock. The journal stays open while we work.</p>
           <a class="btn btn--primary" href="#/journal">Read the journal ${icon('arrowRight')}</a>
         </div></div>`,
@@ -148,7 +148,7 @@
         </div>
 
         <div class="hero__art" data-reveal="scale" style="--d:140ms" data-parallax>
-          <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)} — ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
+          <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)}, ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
           <div class="float-card float-card--tl">
             <span class="float-card__icon">${icon('wrench')}</span>
             <span class="float-card__text"><span class="float-card__v">Repairable</span></span>
@@ -420,6 +420,7 @@
 
   function shop(params) {
     const active = params.cat && DATA.categories.some((c) => c.id === params.cat) ? params.cat : 'all';
+    const query = (params.q || '').trim();
     const counts = { all: DATA.products.length };
     DATA.categories.forEach((c) => (counts[c.id] = inCat(c.id).length));
 
@@ -429,12 +430,14 @@
       <div class="page-head__inner">
         <div class="page-head__row">
           <h1 data-reveal style="--d:60ms">${
-            active === 'all' ? 'Everything we make' : esc(catName(active))
+            query ? `“${esc(query)}”` : active === 'all' ? 'Everything we make' : esc(catName(active))
           }<span class="accent">.</span></h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:42ch">${
-            active === 'all'
-              ? `No seasons, no drops that vanish. ${count()} products, restocked continuously, warrantied for years.`
-              : esc((DATA.categories.find((c) => c.id === active) || {}).blurb || '')
+            query
+              ? `Matches for “${esc(query)}” across the ${count()}-object line. Combine them with the filters below.`
+              : active === 'all'
+                ? `No seasons, no drops that vanish. ${count()} products, restocked continuously, warrantied for years.`
+                : esc((DATA.categories.find((c) => c.id === active) || {}).blurb || '')
           }</p>
         </div>
       </div>
@@ -443,6 +446,13 @@
     <div class="container">
       <div class="toolbar">
         <div class="toolbar__filters" role="group" aria-label="Filter by category">
+          ${
+            query
+              ? `<button class="pill is-active" data-fclearq aria-pressed="true" title="Clear search">“${esc(
+                  query
+                )}” ✕</button>`
+              : ''
+          }
           <button class="pill${active === 'all' ? ' is-active' : ''}" data-filter="all">All <span class="pill__count">${
       counts.all
     }</span></button>
@@ -522,12 +532,20 @@
 
     return {
       html,
-      title: active === 'all' ? 'Shop all — AETHER' : `${catName(active)} — AETHER`,
+      title: query ? `Search: ${query} — AETHER` : active === 'all' ? 'Shop all — AETHER' : `${catName(active)} — AETHER`,
+      desc: `Browse all ${count()} AETHER products: audio, workspace and everyday carry, with a 60-night trial and free shipping over $150.`,
       mount(root) {
         let sort = 'featured';
         const grid = root.querySelector('[data-grid]');
         const empty = root.querySelector('[data-empty]');
         const countEl = root.querySelector('[data-shopcount]');
+
+        if (query && empty) {
+          const eh = empty.querySelector('h3');
+          const ep = empty.querySelector('p');
+          if (eh) eh.textContent = `No products match “${query}”.`;
+          if (ep) ep.textContent = 'Try a shorter word, or clear the search and browse everything.';
+        }
 
         const priceMatch = (cents) => {
           const range = params.price || '';
@@ -539,10 +557,17 @@
         };
         const minRating = parseFloat(params.rating) || 0;
         const inStock = params.stock === '1';
+        const needle = query.toLowerCase();
 
         const paint = () => {
           let list = active === 'all' ? DATA.products.slice() : inCat(active);
-          list = list.filter((x) => priceMatch(x.price) && x.rating >= minRating && (!inStock || x.stock > 0));
+          list = list.filter(
+            (x) =>
+              priceMatch(x.price) &&
+              x.rating >= minRating &&
+              (!inStock || x.stock > 0) &&
+              (!needle || [x.name, x.tagline, x.blurb, catName(x.category)].join(' ').toLowerCase().includes(needle))
+          );
           if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
           if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
           if (sort === 'rating') list.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
@@ -556,9 +581,22 @@
 
         root.querySelectorAll('[data-filter]').forEach((btn) =>
           btn.addEventListener('click', () => {
-            location.hash = btn.getAttribute('data-filter') === 'all' ? '#/shop' : `#/shop?cat=${btn.getAttribute('data-filter')}`;
+            const p = new URLSearchParams();
+            const id = btn.getAttribute('data-filter');
+            if (id !== 'all') p.set('cat', id);
+            if (query) p.set('q', query);
+            const qs = p.toString();
+            location.hash = '#/shop' + (qs ? '?' + qs : '');
           })
         );
+        const clearQ = root.querySelector('[data-fclearq]');
+        if (clearQ)
+          clearQ.addEventListener('click', () => {
+            const p = new URLSearchParams(location.hash.split('?')[1] || '');
+            p.delete('q');
+            const qs = p.toString();
+            location.hash = '#/shop' + (qs ? '?' + qs : '');
+          });
 
         const setFilter = (key, val) => {
           const q = new URLSearchParams();
@@ -569,6 +607,7 @@
           if (price) q.set('price', price);
           if (rating) q.set('rating', rating);
           if (stock) q.set('stock', stock);
+          if (query) q.set('q', query);
           const qs = q.toString();
           location.hash = '#/shop' + (qs ? '?' + qs : '');
         };
@@ -602,6 +641,10 @@
     /* frequently bought together: this object + two in-stock companions */
     const bundle = [p].concat(related.filter((x) => x.stock > 0)).slice(0, 3);
     const save = p.compareAt ? p.compareAt - p.price : 0;
+    /* social crawlers ignore SVG, so share the first real photo we have */
+    const shareImg = [p.image]
+      .concat((p.gallery || []).map((g) => g.src))
+      .find((s) => /\.(png|jpe?g|webp|avif)$/i.test(s));
 
     const html = `
     ${crumbs([
@@ -827,6 +870,8 @@
     return {
       html,
       title: `${p.name} — ${p.tagline} · AETHER`,
+      desc: `${p.name}: ${p.tagline}. ${p.blurb}`,
+      image: shareImg,
       mount(root) {
         bindGallery(root, p);
         bindAccordions(root);
@@ -1782,6 +1827,7 @@
     return {
       html,
       title: 'Track your order — AETHER',
+      desc: 'Look up an AETHER order with your order number and email, and follow its status live.',
       mount(root) {
         const form = root.querySelector('[data-track-form]');
         const body = root.querySelector('[data-track-body]');
@@ -1858,6 +1904,7 @@
   function notFound() {
     return {
       title: 'Page not found — AETHER',
+      noindex: true,
       html: `
       <div class="container">
         <div class="done">
@@ -1920,7 +1967,7 @@
     ${newsletterSection()}
     ${perkRow()}`;
 
-    return { html, title: 'Journal — AETHER', mount(root) { bindNewsletter(root); } };
+    return { html, title: 'Journal — AETHER', desc: 'Notes from the AETHER studio: repair stories, materials, and why we only release twice a year.', mount(root) { bindNewsletter(root); } };
   }
 
   /* ================================ ABOUT ================================ */
@@ -1960,7 +2007,7 @@
       <div class="split split--reverse">
         <div class="split__media" data-reveal="right">
           <img src="assets/img/desk-flatlay.jpg" alt="Workbench with tools and parts" loading="lazy" width="1400" height="1600">
-          <span class="split__tag">Repair bench — 4 min per unit</span>
+          <span class="split__tag">Repair bench · 4 min per unit</span>
         </div>
         <div class="split__copy">
           <h2 class="h2" data-reveal style="--d:70ms">If it opens, it <span class="accent">lasts.</span></h2>
@@ -2004,10 +2051,52 @@
           .join('')}
       </div>
     </section>
+    <section class="section section--tight container" id="legal">
+      ${sectionHead({ title: 'The fine print. <span class="accent">Short.</span>' })}
+      <div class="feature-row">
+        ${[
+          [
+            'lock',
+            'Privacy',
+            'We keep only what an order needs: name, address, email and what you bought. Card numbers never touch our servers. Order records stay for seven years because Danish tax law requires it. No ad trackers, no reselling data.',
+            'privacy@aether.studio',
+          ],
+          [
+            'shield',
+            'Terms',
+            'Sixty nights to send anything back on our prepaid label. Every product ships with a repair guide and parts stay stocked for seven years after discontinuation. Danish law and EU consumer rights govern every order.',
+            'Last updated 1 October 2026',
+          ],
+          [
+            'user',
+            'Accessibility',
+            'Built to WCAG 2.2 AA: full keyboard control, screen-reader labels, AA contrast and reduced-motion support. If you hit a barrier, write accessibility@aether.studio and we will fix it within one business day.',
+            'accessibility@aether.studio',
+          ],
+        ]
+          .map(
+            ([ic, t, d, extra], i) => `
+          <div class="feature" data-reveal style="--d:${i * 80}ms">
+            <span class="feature__icon">${icon(ic)}</span>
+            <span class="feature__t">${t}</span>
+            <span class="feature__d">${d}</span>
+            <span class="mono" style="color:var(--accent)">${extra}</span>
+          </div>`
+          )
+          .join('')}
+      </div>
+    </section>
     ${newsletterSection()}
     ${perkRow()}`;
 
-    return { html, title: 'Our story — AETHER', mount(root) { bindNewsletter(root); } };
+    return {
+      html,
+      title: 'Our story — AETHER',
+      desc: 'Why AETHER exists, how the objects are drawn, built and repaired, and how to reach the Copenhagen studio.',
+      mount(root) {
+        bindNewsletter(root);
+      },
+    };
   }
 
   window.Views = { home, shop, product, checkout, confirmed, track, notFound, journal, about, newsletterSection, perkRow, bindNewsletter, sectionHead, unmountLive };

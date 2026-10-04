@@ -520,7 +520,7 @@
             }
             UI.toast({
               title: `${added} item${added === 1 ? '' : 's'} back in your bag`,
-              sub: skipped ? `${skipped} skipped — out of stock` : `From order ${o.id}`,
+              sub: skipped ? `${skipped} skipped · out of stock` : `From order ${o.id}`,
               action: { label: 'Checkout', href: '#/checkout' },
             });
           });
@@ -570,7 +570,7 @@
             }
             UI.toast({
               title: `${added} item${added === 1 ? '' : 's'} added to bag`,
-              sub: skipped ? `${skipped} skipped — out of stock` : `Bag total ${Store.money(Store.subtotal())}`,
+              sub: skipped ? `${skipped} skipped · out of stock` : `Bag total ${Store.money(Store.subtotal())}`,
               action: { label: 'Checkout', href: '#/checkout' },
             });
             setTimeout(() => UI.setLayer('cart', true), 420);
@@ -794,7 +794,7 @@
         <div class="grid-products grid-products--4" data-wishgrid>${list.map((p, i) => UI.productCard(p, i)).join('')}</div>
         <div class="aempty" data-wishempty${list.length ? ' hidden' : ''}>
           ${icon('heart')}
-          <p>Not saved yet — hearts sit on every product card.</p>
+          <p>Not saved yet. Hearts sit on every product card.</p>
           <a class="btn btn--primary btn--sm" href="#/shop">Browse the collection ${icon('arrowRight')}</a>
         </div>
       </div>

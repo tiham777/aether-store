@@ -217,7 +217,7 @@
     const pct = Math.min(100, Math.round(((DATA.freeShipThreshold - remaining) / DATA.freeShipThreshold) * 100));
     $('[data-progress-text]').innerHTML = remaining
       ? `You're <b>${Store.money(remaining)}</b> away from free shipping`
-      : `<b>Free shipping unlocked</b> · arrives ${Store.etaLabel('standard')}`;
+      : `<b>Free shipping applied</b> · arrives ${Store.etaLabel('standard')}`;
     $('[data-progress-fill]').style.width = pct + '%';
 
     body.innerHTML = items.map(cartLine).join('');
@@ -291,10 +291,10 @@
     const q = term.trim().toLowerCase();
 
     if (!q) {
-      const trending = DATA.products.filter((p) => p.badge).slice(0, 4);
+      const picks = DATA.products.filter((p) => p.badge === 'Bestseller' || p.badge === 'New').slice(0, 4);
       body.innerHTML =
-        `<div class="search__hint">Trending now</div>` +
-        trending.map((p) => resultRow(p)).join('') +
+        `<div class="search__hint">Bestsellers &amp; new arrivals</div>` +
+        picks.map((p) => resultRow(p)).join('') +
         `<div class="search__hint">Browse</div>
          <div class="search__chips">${DATA.categories
            .map((c) => `<a class="pill" href="#/shop?cat=${c.id}" data-close-search>${c.name}</a>`)
@@ -310,7 +310,11 @@
     });
 
     body.innerHTML = hits.length
-      ? `<div class="search__hint">${hits.length} result${hits.length > 1 ? 's' : ''}</div>` + hits.map((p) => resultRow(p)).join('')
+      ? `<div class="search__hint">${hits.length} result${hits.length > 1 ? 's' : ''}</div>` +
+          hits.map((p) => resultRow(p)).join('') +
+          `<div class="search__chips"><a class="pill" href="#/shop?q=${encodeURIComponent(
+            term.trim()
+          )}" data-close-search>See all results in the shop</a></div>`
       : `<div class="search__empty">No matches for “${esc(term)}”.<br>Try “headphones”, “keyboard” or “watch”.</div>`;
     searchCursor = -1;
   }
@@ -340,18 +344,37 @@
   /* ------------------------------ layer state ----------------------------- */
 
   const layers = { cart: false, search: false, menu: false };
+  /* while a dialog is open the rest of the page must not be tabbable */
+  const BACKGROUND = ['.skip-link', '.topbar', '.header', 'main#app', '.footer', '.back-top'];
+  const TRIGGERS = { cart: '[data-open-cart]', search: '[data-open-search]', menu: '[data-open-menu]' };
+  const openers = {};
 
   function syncLock() {
-    document.body.classList.toggle('is-locked', layers.cart || layers.search || layers.menu);
+    const any = layers.cart || layers.search || layers.menu;
+    document.body.classList.toggle('is-locked', Boolean(any));
     const scrim = $('.scrim');
     if (scrim) scrim.classList.toggle('is-open', layers.cart);
+    BACKGROUND.forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      if (any) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    });
   }
 
   function setLayer(name, open) {
+    const was = layers[name];
+    if (open && !was) openers[name] = document.activeElement;
     layers[name] = open;
     const el = $(`[data-layer="${name}"]`);
-    if (el) el.classList.toggle('is-open', open);
-    if (el) el.setAttribute('aria-hidden', String(!open));
+    if (el) {
+      el.classList.toggle('is-open', open);
+      el.setAttribute('aria-hidden', String(!open));
+      if (open) el.removeAttribute('inert');
+      else el.setAttribute('inert', '');
+    }
+    const trigger = document.querySelector(TRIGGERS[name]);
+    if (trigger) trigger.setAttribute('aria-expanded', String(open));
     syncLock();
 
     if (open && name === 'search') {
@@ -359,10 +382,27 @@
       searchResults('');
       setTimeout(() => input && input.focus(), 90);
     }
-    if (open && name === 'cart') renderCart();
+    if (open && name === 'cart') {
+      renderCart();
+      const closeBtn = $('.drawer [data-close-cart]');
+      setTimeout(() => closeBtn && closeBtn.focus(), 120);
+    }
     if (open && name === 'menu') {
       const first = $('.menu__link');
       setTimeout(() => first && first.focus(), 120);
+    }
+    if (!open && was) {
+      /* return focus to whatever opened the dialog, and never leave focus
+         parked inside a panel that is now hidden */
+      const back = openers[name];
+      openers[name] = null;
+      const active = document.activeElement;
+      const inside = Boolean(el && active && el.contains(active));
+      if (back && back.isConnected && back !== document.body && (inside || !active || active === document.body)) {
+        back.focus();
+      } else if (inside && active && active.blur) {
+        active.blur();
+      }
     }
   }
 
@@ -432,6 +472,19 @@
 
     const drawer = $('[data-layer="cart"]');
     if (drawer) drawer.setAttribute('aria-hidden', 'true');
+    /* dialogs start collapsed for assistive tech, and the shortcut hint on
+       Windows/Linux reads better as Ctrl K than ⌘K */
+    Object.keys(TRIGGERS).forEach((k) => {
+      const t = document.querySelector(TRIGGERS[k]);
+      if (t) t.setAttribute('aria-expanded', 'false');
+    });
+    const isMac = /mac|iphone|ipad|ipod/i.test(navigator.platform || navigator.userAgent || '');
+    if (!isMac) {
+      const kbd = document.querySelector('.search-trigger kbd');
+      if (kbd) kbd.textContent = 'Ctrl K';
+      const trigger = document.querySelector('[data-open-search]');
+      if (trigger) trigger.setAttribute('aria-label', 'Search (Ctrl K)');
+    }
 
     /* delegated actions */
     document.addEventListener('click', (e) => {

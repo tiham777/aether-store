@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>AETHER — Considered objects for modern life</title>
-    <meta name="description" content="A deliberately small line of audio, workspace and everyday essentials — designed in Copenhagen, built to be repaired, kept for decades.">
+    <meta name="description" content="A deliberately small line of audio, workspace and everyday essentials. Designed in Copenhagen, built to be repaired, kept for decades.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://aether-store-omega.vercel.app/">
     <meta name="theme-color" content="#faf9f7">
     <meta name="color-scheme" content="light">
     <!-- Defense in depth: same policy is sent as a header on Vercel (see vercel.json,
@@ -12,9 +14,21 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://*.googleapis.com https://identitytoolkit.googleapis.com; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta property="og:title" content="AETHER — Considered objects for modern life">
-    <meta property="og:description" content="A deliberately small product line. Repairable by design, quiet by default, warrantied for years.">
+    <meta property="og:description" content="A deliberately small line of audio, workspace and everyday essentials. Designed in Copenhagen, built to be repaired, kept for decades.">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AETHER">
+    <meta property="og:url" content="https://aether-store-omega.vercel.app/">
+    <meta property="og:image" content="https://aether-store-omega.vercel.app/assets/img/desk-flatlay.jpg">
+    <meta property="og:image:width" content="960">
+    <meta property="og:image:height" content="636">
+    <meta property="og:image:alt" content="AETHER objects laid out on a workbench">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AETHER — Considered objects for modern life">
+    <meta name="twitter:description" content="A deliberately small line of audio, workspace and everyday essentials. Designed in Copenhagen, built to be repaired, kept for decades.">
+    <meta name="twitter:image" content="https://aether-store-omega.vercel.app/assets/img/desk-flatlay.jpg">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://aether-store-omega.vercel.app/#organization","name":"AETHER","url":"https://aether-store-omega.vercel.app/","logo":"https://aether-store-omega.vercel.app/assets/favicon.svg","description":"Copenhagen object studio making repairable audio, workspace and everyday goods.","address":{"@type":"PostalAddress","streetAddress":"Strandgade 14","addressLocality":"Copenhagen","postalCode":"1401","addressCountry":"DK"},"contactPoint":{"@type":"ContactPoint","contactType":"customer service","email":"hello@aether.studio","telephone":"+45-33-12-44-08","availableLanguage":["English","Danish"]}},{"@type":"WebSite","@id":"https://aether-store-omega.vercel.app/#website","url":"https://aether-store-omega.vercel.app/","name":"AETHER","publisher":{"@id":"https://aether-store-omega.vercel.app/#organization"},"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://aether-store-omega.vercel.app/#/shop?q={search_term_string}"},"query-input":"required name=search_term_string"}}]}</script>
     <link rel="preload" href="assets/fonts/schibsted-grotesk-400-900-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/instrument-serif-400-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="css/base.css">
@@ -148,8 +162,8 @@
               <li><a href="#/about">Our story</a></li>
               <li><a href="#/journal">Journal</a></li>
               <li><a href="#/about?to=repair">Materials &amp; repair</a></li>
-              <li><a href="#/about">Stockists</a></li>
-              <li><a href="#/about">Careers</a></li>
+              <li><a href="#/about?to=contact">Stockists</a></li>
+              <li><a href="#/about?to=contact">Careers</a></li>
             </ul>
           </div>
 
@@ -160,8 +174,7 @@
               <li><a href="#/account?tab=orders">Order status</a></li>
               <li><a href="#/about?to=contact">Shipping &amp; returns</a></li>
               <li><a href="#/about?to=repair">Warranty</a></li>
-              <li><a href="#/about?to=repair">Repairs &amp; parts</a></li>
-              <li><a href="#/about?to=contact">Contact a human</a></li>
+              <li><a href="#/about?to=repair">Repairs &amp; parts</a></li>              <li><a href="#/about?to=contact">Contact a human</a></li>
               <li data-admin-link hidden><a href="#/admin">Admin dashboard</a></li>
             </ul>
           </div>
@@ -173,9 +186,9 @@
             <span>VISA</span><span>MASTERCARD</span><span>AMEX</span><span>PAYPAL</span><span>APPLE PAY</span><span>KLARNA</span>
           </div>
           <span class="row row-3" style="gap:14px">
-            <a href="#/about">Privacy</a>
-            <a href="#/about">Terms</a>
-            <a href="#/about">Accessibility</a>
+            <a href="#/about?to=legal">Privacy</a>
+            <a href="#/about?to=legal">Terms</a>
+            <a href="#/about?to=legal">Accessibility</a>
           </span>
         </div>
 
@@ -184,7 +197,7 @@
     </footer>
 
     <!-- mobile menu -->
-    <div class="menu" data-layer="menu" aria-hidden="true">
+    <div class="menu" data-layer="menu" aria-hidden="true" inert>
       <div class="menu__scrim" data-close-menu></div>
       <div class="menu__panel" role="dialog" aria-modal="true" aria-label="Menu">
         <div class="menu__head">
@@ -224,7 +237,7 @@
     </div>
 
     <!-- search -->
-    <div class="search" data-layer="search" aria-hidden="true">
+    <div class="search" data-layer="search" aria-hidden="true" inert>
       <div class="search__scrim" data-close-search></div>
       <div class="search__panel" role="dialog" aria-modal="true" aria-label="Search products">
         <div class="search__bar">
@@ -235,13 +248,13 @@
           <input class="search__input" type="search" placeholder="Search headphones, keyboard, watch…" aria-label="Search" autocomplete="off" spellcheck="false">
           <span class="search__esc">ESC</span>
         </div>
-        <div class="search__body" role="listbox" aria-label="Search results"></div>
+        <div class="search__body"></div>
       </div>
     </div>
 
     <!-- cart -->
     <div class="scrim" aria-hidden="true"></div>
-    <aside class="drawer" data-layer="cart" aria-label="Shopping bag">
+    <aside class="drawer" data-layer="cart" role="dialog" aria-modal="true" aria-label="Shopping bag" inert>
       <div class="drawer__head">
         <h2 class="drawer__title" data-cart-title>Your bag <span>· 0 items</span></h2>
         <button class="icon-btn" data-close-cart aria-label="Close bag">

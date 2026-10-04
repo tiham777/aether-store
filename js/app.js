@@ -6,6 +6,41 @@
 
   const app = () => document.getElementById('app');
 
+  const SITE = 'https://aether-store-omega.vercel.app';
+  /* routes that hold personal data and must never be indexed */
+  const PRIVATE_ROUTES = ['account', 'admin', 'checkout', 'login', 'register', 'order-confirmed'];
+  const DEFAULT_DESC = (document.head.querySelector('meta[name="description"]') || {}).content || '';
+  const DEFAULT_OG = (document.head.querySelector('meta[property="og:image"]') || {}).content || '';
+
+  const setMeta = (sel, value) => {
+    const el = document.head.querySelector(sel);
+    if (el) el.setAttribute('content', value);
+  };
+
+  /* keep search + social metadata in step with the route */
+  function syncHead(parts, view) {
+    const head = parts[0] || 'home';
+    let desc = view.desc || DEFAULT_DESC;
+    if (desc.length > 160) desc = desc.slice(0, 157).replace(/\s+\S*$/, '') + '…';
+    const hash = location.hash || '';
+    const canonical = !hash || hash === '#/' ? SITE + '/' : SITE + '/' + hash;
+    const noindex = PRIVATE_ROUTES.includes(head) || view.noindex === true;
+    /* social crawlers will not render SVG, so only swap in raster images */
+    const raster = view.image && /\.(png|jpe?g|webp|avif)$/i.test(view.image);
+    const image = raster ? SITE + '/' + view.image : DEFAULT_OG;
+    setMeta('meta[name="description"]', desc);
+    setMeta('meta[name="robots"]', noindex ? 'noindex, nofollow' : 'index, follow');
+    setMeta('meta[property="og:title"]', view.title || 'AETHER');
+    setMeta('meta[property="og:description"]', desc);
+    setMeta('meta[property="og:url"]', canonical);
+    setMeta('meta[property="og:image"]', image);
+    setMeta('meta[name="twitter:title"]', view.title || 'AETHER');
+    setMeta('meta[name="twitter:description"]', desc);
+    setMeta('meta[name="twitter:image"]', image);
+    const link = document.head.querySelector('link[rel="canonical"]');
+    if (link) link.setAttribute('href', canonical);
+  }
+
   /* ------------------------------- router -------------------------------- */
 
   function parseHash() {
@@ -70,6 +105,7 @@
   }
 
   let lastKey = null;
+  let lastPath = null;
 
   function renderFailure(host, err) {
     if (!host) return;
@@ -124,6 +160,7 @@
       host.setAttribute('tabindex', '-1');
 
       document.title = view.title || 'AETHER';
+      syncHead(parts, view);
       document.body.classList.toggle('is-admin', parts[0] === 'admin');
       if (view.mount) view.mount(host);
       observeReveal(host);
@@ -136,8 +173,13 @@
     }
 
     const key = parts.join('/') + JSON.stringify(params);
+    const pathChanged = lastKey !== null && lastPath !== parts.join('/');
     if (lastKey !== null) window.scrollTo({ top: 0, behavior: 'auto' });
+    /* keyboard + screen-reader users start at the new page, but only on real
+       route changes so refining filters never steals focus from the toolbar */
+    if (pathChanged) host.focus({ preventScroll: true });
     lastKey = key;
+    lastPath = parts.join('/');
 
     /* re-render cart chrome in case the drawer is open behind us */
     UI.renderCart();
@@ -175,15 +217,15 @@
 
   function bindInternalScroll() {
     document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      const href = a.getAttribute('href') || '';
+      /* router links and the skip link keep native behaviour; binding them
+         here would stack another listener on the static header per render */
+      if (href === '#' || href === '#top' || href === '#app' || href.startsWith('#/')) return;
       a.addEventListener('click', (e) => {
-        const href = a.getAttribute('href');
-        if (href === '#top' || href === '#/') return;
-        if (href.startsWith('#/')) return;
         const target = document.querySelector(href);
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     });
   }
