@@ -103,6 +103,93 @@ describe('pricing', () => {
   });
 });
 
+/* ------------------------------ delivery ETA ------------------------------ */
+
+describe('delivery ETA', () => {
+  const isBiz = (d) => d.getDay() !== 0 && d.getDay() !== 6;
+
+  test('a Tuesday morning order dispatches the same day', () => {
+    const c = boot();
+    const r = c.Store.eta('standard', new Date(2026, 9, 6, 10)); // Tue 10:00
+    assert.equal(r.from.toDateString(), 'Fri Oct 09 2026', '3 business days of transit');
+    assert.equal(r.to.toDateString(), 'Tue Oct 13 2026', '5 business days of transit');
+  });
+
+  test('orders after 14:00 roll to the next business day', () => {
+    const c = boot();
+    const r = c.Store.eta('standard', new Date(2026, 9, 6, 15)); // Tue 15:00
+    assert.equal(r.from.toDateString(), 'Mon Oct 12 2026', 'dispatch pushed to Wed 7th');
+    assert.equal(r.to.toDateString(), 'Wed Oct 14 2026');
+  });
+
+  test('weekend orders dispatch on Monday', () => {
+    const c = boot();
+    const r = c.Store.eta('express', new Date(2026, 9, 10, 9)); // Sat 09:00
+    assert.equal(r.from.toDateString(), 'Tue Oct 13 2026', 'dispatch Mon 12th + 1 day');
+    assert.equal(r.to.toDateString(), 'Wed Oct 14 2026');
+  });
+
+  test('windows land on business days and express beats standard', () => {
+    const c = boot();
+    const at = new Date(2026, 9, 6, 9);
+    const exp = c.Store.eta('express', at);
+    const std = c.Store.eta('standard', at);
+    for (const d of [exp.from, exp.to, std.from, std.to]) {
+      assert.ok(isBiz(d), `delivery quoted on a weekend: ${d.toDateString()}`);
+    }
+    assert.ok(exp.to < std.from, 'express must arrive before standard');
+  });
+
+  test('etaLabel renders an honest short-date range', () => {
+    const c = boot();
+    const at = new Date(2026, 9, 6, 10);
+    assert.equal(c.Store.etaLabel('standard', at), 'Fri, Oct 9 – Tue, Oct 13');
+    assert.equal(
+      c.Store.etaLabel('standard', at, true),
+      'Friday, October 9 – Tuesday, October 13'
+    );
+  });
+});
+
+/* ----------------------------- inventory guard ---------------------------- */
+
+describe('inventory guard', () => {
+  test('the bag may never hold more than stock allows', () => {
+    const c = boot();
+    c.Store.clear();
+    assert.equal(c.Store.stockCap('halo-one'), 60, 'stock floor from hydrate');
+    assert.equal(c.Store.add('halo-one', 99), true);
+    assert.equal(c.Store.line('halo-one::Graphite').qty, 60, 'quantity clamped to stock');
+    c.Store.setQty('halo-one::Graphite', 500);
+    assert.equal(c.Store.line('halo-one::Graphite').qty, 60, 'setQty clamps too');
+    const p = c.DATA.products.find((x) => x.id === 'halo-one');
+    p.stock = 500;
+    assert.equal(c.Store.stockCap('halo-one'), 99, 'cap keeps a 99 sanity ceiling');
+  });
+
+  test('missing and sold-out products refuse to be added', () => {
+    const c = boot();
+    c.Store.clear();
+    assert.equal(c.Store.add('does-not-exist', 1), false);
+    const p = c.DATA.products.find((x) => x.id === 'field-bottle');
+    p.stock = 0;
+    assert.equal(c.Store.stockCap('field-bottle'), 0);
+    assert.equal(c.Store.add('field-bottle', 1), false);
+    assert.equal(c.Store.count, 0, 'nothing landed in the bag');
+  });
+
+  test('a line sold out mid-session is never quietly restocked', () => {
+    const c = boot();
+    c.Store.clear();
+    c.Store.add('halo-one', 1);
+    const p = c.DATA.products.find((x) => x.id === 'halo-one');
+    p.stock = 0;
+    c.Store.setQty('halo-one::Graphite', 5);
+    assert.equal(c.Store.line('halo-one::Graphite').qty, 1, 'qty unchanged when sold out');
+    assert.equal(c.Store.add('halo-one', 1), false);
+  });
+});
+
 /* ---------------------------------- auth ---------------------------------- */
 
 describe('auth', () => {

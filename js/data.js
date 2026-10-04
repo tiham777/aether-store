@@ -764,7 +764,7 @@
   ];
 
   const perks = [
-    { icon: 'truck', title: 'Free express shipping', text: 'On every order over $150, worldwide.' },
+    { icon: 'truck', title: 'Free shipping', text: 'Standard delivery on orders over $150, worldwide.' },
     { icon: 'refresh', title: '60-night trial', text: 'Live with it two months. Return it free.' },
     { icon: 'shield', title: '2-year warranty', text: 'Parts stocked for 7+ years after launch.' },
   ];

@@ -4,12 +4,13 @@
 (function () {
   'use strict';
 
-  const { icon, stars, esc, productCard, catName, money } = {
+  const { icon, stars, esc, productCard, catName, money, productUrl } = {
     icon: UI.icon,
     stars: UI.stars,
     esc: UI.esc,
     productCard: UI.productCard,
     catName: UI.catName,
+    productUrl: UI.productUrl,
     money: (c) => Store.money(c),
   };
 
@@ -32,6 +33,25 @@
     }
   }
   const inCat = (cat) => DATA.products.filter((p) => p.category === cat);
+
+  /* recently viewed — remembered across visits, shown on the home page */
+  const RECENT_KEY = 'aether.recent.v1';
+  const recentIds = () => {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_KEY));
+      return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : [];
+    } catch (e) {
+      return [];
+    }
+  };
+  function pushRecent(id) {
+    try {
+      const list = [id].concat(recentIds().filter((x) => x !== id)).slice(0, 8);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch (e) {
+      /* private mode — the strip just stays empty */
+    }
+  }
   /* live catalogue figures — admin edits must not leave stale claims behind */
   const count = () => DATA.products.length;
   const reviewTotal = () => DATA.products.reduce((n, p) => n + (p.reviews || 0), 0);
@@ -123,7 +143,7 @@
           </div>
           <div class="hero__trust" data-reveal style="--d:310ms">
             <span class="hero__trust-item">${stars(5)} <b>4.9</b> from ${num(reviewTotal())} reviews</span>
-            <span class="hero__trust-item">${icon('truck')} Free express over $150 · 60-night returns</span>
+            <span class="hero__trust-item">${icon('truck')} Free shipping over $150 · 60-night returns</span>
             <span class="hero__trust-item" style="color:var(--accent)">${icon('sparkle')} 10% off your first order — code AETHER10</span>
           </div>
         </div>
@@ -147,7 +167,7 @@
             .map(
               (k) => `<div class="press__group"${k ? ' aria-hidden="true"' : ''}>${[
                   '60 nights to decide',
-                  'Free express over $150',
+                  'Free shipping over $150',
                   'Duties paid to 92 countries',
                   'Parts stocked for 7 years',
                   'Repairs at cost, for as long as you own it',
@@ -329,6 +349,7 @@
       </div>
     </section>
 
+    ${recentSection()}
     ${newsletterSection()}
     ${perkRow()}`;
 
@@ -340,6 +361,25 @@
         bindSpotlight();
       },
     };
+  }
+
+  /* recently-viewed strip — rendered after home()'s main html so first-time
+     visitors simply never see the section */
+  function recentSection() {
+    const list = recentIds()
+      .map(byId)
+      .filter(Boolean)
+      .slice(0, 4);
+    if (list.length < 2) return '';
+    return `
+    <section class="section section--flush-top container" id="recently">
+      ${sectionHead({
+        eyebrow: 'Recently viewed',
+        title: 'Where you <span class="accent">left off.</span>',
+        link: { href: '#/shop', label: 'Back to the shop' },
+      })}
+      <div class="grid-products grid-products--4">${list.map((p, i) => productCard(p, i)).join('')}</div>
+    </section>`;
   }
 
   /* ----------------------------- shared blocks ---------------------------- */
@@ -578,6 +618,8 @@
     const related = DATA.products.filter((x) => x.id !== p.id && x.category === p.category)
       .concat(DATA.products.filter((x) => x.id !== p.id && x.category !== p.category))
       .slice(0, 4);
+    /* frequently bought together: this object + two in-stock companions */
+    const bundle = [p].concat(related.filter((x) => x.stock > 0)).slice(0, 3);
     const save = p.compareAt ? p.compareAt - p.price : 0;
 
     const html = `
@@ -661,7 +703,12 @@
           </div>
 
           <div class="assurances" data-reveal style="--d:310ms">
-            <span class="assurance">${icon('truck')} <span><b>Free express shipping</b> — order within <span data-countdown>6h 42m</span></span></span>
+            <span class="assurance">${icon('truck')} <span><b>Express arrives ${Store.etaLabel(
+              'express'
+            )}</b> — order within <span data-countdown>6h 42m</span></span></span>
+            <span class="assurance">${icon('package')} <span><b>Standard arrives ${Store.etaLabel(
+              'standard'
+            )}</b> — free over $150</span></span>
             <span class="assurance">${icon('refresh')} <span><b>60-night trial</b> — free returns, no questions</span></span>
             <span class="assurance">${icon('shield')} <span><b>2-year warranty</b> + lifetime repair support</span></span>
           </div>
@@ -686,7 +733,9 @@
             <div class="acc">
               <button class="acc__btn" aria-expanded="false">Shipping, returns & repairs <span class="acc__icon"></span></button>
               <div class="acc__panel"><div class="acc__inner"><div class="acc__content">
-                <p>Ordered before 14:00 CET on a business day and it leaves Copenhagen the same afternoon. Express delivery is free above $150; duties and taxes are included at checkout for all 92 countries we ship to.</p>
+                <p>Ordered before 14:00 CET on a business day and it leaves Copenhagen the same afternoon — standard delivery is free above $150, express is a flat ${money(
+                  DATA.expressFee
+                )}. Duties and taxes are included at checkout for all 92 countries we ship to.</p>
                 <p>Sixty nights to change your mind, then two years of warranty — extendable to five at checkout. Out of warranty? We still sell the parts and publish the guide.</p>
               </div></div></div>
             </div>
@@ -694,6 +743,37 @@
         </div>
       </div>
     </div>
+
+    <section class="section section--tight container">
+      ${sectionHead({ eyebrow: 'Frequently bought together', title: 'Complete the <span class="accent">set.</span>' })}
+      <div class="fbt" data-fbt>
+        <div class="fbt__items">
+          ${bundle
+            .map(
+              (x, i) => `
+            <div class="fbt__item${x.stock === 0 ? ' is-oos' : ''}">
+              <label class="fbt__pick">
+                <input type="checkbox" data-fbt-check="${x.id}" data-fbt-price="${x.price}"${
+                  x.stock === 0 ? ' disabled' : ' checked'
+                }>
+                <span class="fbt__media"><img src="${x.image}" alt="${esc(x.name)}" width="72" height="90" loading="lazy"></span>
+              </label>
+              <span class="fbt__meta">
+                <a class="fbt__name" href="${productUrl(x.id)}">${esc(x.name)}</a>
+                <span class="fbt__price">${x.stock === 0 ? 'Sold out' : money(x.price)}</span>
+              </span>
+              ${i < bundle.length - 1 ? `<span class="fbt__plus" aria-hidden="true">+</span>` : ''}
+            </div>`
+            )
+            .join('')}
+        </div>
+        <div class="fbt__bar">
+          <span class="fbt__total">Total: <b data-fbt-total>${money(bundle.filter((x) => x.stock > 0).reduce((n, x) => n + x.price, 0))}</b>
+            <span class="xs muted" data-fbt-count>${bundle.filter((x) => x.stock > 0).length} items</span></span>
+          <button class="btn btn--primary" data-fbt-add>Add all to bag ${icon('bag')}</button>
+        </div>
+      </div>
+    </section>
 
     <section class="section section--tight container">
       ${sectionHead({ eyebrow: 'Included', title: 'What ownership <span class="accent">looks like.</span>' })}
@@ -774,7 +854,9 @@
         bindGallery(root, p);
         bindAccordions(root);
         bindPdpBuy(root, p);
+        bindFbt(root);
         bindReviews(root, p);
+        pushRecent(p.id);
         const cd = root.querySelector('[data-countdown]');
         if (cd) tickCountdown(cd);
         injectProductLd(p);
@@ -994,7 +1076,8 @@
 
     root.querySelectorAll('[data-pdp-qty]').forEach((b) =>
       b.addEventListener('click', () => {
-        qty = Math.min(99, Math.max(1, qty + Number(b.getAttribute('data-pdp-qty'))));
+        const cap = Store.stockCap(p.id) || 1;
+        qty = Math.min(cap, Math.max(1, qty + Number(b.getAttribute('data-pdp-qty'))));
         value.textContent = qty;
         if (p.stock !== 0) addBtn.textContent = `Add to bag · ${Store.money(p.price * qty)}`;
       })
@@ -1026,6 +1109,52 @@
       }, 1600);
       setTimeout(() => UI.setLayer('cart', true), 420);
     });
+  }
+
+  /* ------------------------ frequently bought together ------------------- */
+
+  function bindFbt(root) {
+    const box = root.querySelector('[data-fbt]');
+    if (!box) return;
+    const checks = Array.from(box.querySelectorAll('[data-fbt-check]'));
+    const totalEl = box.querySelector('[data-fbt-total]');
+    const countEl = box.querySelector('[data-fbt-count]');
+    const addBtn = box.querySelector('[data-fbt-add]');
+
+    const sync = () => {
+      const on = checks.filter((c) => c.checked);
+      const sum = on.reduce((n, c) => n + Number(c.getAttribute('data-fbt-price')), 0);
+      totalEl.textContent = Store.money(sum);
+      countEl.textContent = `${on.length} item${on.length === 1 ? '' : 's'}`;
+      addBtn.disabled = !on.length;
+      addBtn.innerHTML = on.length
+        ? `Add ${on.length} to bag · ${Store.money(sum)} ${icon('bag')}`
+        : 'Select at least one item';
+    };
+
+    checks.forEach((c) => c.addEventListener('change', sync));
+    addBtn.addEventListener('click', () => {
+      const on = checks.filter((c) => c.checked);
+      let added = 0;
+      let skipped = 0;
+      on.forEach((c) => {
+        const id = c.getAttribute('data-fbt-check');
+        const p = Store.product(id);
+        if (Store.add(id, 1, p && p.colors[0].name)) added++;
+        else skipped++;
+      });
+      if (!added) {
+        UI.toast({ title: 'Nothing could be added', sub: 'Those items are out of stock right now.' });
+        return;
+      }
+      UI.toast({
+        title: `${added} item${added === 1 ? '' : 's'} added to bag`,
+        sub: skipped ? `${skipped} skipped — out of stock` : `Bundle total ${Store.money(Store.subtotal())}`,
+        action: { label: 'Checkout', href: '#/checkout' },
+      });
+      setTimeout(() => UI.setLayer('cart', true), 420);
+    });
+    sync();
   }
 
   function tickCountdown(el) {
@@ -1081,6 +1210,7 @@
       <div class="summary__line"><span>Shipping${method === 'express' ? ' · Express' : ''}</span><span>${
       shipping === 0 ? 'Free' : money(shipping)
     }</span></div>
+      <div class="summary__line"><span>Estimated delivery</span><span><b>${Store.etaLabel(method)}</b></span></div>
       <div class="summary__line"><span>Estimated tax</span><span>${money(Store.tax(method))}</span></div>`;
   }
 
@@ -1164,12 +1294,16 @@
           <div class="stack stack-2" data-delivery>
             <label class="choice is-active">
               <input type="radio" name="ship" value="standard" checked>
-              <span class="choice__body"><span class="choice__t">Standard · 3–5 business days</span><span class="choice__d">Tracked, carbon-neutral</span></span>
+              <span class="choice__body"><span class="choice__t">Standard · 3–5 business days</span><span class="choice__d">Tracked, carbon-neutral · arrives ${Store.etaLabel(
+                'standard'
+              )}</span></span>
               <span class="choice__p" data-ship-standard>${Store.shipping('standard') === 0 ? 'Free' : money(Store.shipping('standard'))}</span>
             </label>
             <label class="choice">
               <input type="radio" name="ship" value="express">
-              <span class="choice__body"><span class="choice__t">Express · 1–2 business days</span><span class="choice__d">Order before 14:00 CET</span></span>
+              <span class="choice__body"><span class="choice__t">Express · 1–2 business days</span><span class="choice__d">Order before 14:00 CET · arrives ${Store.etaLabel(
+                'express'
+              )}</span></span>
               <span class="choice__p">${money(DATA.expressFee)}</span>
             </label>
           </div>
@@ -1481,8 +1615,7 @@
       };
     }
 
-    const eta = new Date(o.placedAt + (o.method === 'express' ? 2 : 5) * 864e5);
-    const etaText = eta.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const etaText = Store.etaLabel(o.method, new Date(o.placedAt), true);
 
     const html = `
     <div class="container">
@@ -1583,8 +1716,7 @@
 
   function trackBodyHTML(o) {
     const kit = window.OrderKit;
-    const eta = new Date(o.placedAt + (o.method === 'express' ? 2 : 5) * 864e5);
-    const etaText = eta.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const etaText = Store.etaLabel(o.method, new Date(o.placedAt), true);
     const label = kit ? kit.label(o.status) : o.status;
     const live = window.Cloud && Cloud.configured;
     return `

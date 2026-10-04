@@ -513,14 +513,73 @@
           btn.addEventListener('click', () => {
             const o = Orders.byId(btn.getAttribute('data-reorder'));
             if (!o) return;
-            o.items.forEach((it) => Store.add(it.productId || it.id, it.qty, it.color));
+            let added = 0;
+            let skipped = 0;
+            o.items.forEach((it) => {
+              if (Store.add(it.productId || it.id, it.qty, it.color)) added++;
+              else skipped++;
+            });
+            if (!added) {
+              UI.toast({ title: 'Everything is out of stock', sub: `Nothing from ${o.id} could be added.` });
+              return;
+            }
             UI.toast({
-              title: `${o.items.length} item${o.items.length === 1 ? '' : 's'} back in your bag`,
-              sub: `From order ${o.id}`,
+              title: `${added} item${added === 1 ? '' : 's'} back in your bag`,
+              sub: skipped ? `${skipped} skipped — out of stock` : `From order ${o.id}`,
               action: { label: 'Checkout', href: '#/checkout' },
             });
           });
         });
+
+        /* -------- cancel an order that hasn't shipped yet -------- */
+        root.querySelectorAll('[data-cancel-order]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-cancel-order');
+            if (btn.dataset.armed !== '1') {
+              /* two-step confirm instead of a modal: one slip can't cancel */
+              btn.dataset.armed = '1';
+              btn.textContent = 'Confirm cancel';
+              btn.classList.add('is-armed');
+              setTimeout(() => {
+                if (btn.isConnected && btn.dataset.armed === '1') {
+                  btn.dataset.armed = '';
+                  btn.textContent = 'Cancel order';
+                  btn.classList.remove('is-armed');
+                }
+              }, 4000);
+              return;
+            }
+            const o = Orders.setStatus(id, 'cancelled');
+            if (!o) return;
+            UI.toast({
+              title: `Order ${id} cancelled`,
+              sub: 'Nothing was charged — any pre-auth drops within 3–5 days.',
+            });
+            AETHER.render();
+          });
+        });
+
+        /* -------- wishlist: move everything into the bag -------- */
+        const wishAll = root.querySelector('[data-wish-addall]');
+        if (wishAll)
+          wishAll.addEventListener('click', () => {
+            let added = 0;
+            let skipped = 0;
+            Store.wishlist.slice().forEach((id) => {
+              if (Store.add(id, 1)) added++;
+              else skipped++;
+            });
+            if (!added) {
+              UI.toast({ title: 'Nothing could be added', sub: 'Saved items are out of stock right now.' });
+              return;
+            }
+            UI.toast({
+              title: `${added} item${added === 1 ? '' : 's'} added to bag`,
+              sub: skipped ? `${skipped} skipped — out of stock` : `Bag total ${Store.money(Store.subtotal())}`,
+              action: { label: 'Checkout', href: '#/checkout' },
+            });
+            setTimeout(() => UI.setLayer('cart', true), 420);
+          });
 
         /* -------- addresses -------- */
         bindAddresses(root, u);
@@ -645,7 +704,11 @@
             <div class="orow">
               <div>
                 <div class="orow__id">${esc(o.id)}</div>
-                <div class="orow__date">${fmtDate(o.placedAt)} · ${o.method === 'express' ? 'Express' : 'Standard'} · ${o.payment === 'cod' ? 'Cash on delivery' : 'Card'} · ${o.items.reduce((n, i) => n + i.qty, 0)} item${o.items.reduce((n, i) => n + i.qty, 0) === 1 ? '' : 's'}</div>
+                <div class="orow__date">${fmtDate(o.placedAt)} · ${o.method === 'express' ? 'Express' : 'Standard'} · ${o.payment === 'cod' ? 'Cash on delivery' : 'Card'} · ${o.items.reduce((n, i) => n + i.qty, 0)} item${o.items.reduce((n, i) => n + i.qty, 0) === 1 ? '' : 's'}${
+                  o.status !== 'delivered' && o.status !== 'cancelled' && o.status !== 'refunded'
+                    ? ` · <b style="color:var(--ink-2)">arrives ${Store.etaLabel(o.method, new Date(o.placedAt))}</b>`
+                    : ''
+                }</div>
               </div>
               <div class="orow__thumbs">
                 ${live.map((it) => `<img src="${esc(it.image)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
@@ -654,7 +717,13 @@
               <span class="st st--${o.status}">${STATUS_LABEL[o.status] || o.status}</span>
               <div class="orow__actions">
                 <span class="orow__total">${money(o.total)}</span>
+                <a class="abtn abtn--sm" href="#/track?id=${encodeURIComponent(o.id)}">Track</a>
                 <button class="abtn abtn--sm" data-reorder="${esc(o.id)}">Reorder</button>
+                ${
+                  o.status === 'paid' || o.status === 'packed'
+                    ? `<button class="abtn abtn--sm abtn--danger" data-cancel-order="${esc(o.id)}">Cancel order</button>`
+                    : ''
+                }
               </div>
             </div>
             <details class="oder">
@@ -718,7 +787,14 @@
       <div class="panel-card">
         <div class="panel-card__head">
           <h3>Saved objects</h3>
-          <span class="xs muted" data-wish-count>${list.length} saved</span>
+          <span class="row row-3">
+            <span class="xs muted" data-wish-count>${list.length} saved</span>
+            ${
+              list.length
+                ? `<button class="abtn abtn--sm abtn--primary" data-wish-addall>${icon('bag')} Add all to bag</button>`
+                : ''
+            }
+          </span>
         </div>
         <div class="grid-products grid-products--4" data-wishgrid>${list.map((p, i) => UI.productCard(p, i)).join('')}</div>
         <div class="aempty" data-wishempty${list.length ? ' hidden' : ''}>

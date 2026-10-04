@@ -71,30 +71,43 @@
     get count() {
       return state.items.reduce((n, l) => n + l.qty, 0);
     },
+    /* inventory guard: how many of this product the bag may hold */
+    stockCap(id) {
+      const p = product(id);
+      if (!p) return 0;
+      return typeof p.stock === 'number' && p.stock >= 0 ? Math.min(99, p.stock) : 99;
+    },
+    /* returns false when the product is missing or sold out, so callers
+       (quick add, reorder, bundles) can tell the user what happened */
     add(id, qty, color) {
       const p = product(id);
-      if (!p) return;
+      if (!p) return false;
+      const cap = Store.stockCap(id);
+      if (cap <= 0) return false;
       const variant = color || p.colors[0].name;
       const key = lineId(id, variant);
       const existing = state.items.find((l) => l.id === key);
-      if (existing) existing.qty = Math.min(existing.qty + (qty || 1), 99);
+      if (existing) existing.qty = Math.min(existing.qty + (qty || 1), cap);
       else
         state.items.push({
           id: key,
           productId: id,
           color: variant,
-          qty: Math.min(qty || 1, 99),
+          qty: Math.min(qty || 1, cap),
           price: p.price,
           addedAt: Date.now(),
         });
       persist();
       emit('add');
+      return true;
     },
     setQty(key, qty) {
       const line = state.items.find((l) => l.id === key);
       if (!line) return;
       if (qty <= 0) return Store.remove(key);
-      line.qty = Math.min(qty, 99);
+      const cap = Store.stockCap(line.productId);
+      if (cap <= 0) return; /* sold out while in the bag: no quiet restock */
+      line.qty = Math.min(qty, cap);
       persist();
       emit('change');
     },
@@ -141,6 +154,42 @@
     },
     freeShipRemaining() {
       return Math.max(0, DATA.freeShipThreshold - (Store.subtotal() - Store.discount()));
+    },
+
+    /* --------------------------- delivery promise ------------------------ */
+    /* Business-day dispatch + transit windows: express 1–2 days, standard
+       3–5. Orders placed after 14:00 (or on a weekend) leave the next
+       business day — the same rule the countdown on the product page
+       quotes, so every ETA on the site agrees with every other one. */
+    eta(method, from) {
+      const isBiz = (d) => d.getDay() !== 0 && d.getDay() !== 6;
+      const addBiz = (d, n) => {
+        const x = new Date(d);
+        let left = n;
+        while (left > 0) {
+          x.setDate(x.getDate() + 1);
+          if (isBiz(x)) left--;
+        }
+        return x;
+      };
+      const disp = new Date(from || Date.now());
+      if (!isBiz(disp) || disp.getHours() >= 14) {
+        do {
+          disp.setDate(disp.getDate() + 1);
+        } while (!isBiz(disp));
+      }
+      const [loN, hiN] = method === 'express' ? [1, 2] : [3, 5];
+      return { from: addBiz(disp, loN), to: addBiz(disp, hiN) };
+    },
+    etaLabel(method, from, long) {
+      const r = Store.eta(method, from);
+      const f = (d) => Store.dayLabel(d, long);
+      return r.from.toDateString() === r.to.toDateString() ? f(r.to) : `${f(r.from)} – ${f(r.to)}`;
+    },
+    dayLabel(d, long) {
+      return new Date(d).toLocaleDateString('en-US',
+        long ? { weekday: 'long', month: 'long', day: 'numeric' } : { weekday: 'short', month: 'short', day: 'numeric' }
+      );
     },
 
     /* ------------------------------- promo ------------------------------ */

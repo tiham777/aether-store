@@ -216,23 +216,69 @@
     const remaining = Store.freeShipRemaining();
     const pct = Math.min(100, Math.round(((DATA.freeShipThreshold - remaining) / DATA.freeShipThreshold) * 100));
     $('[data-progress-text]').innerHTML = remaining
-      ? `You're <b>${Store.money(remaining)}</b> away from free express shipping`
-      : `<b>Free express shipping unlocked</b> — arrives in 1–2 days`;
+      ? `You're <b>${Store.money(remaining)}</b> away from free shipping`
+      : `<b>Free shipping unlocked</b> — arrives ${Store.etaLabel('standard')}`;
     $('[data-progress-fill]').style.width = pct + '%';
 
     body.innerHTML = items.map(cartLine).join('');
+    const disc = Store.discount();
     foot.innerHTML = `
       <div class="drawer__row"><span class="muted small">Subtotal</span><strong class="price">${Store.money(
         Store.subtotal()
       )}</strong></div>
+      ${
+        disc
+          ? `<div class="drawer__row" style="color:var(--ok)"><span class="small">Discount · ${esc(
+              Store.promo
+            )}</span><span class="small">−${Store.money(disc)}</span></div>`
+          : ''
+      }
       <div class="drawer__row"><span class="muted small">Shipping</span><span class="small">${
         Store.shipping('standard') === 0 ? 'Free' : Store.money(Store.shipping('standard'))
       }</span></div>
+      <div class="drawer__row"><span class="muted small">Estimated delivery</span><span class="small"><b>${Store.etaLabel(
+        'standard'
+      )}</b></span></div>
+      ${
+        Store.promo
+          ? `<div class="drawer__promo-done">${icon('check')} <span><b>${esc(Store.promo)}</b> applied — ${
+              Math.round((DATA.promoCodes[Store.promo] || 0) * 100)
+            }% off</span> <button class="linkish" type="button" data-promo-clear>Remove</button></div>`
+          : `<form class="promo drawer__promo" data-promo-form novalidate>
+              <input class="input" name="promo" placeholder="Discount code" aria-label="Discount code" autocomplete="off" spellcheck="false">
+              <button class="btn btn--ghost btn--sm" type="submit">Apply</button>
+            </form>
+            <span class="promo__msg${Store.promo ? ' is-shown' : ''}" data-promo-msg></span>`
+      }
       <a class="btn btn--primary btn--block btn--lg" href="#/checkout" data-close-cart>Checkout · ${Store.money(
         Store.total('standard')
       )}</a>
       <button class="btn btn--ghost btn--block btn--sm" data-close-cart>Continue shopping</button>
       <p class="drawer__note">Free returns for 60 nights · Duties included</p>`;
+
+    /* promo box lives in the drawer so a code can be applied pre-checkout */
+    const pForm = foot.querySelector('[data-promo-form]');
+    if (pForm)
+      pForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = pForm.querySelector('[name="promo"]');
+        const msg = foot.querySelector('[data-promo-msg]');
+        const code = input.value.trim().toUpperCase();
+        if (Store.applyPromo(code)) {
+          /* applyPromo emits 'promo' → the subscription repaints the drawer */
+          toast({ title: 'Discount applied', sub: `${code} · you saved ${Store.money(Store.discount())}` });
+        } else {
+          msg.textContent = code ? `“${code}” isn’t a valid code.` : 'Enter a code first.';
+          msg.classList.add('is-shown', 'is-bad');
+          input.focus();
+        }
+      });
+    const pClear = foot.querySelector('[data-promo-clear]');
+    if (pClear)
+      pClear.addEventListener('click', () => {
+        Store.clearPromo();
+        toast({ title: 'Discount removed', sub: 'The code is no longer applied.' });
+      });
   }
 
   /* -------------------------------- search -------------------------------- */
@@ -277,7 +323,9 @@
           <span class="search__name">${esc(p.name)}</span>
           <span class="search__cat">${catName(p.category)} · ${esc(p.tagline)}</span>
         </span>
-        <span class="search__price">${Store.money(p.price)}</span>
+        <span class="search__price">${
+          p.stock === 0 ? '<b class="stock-out">Sold out</b>' : Store.money(p.price)
+        }</span>
       </a>`;
   }
 
@@ -428,10 +476,20 @@
         e.preventDefault();
         const id = add.getAttribute('data-add');
         const p = Store.product(id);
-        Store.add(id, 1);
+        if (!p) return;
+        const variant = p.colors[0].name;
+        const cap = Store.stockCap(id);
+        const before = Store.line(`${id}::${variant}`);
+        const wasCapped = Boolean(before) && before.qty >= cap;
+        if (!Store.add(id, 1)) {
+          toast({ title: `${p.name} is out of stock`, sub: 'Everything we make comes back — check the journal for restocks.' });
+          return;
+        }
         toast({
           title: p.name + ' added to bag',
-          sub: Store.money(p.price) + ' · ' + Store.count + ' item' + (Store.count === 1 ? '' : 's') + ' in bag',
+          sub: wasCapped
+            ? `That's all ${cap} we have in stock`
+            : Store.money(p.price) + ' · ' + Store.count + ' item' + (Store.count === 1 ? '' : 's') + ' in bag',
           img: p.image,
           action: { label: 'View bag', href: '#/checkout' },
         });
