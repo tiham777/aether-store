@@ -610,7 +610,7 @@
     const last = (o.history || []).slice(-1)[0];
     if (o.status === 'cancelled' || o.status === 'refunded') {
       return `<div class="osteps osteps--dead">
-        <span class="st st--${o.status}">${STATUS_LABEL[o.status] || o.status}</span>
+        <span class="st st--${o.status}">${esc(STATUS_LABEL[o.status] || o.status)}</span>
         <span class="xs muted">Updated ${fmtTime(last ? last.at : o.placedAt)}</span>
       </div>`;
     }
@@ -644,17 +644,17 @@
           <div class="order-block">
             <div class="orow">
               <div>
-                <div class="orow__id">${o.id}</div>
+                <div class="orow__id">${esc(o.id)}</div>
                 <div class="orow__date">${fmtDate(o.placedAt)} · ${o.method === 'express' ? 'Express' : 'Standard'} · ${o.payment === 'cod' ? 'Cash on delivery' : 'Card'} · ${o.items.reduce((n, i) => n + i.qty, 0)} item${o.items.reduce((n, i) => n + i.qty, 0) === 1 ? '' : 's'}</div>
               </div>
               <div class="orow__thumbs">
-                ${live.map((it) => `<img src="${it.image}" alt="${esc(it.name)}" loading="lazy">`).join('')}
+                ${live.map((it) => `<img src="${esc(it.image)}" alt="${esc(it.name)}" loading="lazy">`).join('')}
                 ${o.items.length > 4 ? `<span class="orow__more">+${o.items.length - 4}</span>` : ''}
               </div>
               <span class="st st--${o.status}">${STATUS_LABEL[o.status] || o.status}</span>
               <div class="orow__actions">
                 <span class="orow__total">${money(o.total)}</span>
-                <button class="abtn abtn--sm" data-reorder="${o.id}">Reorder</button>
+                <button class="abtn abtn--sm" data-reorder="${esc(o.id)}">Reorder</button>
               </div>
             </div>
             <details class="oder">
@@ -665,7 +665,7 @@
                     .map(
                       (it) => `
                     <div class="oitem">
-                      <img src="${it.image}" alt="">
+                      <img src="${esc(it.image)}" alt="">
                       <div><b>${esc(it.name)}</b><div class="xs">${esc(it.color)} · Qty ${it.qty}</div></div>
                       <span class="num">${money(it.price * it.qty)}</span>
                     </div>`

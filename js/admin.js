@@ -401,7 +401,7 @@
               .map(
                 (o) => `
               <tr>
-                <td class="mono-cell">${o.id}</td>
+                <td class="mono-cell">${esc(o.id)}</td>
                 <td><span class="cell-sub"><b>${esc(o.name)}</b><span>${esc(o.email)}</span></span></td>
                 <td class="num">${fmtDT(o.placedAt)}</td>
                 <td class="num">${money(o.total)}</td>
@@ -705,13 +705,13 @@
         const units = o.items.reduce((n, i) => n + i.qty, 0);
         return `
       <tr data-orow data-status="${esc(o.status)}" data-find="${esc((o.id + ' ' + o.email + ' ' + o.name).toLowerCase())}">
-        <td class="mono-cell">${o.id}</td>
+        <td class="mono-cell">${esc(o.id)}</td>
         <td><span class="cell-sub"><b>${esc(o.name)}</b><span>${esc(o.email)}</span></span></td>
         <td class="num">${fmtDT(o.placedAt)}</td>
         <td class="num">${units}</td>
         <td class="num">${money(o.total)}</td>
         <td data-cell-status>${pill(o.status)}</td>
-        <td><span class="cell-actions"><button class="abtn abtn--sm" data-oview="${o.id}">${ai('eye')} View</button></span></td>
+        <td><span class="cell-actions"><button class="abtn abtn--sm" data-oview="${esc(o.id)}">${ai('eye')} View</button></span></td>
       </tr>`;
       })
       .join('');
@@ -722,7 +722,7 @@
     const live = o.status !== 'cancelled' && o.status !== 'refunded';
     return `
     <div class="amodal__head">
-      <div><h2>${o.id}</h2><p class="xs" style="color:var(--ink-3)">${fmtFull(o.placedAt)} · ${o.method === 'express' ? 'Express' : 'Standard'} shipping · ${o.payment === 'cod' ? 'Cash on delivery' : 'Card'}</p></div>
+      <div><h2>${esc(o.id)}</h2><p class="xs" style="color:var(--ink-3)">${fmtFull(o.placedAt)} · ${o.method === 'express' ? 'Express' : 'Standard'} shipping · ${o.payment === 'cod' ? 'Cash on delivery' : 'Card'}</p></div>
       ${pill(o.status)}
     </div>
     <div class="oadetail">
@@ -740,7 +740,7 @@
           .map(
             (it) => `
           <div class="oitem">
-            <img src="${it.image}" alt="">
+            <img src="${esc(it.image)}" alt="">
             <div><b>${esc(it.name)}</b><div class="xs">${esc(it.color)} · Qty ${it.qty} · ${money(it.price)} each</div></div>
             <span class="num">${money(it.price * it.qty)}</span>
           </div>`
@@ -766,10 +766,10 @@
       </div>
 
       <div class="oactions">
-        ${NEXT[o.status] ? `<button class="abtn abtn--primary" data-advance="${o.id}">${ai('check2')} Mark as ${SL()[NEXT[o.status]]}</button>` : ''}
-        ${o.status === 'paid' || o.status === 'packed' ? `<button class="abtn abtn--danger" data-cancel="${o.id}">Cancel order</button>` : ''}
-        ${live && o.status !== 'delivered' ? `<button class="abtn abtn--danger" data-refund="${o.id}">Issue refund</button>` : ''}
-        ${o.status === 'delivered' ? `<button class="abtn abtn--danger" data-refund="${o.id}">Refund after delivery</button>` : ''}
+        ${NEXT[o.status] ? `<button class="abtn abtn--primary" data-advance="${esc(o.id)}">${ai('check2')} Mark as ${SL()[NEXT[o.status]]}</button>` : ''}
+        ${o.status === 'paid' || o.status === 'packed' ? `<button class="abtn abtn--danger" data-cancel="${esc(o.id)}">Cancel order</button>` : ''}
+        ${live && o.status !== 'delivered' ? `<button class="abtn abtn--danger" data-refund="${esc(o.id)}">Issue refund</button>` : ''}
+        ${o.status === 'delivered' ? `<button class="abtn abtn--danger" data-refund="${esc(o.id)}">Refund after delivery</button>` : ''}
       </div>
     </div>`;
   }
@@ -990,7 +990,7 @@
                       .map(
                         (o) => `
                 <div class="oitem" style="grid-template-columns:minmax(0,1fr) auto auto;gap:14px">
-                  <div><b class="mono">${o.id}</b><div class="xs">${fmtDay(o.placedAt)} · ${o.items.length} product${o.items.length === 1 ? '' : 's'}</div></div>
+                  <div><b class="mono">${esc(o.id)}</b><div class="xs">${fmtDay(o.placedAt)} · ${o.items.length} product${o.items.length === 1 ? '' : 's'}</div></div>
                   ${pill(o.status)}
                   <span class="num">${money(o.total)}</span>
                 </div>`

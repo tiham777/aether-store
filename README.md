@@ -60,6 +60,14 @@ Once configured, the site:
 
 Leave `apiKey` empty and everything stays in local storage exactly as before.
 
+**Hardened by design:** cloud documents are re-validated and coerced to a
+known-good shape on ingest (status enum, strict id pattern, capped strings,
+`javascript:` image sources dropped) and every field is HTML-escaped at the
+render site; order numbers carry 60 bits of crypto entropy so tracking URLs
+can't be enumerated; a Content-Security-Policy ships as both a `vercel.json`
+header and an `index.html` meta tag; and `firestore.rules` enforces the same
+order shape server-side. Re-publish the rules file after updating it.
+
 > **Demo-grade rules.** `firestore.rules` lets anyone who knows an order
 > number read that one order, and lets the dashboard list orders without a
 > sign-in — the same stance as the rest of this demo storefront. Before

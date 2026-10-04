@@ -128,7 +128,7 @@
     node.className = 'toast';
     node.setAttribute('role', 'status');
     node.innerHTML = `
-      ${opts.img ? `<img src="${opts.img}" alt="" width="40" height="50">` : ''}
+      ${opts.img ? `<img src="${esc(opts.img)}" alt="" width="40" height="50">` : ''}
       <div class="toast__text">
         <span class="toast__title">${esc(opts.title)}</span>
         ${opts.sub ? `<span class="toast__sub">${esc(opts.sub)}</span>` : ''}

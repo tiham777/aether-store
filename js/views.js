@@ -1040,15 +1040,25 @@
     window.__cdTimer = setInterval(paint, 30000);
   }
 
-  /* collision-free order id — random alone can clash with seeded orders */
+  /* Collision-free, unguessable order id — order numbers are readable by
+     anyone who has one (customer tracking), so they must not be
+     enumerable: 12 characters from a 32-symbol alphabet via crypto (2^60). */
   function makeOrderId() {
     const y = new Date().getFullYear();
+    const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; /* no 0/O/1/I */
+    const bytes = new Uint8Array(12);
+    const chunk = () => {
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+      else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+      return Array.from(bytes, (b) => ALPHABET[b % 32]).join(''); /* 256 % 32 === 0 — no modulo bias */
+    };
     let id;
     for (let i = 0; i < 25; i++) {
-      id = 'AET-' + y + '-' + Math.floor(100000 + Math.random() * 899999);
+      const body = chunk();
+      id = `AET-${y}-${body.slice(0, 6)}-${body.slice(6)}`;
       if (!window.Orders || !Orders.byId(id)) return id;
     }
-    return 'AET-' + y + '-' + Date.now().toString(36).toUpperCase();
+    return `AET-${y}-${chunk()}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
   }
 
   /* ============================== CHECKOUT =============================== */
@@ -1477,7 +1487,7 @@
         <span class="eyebrow" data-reveal>Order confirmed · a copy is on its way to ${esc(o.email)}</span>
         <h1 class="done__title" data-reveal style="--d:70ms">Thank you, <span class="accent">${esc(o.name.split(' ')[0])}.</span></h1>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
-        <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${o.id} ${UI.icon('copy')}</span>
+        <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${esc(o.id)} ${UI.icon('copy')}</span>
 
         <div data-live-status data-reveal style="--d:205ms;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-block:14px">${liveStatusHTML(
           o
@@ -1499,7 +1509,7 @@
             .map(
               (it) => `
             <div class="summary__item">
-              <span class="summary__media"><img src="${it.image}" alt="${esc(it.name)}" width="58" height="72"><span class="summary__qty">${it.qty}</span></span>
+              <span class="summary__media"><img src="${esc(it.image)}" alt="${esc(it.name)}" width="58" height="72"><span class="summary__qty">${it.qty}</span></span>
               <span><span class="summary__name">${esc(it.name)}</span><br><span class="summary__var">${esc(it.color)}</span></span>
               <span class="summary__price">${money(it.price * it.qty)}</span>
             </div>`
@@ -1604,7 +1614,7 @@
         .map(
           (it) => `
       <div class="summary__item">
-        <span class="summary__media"><img src="${it.image}" alt="${esc(it.name)}" width="58" height="72"><span class="summary__qty">${it.qty}</span></span>
+        <span class="summary__media"><img src="${esc(it.image)}" alt="${esc(it.name)}" width="58" height="72"><span class="summary__qty">${it.qty}</span></span>
         <span><span class="summary__name">${esc(it.name)}</span><br><span class="summary__var">${esc(it.color || '')}</span></span>
         <span class="summary__price">${money(it.price * it.qty)}</span>
       </div>`

@@ -20,16 +20,24 @@ service cloud.firestore {
       function validOrder(data) {
         return data.id is string
           && data.id == orderId
+          && data.id.matches('^AET-[0-9]{4}-[A-Z0-9-]{6,40}$')
           && data.email is string
-          && data.status is string
+          && data.email.size() <= 120
+          && data.name is string
+          && data.name.size() <= 60
+          && data.status in ['paid', 'packed', 'shipped', 'delivered', 'cancelled', 'refunded']
           && data.placedAt is number
           && data.total is number
           && data.total >= 0
+          && data.total <= 100000000
           && data.items is list
-          && data.items.size() > 0;
+          && data.items.size() > 0
+          && data.items.size() <= 50
+          && data.history is list
+          && data.history.size() <= 20;
       }
 
-      /* customer tracking: fetch one order by its number (AET-YYYY-NNNNNN) */
+      /* customer tracking: fetch one order by its number (AET-YYYY-XXXXXX-XXXXXX) */
       allow get: if true;
       /* admin dashboard reads the queue without a Firebase sign-in */
       allow list: if true;
@@ -43,6 +51,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.resource.data.id == reviewId
         && request.resource.data.productId is string
+        && request.resource.data.productId.size() <= 40
         && request.resource.data.rating is number
         && request.resource.data.text is string
         && request.resource.data.text.size() <= 2000;

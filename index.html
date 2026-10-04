@@ -7,6 +7,10 @@
     <meta name="description" content="A deliberately small line of audio, workspace and everyday essentials — designed in Copenhagen, built to be repaired, kept for decades.">
     <meta name="theme-color" content="#faf9f7">
     <meta name="color-scheme" content="light">
+    <!-- Defense in depth: same policy is sent as a header on Vercel (see vercel.json,
+         which also adds frame-ancestors) so any static host gets the baseline -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://*.googleapis.com https://identitytoolkit.googleapis.com; form-action 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta property="og:title" content="AETHER — Considered objects for modern life">
     <meta property="og:description" content="A deliberately small product line. Repairable by design, quiet by default, warrantied for years.">
     <meta property="og:type" content="website">

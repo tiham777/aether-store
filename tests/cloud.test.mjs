@@ -381,4 +381,55 @@ describe('merge reconciliation', () => {
     assert.equal(got.history.length, 1);
     assert.equal(c.Orders.mergeCloud([foreign]), 0, 'second pull is a no-op');
   });
+
+  test('hostile cloud documents are dropped — id fails the strict pattern', () => {
+    const c = boot();
+    const raw = sampleOrder('AET-2026-999100');
+    raw.id = 'AET-2026-AB" onmouseover="alert(1)';
+    assert.equal(c.Orders.mergeCloud([raw]), 0, 'attribute-breaking id rejected');
+    assert.equal(c.Orders.byId('AET-2026-999100'), null);
+
+    const raw2 = { id: '../../etc/passwd', items: [{ productId: 'halo-one', qty: 1 }] };
+    assert.equal(c.Orders.mergeCloud([raw2]), 0, 'path-shaped id rejected');
+  });
+
+  test('cloud documents are scrubbed to a known-good shape on ingest', () => {
+    const c = boot();
+    const raw = sampleOrder('AET-2026-999001');
+    raw.status = '<svg onload=alert(1)>'; /* not in the enum */
+    raw.name = 'x'.repeat(500); /* form-length overflow */
+    raw.total = 'lots'; /* wrong type */
+    raw.items = [
+      {
+        productId: 'halo-one',
+        name: 'Halo One',
+        image: 'javascript:alert(1)', /* scheme rejected */
+        color: '" onmouseover="alert(1)', /* escaped at render; capped here */
+        qty: 9999,
+        price: -5,
+      },
+    ];
+    assert.equal(c.Orders.mergeCloud([raw]), 1);
+    const o = c.Orders.byId('AET-2026-999001');
+    assert.equal(o.status, 'paid', 'unknown status falls back to the enum');
+    assert.equal(o.name.length, 60, 'name capped');
+    assert.equal(o.total, 0, 'non-numeric total becomes 0');
+    assert.equal(o.items[0].image, '', 'javascript: image source dropped');
+    assert.equal(o.items[0].qty, 99, 'qty clamped');
+    assert.equal(o.items[0].price, 0, 'negative price clamped');
+    assert.ok(o.items[0].color.length <= 40, 'colour capped');
+  });
+
+  test('local orders are capped to what the cloud rules accept', () => {
+    const c = boot();
+    const order = sampleOrder('AET-2026-999002');
+    order.name = 'L'.repeat(300);
+    order.email = 'y'.repeat(300) + '@x.co';
+    order.address = 'A'.repeat(400);
+    c.Orders.place(order);
+    const o = c.Orders.byId('AET-2026-999002');
+    assert.equal(o.name.length, 60);
+    assert.equal(o.email.length, 120);
+    assert.equal(o.address.length, 120);
+  });
 });

@@ -344,6 +344,76 @@
 
   /* ------------------------------- orders ------------------------------- */
 
+  /* Documents that arrive from the shared store are untrusted input: coerce
+     them to a known-good shape before anything can render them — status
+     enum, strict id pattern, capped strings, safe image sources. A doc that
+     fails the basics is dropped entirely. Escaping still happens at every
+     render site; this is defence in depth. */
+  const ORDER_STATUS = ['paid', 'packed', 'shipped', 'delivered', 'cancelled', 'refunded'];
+  const cap = (v, n) => String(v == null ? '' : v).slice(0, n);
+  const finiteNum = (v, min, max, fallback) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.min(Math.max(n, min), max);
+  };
+  const safeImage = (v) => {
+    const s = cap(v, 300).trim();
+    return /^(assets\/|https?:\/\/|data:image\/|#)/i.test(s) ? s : '';
+  };
+  const ORDER_ID_RE = /^AET-\d{4}-[A-Z0-9-]{6,40}$/;
+
+  function sanitizeOrder(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const id = String(raw.id || '');
+    if (!ORDER_ID_RE.test(id)) return null;
+    if (!Array.isArray(raw.items) || !raw.items.length || raw.items.length > 50) return null;
+    const items = [];
+    raw.items.forEach((it) => {
+      if (!it || typeof it !== 'object') return;
+      const pid = String(it.productId || it.id || '');
+      if (!/^[a-z0-9-]{1,40}$/.test(pid)) return;
+      items.push({
+        id: pid,
+        productId: pid,
+        name: cap(it.name || pid, 120),
+        image: safeImage(it.image),
+        color: cap(it.color || '', 40),
+        qty: Math.round(finiteNum(it.qty, 1, 99, 1)),
+        price: Math.round(finiteNum(it.price, 0, 1e8, 0)),
+      });
+    });
+    if (!items.length) return null;
+    const placedAt = finiteNum(raw.placedAt, 1, 8.64e15, Date.now());
+    const history = (Array.isArray(raw.history) ? raw.history : [])
+      .filter((h) => h && typeof h === 'object' && ORDER_STATUS.includes(h.status) && Number.isFinite(Number(h.at)))
+      .slice(0, 20)
+      .map((h) => ({ status: h.status, at: Number(h.at) }));
+    return {
+      id,
+      userId: typeof raw.userId === 'string' && raw.userId.length <= 40 ? raw.userId : null,
+      email: cap(raw.email, 120),
+      name: cap(raw.name, 60),
+      phone: cap(raw.phone, 30),
+      address: cap(raw.address, 120),
+      zip: cap(raw.zip, 12),
+      city: cap(raw.city, 60),
+      country: cap(raw.country, 60),
+      method: raw.method === 'express' ? 'express' : 'standard',
+      payment: raw.payment === 'cod' ? 'cod' : 'card',
+      items,
+      subtotal: Math.round(finiteNum(raw.subtotal, 0, 1e8, 0)),
+      discount: Math.round(finiteNum(raw.discount, 0, 1e8, 0)),
+      promo: typeof raw.promo === 'string' ? cap(raw.promo, 16) : null,
+      shipping: Math.round(finiteNum(raw.shipping, 0, 1e8, 0)),
+      tax: Math.round(finiteNum(raw.tax, 0, 1e8, 0)),
+      total: Math.round(finiteNum(raw.total, 0, 1e8, 0)),
+      placedAt,
+      updatedAt: finiteNum(raw.updatedAt, placedAt, 8.64e15, placedAt),
+      status: ORDER_STATUS.includes(raw.status) ? raw.status : 'paid',
+      history,
+    };
+  }
+
   let orders = read(K.orders, null);
   if (!Array.isArray(orders)) orders = [];
 
@@ -365,6 +435,15 @@
       order.status = order.status || 'paid';
       order.history = order.history || [{ status: 'paid', at: order.placedAt || Date.now() }];
       order.updatedAt = order.updatedAt || Date.now();
+      /* cap what the cloud will accept so a long form value can never make
+         a Firestore write bounce forever (see firestore.rules) */
+      order.name = cap(order.name, 60);
+      order.email = cap(order.email, 120);
+      order.phone = cap(order.phone, 30);
+      order.address = cap(order.address, 120);
+      order.zip = cap(order.zip, 12);
+      order.city = cap(order.city, 60);
+      order.country = cap(order.country, 60);
       orders.push(order);
       write(K.orders, orders);
       ORDERS.decrementStock(order.items || []);
@@ -403,8 +482,9 @@
        Returns the number of orders that changed. */
     mergeCloud(list) {
       let changed = 0;
-      (list || []).forEach((co) => {
-        if (!co || !co.id) return;
+      (list || []).forEach((raw) => {
+        const co = sanitizeOrder(raw);
+        if (!co) return; /* malformed or hostile document — drop it */
         const local = orders.find((o) => o.id === co.id);
         if (!local) {
           orders.push(Object.assign({}, co, { shared: true }));

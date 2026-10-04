@@ -238,10 +238,23 @@
     mergeCloud(list) {
       let added = 0;
       (list || []).forEach((r) => {
-        if (r && r.id && r.productId && !reviews.some((x) => x.id === r.id)) {
-          reviews.push(r);
-          added++;
-        }
+        if (!r || typeof r !== 'object' || !r.id || !r.productId) return;
+        if (!/^[a-z0-9-]{1,40}$/.test(String(r.productId))) return;
+        if (typeof r.text !== 'string' || r.text.trim().length < 10) return; /* malformed */
+        if (reviews.some((x) => x.id === r.id)) return;
+        /* untrusted cloud input — coerce to a known-good shape */
+        reviews.push({
+          id: String(r.id).slice(0, 60),
+          productId: String(r.productId).slice(0, 40),
+          userId: typeof r.userId === 'string' ? r.userId.slice(0, 40) : null,
+          name: String(r.name || 'Owner').slice(0, 60),
+          initials: String(r.initials || '?').slice(0, 4).toUpperCase(),
+          rating: Math.min(5, Math.max(1, Math.round(Number(r.rating) || 5))),
+          text: r.text.slice(0, 500),
+          verified: Boolean(r.verified),
+          at: Number.isFinite(Number(r.at)) ? Number(r.at) : Date.now(),
+        });
+        added++;
       });
       if (added) {
         reviews.sort((a, b) => (b.at || 0) - (a.at || 0));
