@@ -1164,10 +1164,10 @@
       </section>
 
       <section class="acard">
-        <div class="acard__head"><h2>Shared data (cloud)</h2><span class="xs muted" data-shared-status>Checking…</span></div>
-        <p class="xs muted">Orders placed online are mirrored to a shared store so this dashboard sees them from any device. Set <span class="mono">UPSTASH_REDIS_REST_URL</span> and <span class="mono">UPSTASH_REDIS_REST_TOKEN</span> in your Vercel project to enable it — until then everything stays in this browser.</p>
+        <div class="acard__head"><h2>Shared data (Firebase)</h2><span class="xs muted" data-shared-status>Checking…</span></div>
+        <p class="xs muted">Orders are mirrored to Cloud Firestore — free Spark tier — so this dashboard sees them from any device, and customers can follow status changes live at <span class="mono">#/track</span>. Paste your <span class="mono">firebaseConfig</span> into <span class="mono">js/firebase-config.js</span> and publish <span class="mono">firestore.rules</span> to turn it on; until then everything stays in this browser.</p>
         <form class="row row-3" data-shared-form novalidate>
-          <input class="input" name="key" placeholder="Admin key (only if AETHER_ADMIN_KEY is set)" style="flex:1" autocomplete="off">
+          <input class="input" name="key" placeholder="Legacy API key (only if the Upstash bridge is used)" style="flex:1" autocomplete="off">
           <button class="abtn abtn--primary" type="submit">Sync orders</button>
         </form>
       </section>
@@ -1268,27 +1268,51 @@
       })();
       sharedForm.elements.key.value = savedKey;
       const labels = {
-        live: 'Connected — shared store reachable',
-        locked: 'Connected — admin key required',
-        unconfigured: 'Not configured — set the Upstash env vars on Vercel',
+        live: 'Connected — Firebase live, syncing across devices',
+        connecting: 'Connecting to Firebase…',
+        error: 'Firebase unreachable — writes are queued and retried',
         off: 'Not configured — running on local storage',
       };
-      (window.API ? API.probe() : Promise.resolve('off')).then((state) => {
-        sharedStatus.textContent = labels[state] || labels.off;
-      });
+      const queuedNote = () => {
+        const n = window.Cloud && Cloud.pending ? Cloud.pending() : 0;
+        return n ? ` · ${n} write${n === 1 ? '' : 's'} queued` : '';
+      };
+      const probe = async () => {
+        if (window.Cloud && Cloud.configured) {
+          await Cloud.ready();
+          sharedStatus.textContent = (labels[Cloud.state()] || labels.connecting) + queuedNote();
+          return;
+        }
+        if (window.API) {
+          const state = await API.probe();
+          sharedStatus.textContent = state === 'live' ? 'Legacy bridge connected — shared store reachable' : labels.off;
+          return;
+        }
+        sharedStatus.textContent = labels.off;
+      };
+      probe();
       sharedForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const key = String(sharedForm.elements.key.value || '').trim();
         try {
           localStorage.setItem(KEY_LS, key);
         } catch (err) {}
-        const list = await API.pullOrders(key);
-        if (!list) return void UI.toast({ title: 'Sync failed', sub: 'The shared store is unreachable — check the env vars.' });
-        const added = Orders.mergeCloud(list);
+        const list =
+          (window.Cloud && Cloud.configured ? await Cloud.pullOrders() : null) ||
+          (window.API ? await API.pullOrders(key) : null);
+        if (!list)
+          return void UI.toast({
+            title: 'Sync failed',
+            sub: 'The shared store is unreachable — check your Firebase config in js/firebase-config.js.',
+          });
+        const changed = Orders.mergeCloud(list);
         UI.toast({
           title: 'Synced',
-          sub: added ? `${added} new order${added === 1 ? '' : 's'} pulled from the shared store.` : 'Already up to date.',
+          sub: changed
+            ? `${changed} order${changed === 1 ? '' : 's'} pulled or updated from the shared store.`
+            : 'Already up to date.',
         });
+        probe();
         AETHER.render();
       });
     }
@@ -1314,6 +1338,7 @@
             'aether.users.v1', 'aether.session.v1', 'aether.orders.v1',
             'aether.catalog.v2', 'aether.settings.v1', 'aether.subs.v1', 'aether.seeded.v1',
             'aether.cart.v1', 'aether.wish.v1', 'aether.promo.v1', 'aether.attempts.v1',
+            'aether.pending.v1', /* queued Firebase writes */
           ].forEach((k) => {
             try {
               localStorage.removeItem(k);

@@ -14,6 +14,23 @@
   };
 
   const byId = (id) => DATA.products.find((p) => p.id === id);
+
+  /* live Firestore subscriptions — one per screen, swapped on navigation */
+  let unsubConfirmed = null;
+  let unsubTrack = null;
+
+  /* called by the router before every render so listeners never outlive
+     the screen that owns them */
+  function unmountLive() {
+    if (unsubConfirmed) {
+      unsubConfirmed();
+      unsubConfirmed = null;
+    }
+    if (unsubTrack) {
+      unsubTrack();
+      unsubTrack = null;
+    }
+  }
   const inCat = (cat) => DATA.products.filter((p) => p.category === cat);
   /* live catalogue figures — admin edits must not leave stale claims behind */
   const count = () => DATA.products.length;
@@ -836,14 +853,18 @@
       grid.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-in'));
     };
 
-    /* pull shared reviews when the backend is configured */
-    if (window.API) {
-      API.pullReviews(p.id)
-        .then((cloud) => {
-          if (cloud && Reviews.mergeCloud(cloud)) repaint();
-        })
-        .catch(() => {});
-    }
+    /* pull shared reviews — Firebase when configured, legacy bridge otherwise */
+    const pull =
+      window.Cloud && Cloud.configured
+        ? Cloud.pullReviews(p.id)
+        : window.API
+        ? API.pullReviews(p.id)
+        : Promise.resolve(null);
+    pull
+      .then((cloud) => {
+        if (cloud && Reviews.mergeCloud(cloud)) repaint();
+      })
+      .catch(() => {});
 
     const ratingEl = form.querySelector('.rrating');
     let rating = 5;
@@ -908,7 +929,9 @@
         title: 'Review posted',
         sub: purchased ? 'Thanks — marked as a verified purchase.' : 'Thanks for sharing with future owners.',
       });
-      if (window.API) {
+      if (window.Cloud && Cloud.configured) {
+        Cloud.pushReview(rec);
+      } else if (window.API) {
         API.pushReview(rec)
           .then((r) => {
             if (r.shared) Reviews.markShared(rec.id);
@@ -1393,9 +1416,10 @@
       };
       const saved = window.Orders ? Orders.place(order) : order;
       window.__lastOrder = saved;
-      /* best-effort: mirror the order into the shared store so the admin
-         dashboard sees it from any device (falls back to local-only) */
-      if (window.API) {
+      /* best-effort mirror into the shared store. Orders.place already pushed
+         to Firebase when it is configured; without a config we fall back to
+         the legacy serverless bridge — and always to local-only otherwise. */
+      if ((!window.Cloud || !Cloud.configured) && window.API) {
         API.placeOrder(saved)
           .then((r) => {
             if (r.shared && window.Orders) Orders.markShared(saved.id);
@@ -1410,6 +1434,22 @@
   }
 
   /* ============================ CONFIRMATION ============================= */
+
+  /* one-line live status strip used on the confirmation page */
+  function liveStatusHTML(o) {
+    const kit = window.OrderKit;
+    const label = kit ? kit.label(o.status) : o.status;
+    const last = (o.history || []).slice(-1)[0];
+    const when = kit ? kit.fmtTime(last ? last.at : o.placedAt) : new Date(last ? last.at : o.placedAt).toLocaleString();
+    const live = window.Cloud && Cloud.configured;
+    return `
+      <span class="st st--${o.status}">${esc(label)}</span>
+      <span class="xs muted" style="display:inline-flex;gap:6px;align-items:center">${icon(
+        'clock'
+      )} Updated ${esc(when)} · ${
+      live ? 'live — this page refreshes itself' : 'add Firebase in js/firebase-config.js for cross-device updates'
+    }</span>`;
+  }
 
   function confirmed(params) {
     const fromStore = params && params.id && window.Orders ? Orders.byId(params.id) : null;
@@ -1438,6 +1478,10 @@
         <h1 class="done__title" data-reveal style="--d:70ms">Thank you, <span class="accent">${esc(o.name.split(' ')[0])}.</span></h1>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
         <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${o.id} ${UI.icon('copy')}</span>
+
+        <div data-live-status data-reveal style="--d:205ms;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-block:14px">${liveStatusHTML(
+          o
+        )}</div>
 
         <div class="done__card" data-reveal style="--d:230ms">
           <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} — ${
@@ -1486,11 +1530,204 @@
       title: `Order ${o.id} confirmed — AETHER`,
       mount(root) {
         const t = root.querySelector('[data-track]');
-        if (t)
-          t.addEventListener('click', () =>
-            UI.toast({ title: 'Tracking link sent', sub: `We emailed tracking for ${o.id} to ${o.email}.` })
-          );
+        if (t) t.addEventListener('click', () => (location.hash = '#/track?id=' + encodeURIComponent(o.id)));
         bindNewsletter();
+        /* live: watch this order so status changes made anywhere appear here */
+        if (window.Cloud && Cloud.configured) {
+          if (unsubConfirmed) unsubConfirmed();
+          unsubConfirmed = Cloud.watchOrder(o.id, (cloud) => {
+            if (!cloud || !window.Orders) return;
+            Orders.mergeCloud([cloud]);
+            const fresh = Orders.byId(o.id) || cloud;
+            const region = root.querySelector('[data-live-status]');
+            if (region) region.innerHTML = liveStatusHTML(fresh);
+          });
+        }
+      },
+    };
+  }
+
+  /* =============================== TRACK ================================= */
+  /* Public order tracking (#/track). The order lives in Firebase when it is
+     configured, so this page works from any device — otherwise it falls back
+     to whatever this browser has in local storage. */
+
+  function trackHint() {
+    return `<div class="empty-state" style="margin-block:10px">
+      <div class="cart-empty__icon">${icon('truck')}</div>
+      <p class="muted" style="max-width:48ch">Type your order number above — it sits in the confirmation email and looks like <span class="mono">AET-2026-123456</span>. The timeline updates on its own once you track it.</p>
+    </div>`;
+  }
+
+  function trackMissHTML(oid) {
+    return `<div class="empty-state" style="margin-block:10px">
+      <div class="cart-empty__icon">${icon('search')}</div>
+      <h1 class="h2">No order <span class="accent">${esc(oid)}.</span></h1>
+      <p class="muted" style="max-width:48ch">Check the number and the email you used at checkout, then try again. Still stuck? <a class="link link--underline" href="#/about?to=contact">Talk to a human</a> and we’ll find it.</p>
+    </div>`;
+  }
+
+  function trackBodyHTML(o) {
+    const kit = window.OrderKit;
+    const eta = new Date(o.placedAt + (o.method === 'express' ? 2 : 5) * 864e5);
+    const etaText = eta.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const label = kit ? kit.label(o.status) : o.status;
+    const live = window.Cloud && Cloud.configured;
+    return `
+    <div class="done__card" data-track-card>
+      <div class="row row-4 wrap" style="justify-content:space-between;align-items:center;gap:12px">
+        <div>
+          <div class="orow__id">${icon('package')} ${esc(o.id)}</div>
+          <div class="xs muted">${esc(o.name || '')}${o.email ? ' · ' + esc(o.email) : ''} · placed ${
+      kit ? kit.fmtDate(o.placedAt) : new Date(o.placedAt).toLocaleDateString()
+    } · ${o.method === 'express' ? 'Express' : 'Standard'}</div>
+        </div>
+        <span class="st st--${o.status}">${esc(label)}</span>
+      </div>
+      <hr class="hairline">
+      ${kit ? kit.steps(o) : ''}
+      <ul class="otimeline">
+        ${(o.history || [{ status: o.status, at: o.placedAt }])
+          .map(
+            (h) =>
+              `<li><span>${esc(kit ? kit.label(h.status) : h.status)}</span><span class="tl-when">${
+                kit ? kit.fmtTime(h.at) : ''
+              }</span></li>`
+          )
+          .join('')}
+      </ul>
+      <hr class="hairline">
+      <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} — ${
+      o.method === 'express' ? 'Express (1–2 days)' : 'Standard (3–5 days)'
+    }</span></span>
+      ${o.items
+        .map(
+          (it) => `
+      <div class="summary__item">
+        <span class="summary__media"><img src="${it.image}" alt="${esc(it.name)}" width="58" height="72"><span class="summary__qty">${it.qty}</span></span>
+        <span><span class="summary__name">${esc(it.name)}</span><br><span class="summary__var">${esc(it.color || '')}</span></span>
+        <span class="summary__price">${money(it.price * it.qty)}</span>
+      </div>`
+        )
+        .join('')}
+      <hr class="hairline">
+      <div class="summary__lines">
+        <div class="summary__total"><span>${o.status === 'delivered' ? 'Delivered' : 'Order total'}</span><span>${money(
+      o.total
+    )}</span></div>
+      </div>
+      <p class="xs muted" style="display:inline-flex;gap:6px;align-items:center;margin-top:10px">${icon(
+        'clock'
+      )} ${
+        live
+          ? 'Live — status changes appear here automatically, no refresh needed.'
+          : 'Local mode — add your Firebase config (js/firebase-config.js) to track from any device.'
+      }</p>
+    </div>`;
+  }
+
+  function track(params) {
+    const startId = params && params.id ? String(params.id).trim().toUpperCase() : '';
+    const startEmail = params && params.email ? String(params.email).trim() : '';
+
+    const html = `
+    ${crumbs([{ label: 'Track order', href: '#/track' }])}
+    <div class="container">
+      <header class="page-head">
+        <div class="page-head__inner">
+          <span class="eyebrow" data-reveal>Order tracking</span>
+          <div class="page-head__row">
+            <h1 data-reveal style="--d:60ms">Where is my <span class="accent">order.</span></h1>
+            <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Enter your order number and watch it move — paid, packed, shipped, delivered — live, without refreshing.</p>
+          </div>
+        </div>
+      </header>
+
+      <form data-track-form data-reveal style="--d:160ms;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;max-width:820px;margin-bottom:30px">
+        <label class="field" style="flex:1 1 220px"><span class="field__label">Order number</span>
+          <input class="input" name="id" placeholder="AET-2026-123456" value="${esc(
+            startId
+          )}" autocomplete="off" spellcheck="false" required></label>
+        <label class="field" style="flex:1 1 240px"><span class="field__label">Email <span class="muted">(optional)</span></span>
+          <input class="input" name="email" type="email" placeholder="you@example.com" value="${esc(startEmail)}" autocomplete="email"></label>
+        <button class="btn btn--primary" type="submit">Track order ${icon('arrowRight')}</button>
+      </form>
+
+      <div data-track-body style="padding-bottom:clamp(30px,6vw,80px)">${startId ? '<p class="muted">Looking that up…</p>' : trackHint()}</div>
+    </div>
+    ${newsletterSection()}
+    ${perkRow()}`;
+
+    return {
+      html,
+      title: 'Track your order — AETHER',
+      mount(root) {
+        const form = root.querySelector('[data-track-form]');
+        const body = root.querySelector('[data-track-body]');
+        if (!form || !body) return;
+        if (unsubTrack) {
+          unsubTrack();
+          unsubTrack = null;
+        }
+        const repaint = (content) => {
+          body.innerHTML = content;
+        };
+
+        const lookup = async (rawId, rawEmail) => {
+          const oid = String(rawId || '').trim().toUpperCase();
+          const mail = String(rawEmail || '').trim().toLowerCase();
+          if (!oid) {
+            repaint(trackHint());
+            return;
+          }
+          repaint(`<p class="muted">Looking up ${esc(oid)}…</p>`);
+          let o = window.Orders ? Orders.byId(oid) : null;
+          if ((!o || !o.shared) && window.Cloud && Cloud.configured) {
+            const cloud = await Cloud.getOrder(oid);
+            if (cloud && window.Orders) Orders.mergeCloud([cloud]);
+            o = (window.Orders && Orders.byId(oid)) || cloud;
+          }
+          if (o && mail && mail !== String(o.email || '').toLowerCase()) o = null;
+          if (!o) {
+            repaint(trackMissHTML(oid));
+            return;
+          }
+          repaint(trackBodyHTML(o));
+
+          /* live updates for as long as this page is open */
+          if (window.Cloud && Cloud.configured) {
+            if (unsubTrack) unsubTrack();
+            unsubTrack = Cloud.watchOrder(oid, (cloudOrder) => {
+              if (!cloudOrder) return;
+              if (window.Orders) Orders.mergeCloud([cloudOrder]);
+              const fresh = (window.Orders && Orders.byId(oid)) || cloudOrder;
+              if (mail && mail !== String(fresh.email || '').toLowerCase()) return;
+              repaint(trackBodyHTML(fresh));
+            });
+          }
+        };
+
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const data = new FormData(form);
+          const oid = String(data.get('id') || '').trim().toUpperCase();
+          const mail = String(data.get('email') || '').trim();
+          if (!/^[A-Z0-9-]{6,}$/.test(oid)) {
+            UI.toast({ title: 'Check the order number', sub: 'It looks like AET-2026-123456.' });
+            return;
+          }
+          /* make the URL shareable/refreshable without re-rendering the page */
+          const q = new URLSearchParams({ id: oid });
+          if (mail) q.set('email', mail);
+          try {
+            history.replaceState(null, '', '#/track?' + q.toString());
+          } catch (err) {
+            /* very old webviews — the lookup still works */
+          }
+          lookup(oid, mail);
+        });
+
+        if (startId) lookup(startId, startEmail);
       },
     };
   }
@@ -1657,5 +1894,5 @@
     return { html, title: 'Our story — AETHER', mount(root) { bindNewsletter(root); } };
   }
 
-  window.Views = { home, shop, product, checkout, confirmed, notFound, journal, about, newsletterSection, perkRow, bindNewsletter, sectionHead };
+  window.Views = { home, shop, product, checkout, confirmed, track, notFound, journal, about, newsletterSection, perkRow, bindNewsletter, sectionHead, unmountLive };
 })();

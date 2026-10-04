@@ -40,6 +40,8 @@
         return Views.checkout();
       case 'order-confirmed':
         return Views.confirmed(params);
+      case 'track':
+        return Views.track ? Views.track(params) : Views.notFound();
       case 'journal':
         return Views.journal ? Views.journal() : Views.notFound();
       case 'about':
@@ -98,6 +100,8 @@
 
   function render() {
     const { parts, params } = parseHash();
+    /* release live subscriptions owned by the outgoing view */
+    if (window.Views && Views.unmountLive) Views.unmountLive();
     /* structured data belongs to the view that rendered it */
     document.querySelectorAll('script[data-view-ld]').forEach((s) => s.remove());
     let view;
@@ -336,11 +340,42 @@
     window.addEventListener('hashchange', render);
     window.addEventListener('resize', () => UI.headerScroll(), { passive: true });
 
+    /* shared order store: live cloud listener + cross-tab refresh. Screens
+       that patch themselves (confirmation, tracking) opt out by route. */
+    let liveTimer = null;
+    const refreshOrders = () => {
+      const head = parseHash().parts[0] || '';
+      if (head !== 'admin' && head !== 'account') return;
+      clearTimeout(liveTimer);
+      liveTimer = setTimeout(() => {
+        try {
+          render();
+        } catch (e) {
+          /* the route changed under us — the next render covers it */
+        }
+      }, 300);
+    };
+    if (window.Cloud && Cloud.configured) {
+      Cloud.start({
+        onOrders(list) {
+          if (list && window.Orders && Orders.mergeCloud(list)) refreshOrders();
+        },
+      });
+    }
+
     /* cross-tab sync: another tab wrote the cart or the catalogue */
     window.addEventListener('storage', (e) => {
       if (!e.key) return;
       if (e.key === 'aether.cart.v1' || e.key === 'aether.wish.v1' || e.key === 'aether.promo.v1') {
         Store.resync();
+      }
+      if (e.key === 'aether.orders.v1' && e.newValue) {
+        try {
+          const list = JSON.parse(e.newValue);
+          if (window.Orders && Array.isArray(list) && Orders.mergeCloud(list)) refreshOrders();
+        } catch (err) {
+          /* malformed write — ignore */
+        }
       }
       if (e.key === 'aether.catalog.v2' && window.Catalog) {
         Catalog.hydrate();

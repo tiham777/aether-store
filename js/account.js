@@ -926,5 +926,8 @@
     });
   }
 
+  /* shared with the public tracking view (js/views.js) */
+  window.OrderKit = { steps: orderSteps, label: (s) => STATUS_LABEL[s] || s, fmtDate, fmtTime, STATUS_LABEL };
+
   Object.assign(window.Views, { login, register, account, forbidden });
 })();

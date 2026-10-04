@@ -1,0 +1,58 @@
+rules_version = '2';
+
+/* AETHER — Firestore rules for the shared order store.
+ *
+ * Publish from the Firebase console (Firestore → Rules) or run
+ * `firebase deploy --only firestore:rules`.
+ *
+ * These are demo-grade by design, matching the rest of the storefront:
+ * a customer only needs their order number to follow their own order, and
+ * the admin dashboard lists orders without a Firebase sign-in. Before
+ * taking real money, require Firebase Auth for `list` and `update` (only
+ * the admin session should advance an order's status) and scope `get` to
+ * signed-in owners. See the README section "Firebase backend".
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /orders/{orderId} {
+      function validOrder(data) {
+        return data.id is string
+          && data.id == orderId
+          && data.email is string
+          && data.status is string
+          && data.placedAt is number
+          && data.total is number
+          && data.total >= 0
+          && data.items is list
+          && data.items.size() > 0;
+      }
+
+      /* customer tracking: fetch one order by its number (AET-YYYY-NNNNNN) */
+      allow get: if true;
+      /* admin dashboard reads the queue without a Firebase sign-in */
+      allow list: if true;
+      /* orders are always written whole (setDoc with merge), never patched */
+      allow create: if validOrder(request.resource.data);
+      allow update: if validOrder(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.resource.data.id == reviewId
+        && request.resource.data.productId is string
+        && request.resource.data.rating is number
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 2000;
+      allow update: if request.resource.data.id == reviewId;
+      allow delete: if false;
+    }
+
+    /* everything else (accounts, settings, subscribers) stays local */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -364,9 +364,13 @@
       order.userId = order.userId || (current() ? current().id : null);
       order.status = order.status || 'paid';
       order.history = order.history || [{ status: 'paid', at: order.placedAt || Date.now() }];
+      order.updatedAt = order.updatedAt || Date.now();
       orders.push(order);
       write(K.orders, orders);
       ORDERS.decrementStock(order.items || []);
+      /* mirror to Firebase when configured — fire-and-forget, Cloud queues
+         the write itself if the network is down (see js/cloud.js) */
+      if (window.Cloud && Cloud.configured) Cloud.pushOrder(order);
       return order;
     },
     setStatus(id, status) {
@@ -375,7 +379,9 @@
       o.status = status;
       o.history = o.history || [];
       o.history.push({ status, at: Date.now() });
+      o.updatedAt = Date.now();
       write(K.orders, orders);
+      if (window.Cloud && Cloud.configured) Cloud.pushOrder(o);
       return o;
     },
     remove(id) {
@@ -391,19 +397,35 @@
       }
       return o || null;
     },
-    /* pull orders placed on other devices into this dashboard */
+    /* Merge orders from the shared store. Missing ones are added; ones we
+       already have are refreshed when the cloud copy is at least as new, so
+       status changes made on another device show up without a re-seed.
+       Returns the number of orders that changed. */
     mergeCloud(list) {
-      let added = 0;
+      let changed = 0;
       (list || []).forEach((co) => {
-        if (!co || !co.id || orders.some((o) => o.id === co.id)) return;
-        orders.push(Object.assign({}, co, { shared: true }));
-        added++;
+        if (!co || !co.id) return;
+        const local = orders.find((o) => o.id === co.id);
+        if (!local) {
+          orders.push(Object.assign({}, co, { shared: true }));
+          changed++;
+          return;
+        }
+        const cloudAt = co.updatedAt || co.placedAt || 0;
+        const localAt = local.updatedAt || local.placedAt || 0;
+        const sameStatus = local.status === co.status;
+        const sameHistory = (local.history || []).length === (co.history || []).length;
+        const sameStamp = localAt === cloudAt;
+        if (sameStatus && sameHistory && sameStamp) return; /* no-op snapshot */
+        if (cloudAt < localAt) return; /* this browser is ahead — it pushes */
+        Object.assign(local, co, { shared: true });
+        changed++;
       });
-      if (added) {
+      if (changed) {
         orders.sort((a, b) => (b.placedAt || 0) - (a.placedAt || 0));
         write(K.orders, orders);
       }
-      return added;
+      return changed;
     },
     stats() {
       const live = orders.filter((o) => o.status !== 'cancelled' && o.status !== 'refunded');
