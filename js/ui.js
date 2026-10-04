@@ -254,7 +254,7 @@
         Store.total('standard')
       )}</a>
       <button class="btn btn--ghost btn--block btn--sm" data-close-cart>Continue shopping</button>
-      <p class="drawer__note">Free returns for 60 nights · Duties included</p>`;
+      <p class="drawer__note">Free returns for 60 nights</p>`;
 
     /* promo box lives in the drawer so a code can be applied pre-checkout */
     const pForm = foot.querySelector('[data-promo-form]');

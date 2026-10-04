@@ -94,7 +94,7 @@
         .join('')
     }<span class="row row-3"><span style="color:var(--accent)">${icon(
       'globe'
-    )}</span><span>Ships to 92 countries: <span class="muted">duties included</span></span></span></div></section>`;
+    )}</span><span>Ships to 92 countries</span></span></div></section>`;
   }
 
   /* ================================ HOME ================================= */
@@ -151,7 +151,7 @@
           <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)} — ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
           <div class="float-card float-card--tl">
             <span class="float-card__icon">${icon('wrench')}</span>
-            <span class="float-card__text"><span class="float-card__k">Repairable</span><span class="float-card__v">Parts stocked 7+ years</span></span>
+            <span class="float-card__text"><span class="float-card__v">Repairable</span></span>
           </div>
           <div class="float-card float-card--br">
             <span class="float-card__icon float-card__icon--accent">${icon('truck')}</span>
@@ -164,8 +164,6 @@
         <div class="press__group">${[
                   '60 nights to decide',
                   'Free shipping over $150',
-                  'Duties paid to 92 countries',
-                  'Parts stocked for 7 years',
                   'Repairs at cost, for as long as you own it',
                   'Two releases a year, no drop hype',
                 ]
@@ -693,7 +691,6 @@
               'standard'
             )}</b> · free over $150</span></span>
             <span class="assurance">${icon('refresh')} <span><b>60-night trial</b> · free returns, no questions</span></span>
-            <span class="assurance">${icon('shield')} <span><b>2-year warranty</b> + lifetime repair support</span></span>
           </div>
 
           <div data-reveal style="--d:350ms">
@@ -718,7 +715,7 @@
               <div class="acc__panel"><div class="acc__inner"><div class="acc__content">
                 <p>Ordered before 14:00 CET on a business day and it leaves Copenhagen the same afternoon. Standard delivery is free above $150, express is a flat ${money(
                   DATA.expressFee
-                )}. Duties and taxes are included at checkout for all 92 countries we ship to.</p>
+                )}.</p>
                 <p>Sixty nights to change your mind, then two years of warranty, extendable to five at checkout. Out of warranty? We still sell the parts and publish the guide.</p>
               </div></div></div>
             </div>

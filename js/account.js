@@ -62,8 +62,6 @@
         <p>Order history, repair guides and a wishlist that follows you. One account, kept for decades.</p>
         <div class="auth__art-stats">
           <span>${icon('refresh')} 60-night trial</span>
-          <span>${icon('wrench')} 7-year parts</span>
-          <span>${icon('shield')} 2-year warranty</span>
         </div>
       </div>
     </aside>`;

@@ -301,6 +301,29 @@
         if (r.bottom > 0 && r.top < window.innerHeight) run(el);
       });
     }, 1100);
+    /* last-resort sweep: IntersectionObserver callbacks can stall in
+       background tabs and hidden webviews — re-check on scroll, resize and
+       when the tab becomes visible again so a counter never sits at 0 */
+    const sweep = () => {
+      let pending = false;
+      els.forEach((el) => {
+        if (el.dataset.counted || !el.isConnected) return;
+        const r = el.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < window.innerHeight * 0.95) run(el);
+        else pending = true;
+      });
+      if (!pending) {
+        window.removeEventListener('scroll', sweep);
+        window.removeEventListener('resize', sweep);
+        document.removeEventListener('visibilitychange', onVisible);
+      }
+    };
+    const onVisible = () => {
+      if (!document.hidden) sweep();
+    };
+    window.addEventListener('scroll', sweep, { passive: true });
+    window.addEventListener('resize', sweep, { passive: true });
+    document.addEventListener('visibilitychange', onVisible);
   }
 
   /* ------------------------------- parallax ------------------------------- */
