@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aether-store-omega.vercel.app/sitemap.xml
+Sitemap: https://arena-store-omega.vercel.app/sitemap.xml

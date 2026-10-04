@@ -6,7 +6,7 @@
 
   const app = () => document.getElementById('app');
 
-  const SITE = 'https://aether-store-omega.vercel.app';
+  const SITE = 'https://arena-store-omega.vercel.app';
   /* routes that hold personal data and must never be indexed */
   const PRIVATE_ROUTES = ['account', 'admin', 'checkout', 'login', 'register', 'order-confirmed'];
   const DEFAULT_DESC = (document.head.querySelector('meta[name="description"]') || {}).content || '';
