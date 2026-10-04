@@ -476,11 +476,11 @@
 .pdp__thumb:hover { transform: translateY(-2px); }
 .pdp__thumb.is-active { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 
-.pdp__info { display: grid; gap: clamp(16px, 2vw, 24px); }
-.pdp__head { display: grid; gap: 11px; }
+.pdp__info { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(16px, 2vw, 24px); }
+.pdp__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 11px; }
 .pdp__tagline { margin: 0; }
 .pdp__title { font-size: clamp(1.75rem, 3.2vw, 2.6rem); letter-spacing: -0.035em; line-height: 1.05; }
-.pdp__rating { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--ink-3); }
+.pdp__rating { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.85rem; color: var(--ink-3); }
 .pdp__rating b { color: var(--ink); font-weight: 600; }
 .pdp__price { display: flex; align-items: baseline; gap: 12px; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; }
 .pdp__price .price--strike { font-size: 1rem; font-weight: 450; }
