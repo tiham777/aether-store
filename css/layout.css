@@ -38,6 +38,7 @@
   margin-left: 18px;
 }
 .topbar__item:last-child::after { display: none; }
+@media (max-width: 1560px) { .topbar__item:nth-child(n + 5) { display: none; } }
 @media (max-width: 1180px) { .topbar__item:nth-child(n + 4) { display: none; } }
 @media (max-width: 720px) { .topbar__item:nth-child(n + 3) { display: none; } }
 

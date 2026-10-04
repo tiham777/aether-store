@@ -35,6 +35,16 @@
   align-items: center;
 }
 .hero__copy { display: grid; gap: clamp(20px, 2.4vw, 30px); justify-items: start; }
+/* one orchestrated page-load moment: the headline rises into its mask */
+.hero__title .rise {
+  display: block;
+  animation: rise 0.95s var(--ease) 0.12s both;
+}
+@keyframes rise {
+  from { transform: translateY(0.5em); clip-path: inset(0 0 100% 0); }
+  to { transform: none; clip-path: inset(-0.35em 0 -0.35em 0); }
+}
+
 .hero__title { max-width: 13ch; }
 .hero__actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
@@ -287,7 +297,7 @@
   transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
 }
 .quote:hover { transform: translateY(-4px); box-shadow: var(--sh-2); }
-.quote__text { font-size: 0.98rem; line-height: 1.65; color: var(--ink-2); letter-spacing: -0.008em; }
+.quote__text { font-family: var(--serif); font-size: 1.16rem; line-height: 1.5; color: var(--ink); }
 .quote__text::before { content: '“'; }
 .quote__text::after { content: '”'; }
 .quote__who { display: flex; align-items: center; gap: 12px; }

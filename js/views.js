@@ -134,7 +134,7 @@
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__grid">
         <div class="hero__copy">
-          <h1 class="display hero__title" data-reveal style="--d:70ms">Buy it for life. <span class="accent">Actually.</span></h1>
+          <h1 class="display hero__title" data-reveal style="--d:70ms"><span class="rise">Buy it for life. <span class="accent">Actually.</span></span></h1>
           <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods drawn to be opened with a single driver: parts stocked for seven years, repairs at cost for the original owner, and two releases a year, never twenty.</p>
           <div class="hero__actions" data-reveal style="--d:230ms">
             <a class="btn btn--primary btn--lg" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
