@@ -271,7 +271,7 @@
   padding: 4px 10px;
   border-radius: var(--r-pill);
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-ink);
   border: 1px solid rgba(207, 91, 52, 0.3);
 }
 .role-badge--muted { background: var(--paper-2); color: var(--ink-3); border-color: var(--line); }
@@ -369,7 +369,7 @@
   white-space: nowrap;
 }
 .st::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.st--paid { background: rgba(207, 91, 52, 0.1); color: var(--accent); }
+.st--paid { background: rgba(207, 91, 52, 0.1); color: var(--accent-ink); }
 .st--packed { background: rgba(180, 118, 28, 0.12); color: var(--warn); }
 .st--shipped { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
 .st--delivered { background: rgba(31, 122, 77, 0.11); color: var(--ok); }
@@ -392,11 +392,11 @@
 .addr.is-default { border-color: var(--ink); background: var(--surface); box-shadow: var(--sh-1); }
 .addr__label { font-weight: 600; font-size: 0.92rem; display: flex; align-items: center; gap: 8px; }
 .addr__tag {
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .addr__text { color: var(--ink-3); line-height: 1.55; }
 .addr__row { display: flex; gap: 12px; margin-top: 8px; }
@@ -412,7 +412,7 @@
   text-underline-offset: 3px;
   transition: color 0.2s var(--ease);
 }
-.linkish:hover { color: var(--accent); }
+.linkish:hover { color: var(--accent-ink); }
 .linkish.is-danger:hover { color: #c0392b; }
 
 /* --------------------------- admin dashboard ---------------------------- */
@@ -450,11 +450,11 @@ body.is-admin .back-top { display: none !important; }
 .admin__brand .brand__mark { width: 30px; height: 30px; }
 .admin__brand b { font-size: 1.02rem; font-weight: 600; letter-spacing: -0.02em; }
 .admin__brand span.tag {
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-ink);
   border: 1px solid rgba(207, 91, 52, 0.5);
   padding: 2px 7px;
   border-radius: var(--r-pill);
@@ -554,7 +554,7 @@ body.is-admin .back-top { display: none !important; }
 }
 .kpi:last-child { border-right: 0; }
 .kpi:first-child .kpi__n { font-size: clamp(1.7rem, 2.5vw, 2.15rem); letter-spacing: -0.042em; }
-.kpi__label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-4, var(--ink-3)); display: flex; align-items: center; gap: 8px; }
+.kpi__label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); display: flex; align-items: center; gap: 8px; }
 .kpi__label svg { width: 14px; height: 14px; }
 .kpi__n { font-size: clamp(1.5rem, 2.4vw, 1.95rem); font-weight: 600; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .kpi__sub { font-size: 0.78rem; color: var(--ink-3); }
@@ -704,8 +704,8 @@ body.is-admin .back-top { display: none !important; }
 .abtn:hover { border-color: var(--ink); }
 .abtn--primary { background: var(--ink); border-color: var(--ink); color: #fff; }
 .abtn--primary:hover { background: #000; }
-.abtn--accent { background: var(--accent); border-color: var(--accent); color: #fff; }
-.abtn--accent:hover { background: #b84d29; }
+.abtn--accent { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+.abtn--accent:hover { background: #9a3f1f; }
 .abtn--danger { color: #c0392b; border-color: rgba(192, 57, 43, 0.35); background: rgba(192, 57, 43, 0.05); }
 .abtn--danger:hover { background: rgba(192, 57, 43, 0.1); border-color: #c0392b; }
 .abtn--danger.is-armed { background: #c0392b; border-color: #c0392b; color: #fff; }
@@ -822,7 +822,7 @@ body.is-admin .back-top { display: none !important; }
 .ostep.is-now .ostep__dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(207, 91, 52, 0.18); }
 .ostep__t { font-size: 0.75rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink-3); }
 .ostep.is-done .ostep__t { color: var(--ink); }
-.ostep.is-now .ostep__t { color: var(--accent); }
+.ostep.is-now .ostep__t { color: var(--accent-ink); }
 .ostep__d { font-size: 0.68rem; color: var(--ink-3); }
 .osteps--dead { display: flex; align-items: center; gap: 10px; padding: 6px 0 4px; }
 

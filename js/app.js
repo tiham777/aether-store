@@ -308,6 +308,7 @@
   function bindParallax() {
     const art = document.querySelector('[data-parallax]');
     if (!art || window.matchMedia('(hover: none)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const render = art.querySelector('.hero__art-render');
     const cards = art.querySelectorAll('.float-card');
     art.addEventListener('pointermove', (e) => {

@@ -90,11 +90,11 @@
       DATA.perks
         .map((p) => `<span class="row row-3"><span style="color:var(--accent)">${icon(p.icon)}</span><span>${
           p.title
-        } — <span class="muted">${p.text}</span></span></span>`)
+        } : <span class="muted">${p.text}</span></span></span>`)
         .join('')
     }<span class="row row-3"><span style="color:var(--accent)">${icon(
       'globe'
-    )}</span><span>Ships to 92 countries — <span class="muted">duties included</span></span></span></div></section>`;
+    )}</span><span>Ships to 92 countries: <span class="muted">duties included</span></span></span></div></section>`;
   }
 
   /* ================================ HOME ================================= */
@@ -134,9 +134,8 @@
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__grid">
         <div class="hero__copy">
-          <span class="eyebrow" data-reveal>Copenhagen · ${count()} objects — that's all we make</span>
           <h1 class="display hero__title" data-reveal style="--d:70ms">Buy it for life. <span class="accent">Actually.</span></h1>
-          <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods drawn to be opened with a single driver — parts stocked for seven years, repairs at cost for the original owner, and two releases a year, never twenty.</p>
+          <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods drawn to be opened with a single driver: parts stocked for seven years, repairs at cost for the original owner, and two releases a year, never twenty.</p>
           <div class="hero__actions" data-reveal style="--d:230ms">
             <a class="btn btn--primary btn--lg" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
             <a class="btn btn--ghost btn--lg" href="#/product/${hero.id}">Meet ${hero.name}</a>
@@ -144,7 +143,7 @@
           <div class="hero__trust" data-reveal style="--d:310ms">
             <span class="hero__trust-item">${stars(5)} <b>4.9</b> from ${num(reviewTotal())} reviews</span>
             <span class="hero__trust-item">${icon('truck')} Free shipping over $150 · 60-night returns</span>
-            <span class="hero__trust-item" style="color:var(--accent)">${icon('sparkle')} 10% off your first order — code AETHER10</span>
+            <span class="hero__trust-item" style="color:var(--accent-ink)">${icon('sparkle')} 10% off your first order with code AETHER10</span>
           </div>
         </div>
 
@@ -156,34 +155,27 @@
           </div>
           <div class="float-card float-card--br">
             <span class="float-card__icon float-card__icon--accent">${icon('truck')}</span>
-            <span class="float-card__text"><span class="float-card__k">Ordered before 14:00</span><span class="float-card__v">Arrives tomorrow</span></span>
+            <span class="float-card__text"><span class="float-card__k">Ordered before 14:00</span><span class="float-card__v">Leaves the same day</span></span>
           </div>
         </div>
       </div>
     </section>    <section class="press" aria-label="What every order includes">
       <div class="press__viewport">
-        <div class="press__track">
-          ${[0, 1]
-            .map(
-              (k) => `<div class="press__group"${k ? ' aria-hidden="true"' : ''}>${[
+        <div class="press__group">${[
                   '60 nights to decide',
                   'Free shipping over $150',
                   'Duties paid to 92 countries',
                   'Parts stocked for 7 years',
                   'Repairs at cost, for as long as you own it',
-                  'Two releases a year — no drop hype',
+                  'Two releases a year, no drop hype',
                 ]
                   .map((n) => `<span class="press__item">${n}</span>`)
-                  .join('')}</div>`
-            )
-            .join('')}
-        </div>
+                  .join('')}</div>
       </div>
     </section>
 
     <section class="section container" id="collections">
       ${sectionHead({
-        eyebrow: 'Shop by category',
         title: 'Three lines. <span class="accent">No filler.</span>',
         text: `${count()} products in total. Each one exists because nothing on the market was good enough to keep.`,
         link: { href: '#/shop', label: 'View everything' },
@@ -209,7 +201,6 @@
 
     <section class="section section--flush-top container" id="featured">
       ${sectionHead({
-        eyebrow: 'New & notable',
         title: 'Objects people <span class="accent">keep.</span>',
         text: 'Best sellers, recent releases and the one camera we build entirely by hand.',
         link: { href: '#/shop', label: `Shop all ${count()}` },
@@ -221,10 +212,9 @@
       <div class="split">
         <div class="split__media" data-reveal="left">
           <img src="assets/img/stairs.jpg" alt="Concrete stairwell in the AETHER studio building" loading="lazy" width="1400" height="1600">
-          <span class="split__tag">Studio no. 4 — Copenhagen</span>
+          <span class="split__tag">Studio no. 4, Copenhagen</span>
         </div>
         <div class="split__copy">
-          <span class="eyebrow" data-reveal>Why AETHER</span>
           <h2 class="h2" data-reveal style="--d:70ms">Fewer things, <span class="accent">better</span> made.</h2>
           <p class="lede" data-reveal style="--d:130ms">We release two products a year, not twenty. Every object is drawn in one studio, prototyped in-house, and judged by a simple test: would we replace it with itself?</p>
           <ul class="stack stack-2" data-reveal style="--d:190ms">
@@ -252,7 +242,7 @@
     </section>
 
     <section class="section section--tight container" id="principles">
-      ${sectionHead({ eyebrow: 'How we work', title: 'Three rules, <span class="accent">kept.</span>' })}
+      ${sectionHead({ title: 'Three rules, <span class="accent">kept.</span>' })}
       <div class="principles">
         ${[
           ['01', 'Material honesty', 'Aluminium looks like aluminium, felt like felt. Nothing is painted to imitate something it is not, and every surface is one you will still like after a decade of hands.'],
@@ -262,7 +252,6 @@
           .map(
             ([n, t, d], i) => `
           <div class="principle" data-reveal style="--d:${i * 90}ms">
-            <span class="principle__n">${n}</span>
             <h3 class="principle__t">${t}</h3>
             <p class="principle__d">${d}</p>
           </div>`
@@ -274,8 +263,7 @@
     <section class="section night spotlight" id="spotlight">
       <div class="container spotlight__grid">
         <div class="spotlight__copy">
-          <span class="eyebrow" data-reveal>Spotlight</span>
-          <h2 class="h2" data-reveal style="--d:70ms">${spotlight.name} — <span class="accent">room-filling</span> in one column.</h2>
+          <h2 class="h2" data-reveal style="--d:70ms">${spotlight.name}, <span class="accent">room-filling</span> in one column.</h2>
           <p class="lede" data-reveal style="--d:130ms">${esc(spotlight.blurb)}</p>
           <div class="chip-row" data-reveal style="--d:180ms">
             ${Object.values(spotlight.specs || {})
@@ -305,7 +293,6 @@
 
     <section class="section container" id="reviews">
       ${sectionHead({
-        eyebrow: 'Owners',
         title: 'The review we <span class="accent">can’t buy.</span>',
         link: { href: '#/shop', label: 'See the collection' },
       })}
@@ -328,7 +315,6 @@
 
     <section class="section section--flush-top container" id="journal-posts">
       ${sectionHead({
-        eyebrow: 'Journal',
         title: 'Notes from <span class="accent">the studio.</span>',
         link: { href: '#/journal', label: 'All stories' },
       })}
@@ -374,8 +360,7 @@
     return `
     <section class="section section--flush-top container" id="recently">
       ${sectionHead({
-        eyebrow: 'Recently viewed',
-        title: 'Where you <span class="accent">left off.</span>',
+        title: 'Pick up where <span class="accent">you left off.</span>',
         link: { href: '#/shop', label: 'Back to the shop' },
       })}
       <div class="grid-products grid-products--4">${list.map((p, i) => productCard(p, i)).join('')}</div>
@@ -388,7 +373,6 @@
     return `
     <section class="section section--flush-top container" id="newsletter">
       <div class="news" data-reveal>
-        <span class="eyebrow">Newsletter</span>
         <h2 class="h2">Ten percent off your <span class="accent">first</span> object.</h2>
         <p class="lede" style="color:rgba(244,243,241,.72);max-width:46ch">One considered letter a month: new releases, repair notes, and the occasional archive sale.</p>
         <form class="news__form" data-newsletter novalidate>
@@ -416,11 +400,11 @@
       const applied = !Store.promo && Boolean(DATA.promoCodes.FIRST10) && Store.applyPromo('FIRST10');
       if (window.Subs) Subs.add(input.value.trim(), 'newsletter');
       form.innerHTML = applied
-        ? `<p class="news__ok">${icon('check')} Welcome in — <b style="color:#fff">FIRST10</b> is already in your bag.</p>`
-        : `<p class="news__ok">${icon('check')} Welcome in — studio notes head to ${esc(input.value.trim())} once a month.</p>`;
+        ? `<p class="news__ok">${icon('check')} Welcome in. <b style="color:#fff">FIRST10</b> is already in your bag.</p>`
+        : `<p class="news__ok">${icon('check')} Welcome in. Studio notes head to ${esc(input.value.trim())} once a month.</p>`;
       UI.toast({
         title: 'Subscribed',
-        sub: applied ? 'FIRST10 applied — 10% off your first order.' : 'One letter a month, nothing else.',
+        sub: applied ? 'FIRST10 applied, 10% off your first order.' : 'One letter a month, nothing else.',
       });
     });
   }
@@ -445,7 +429,6 @@
     ${crumbs([{ label: 'Shop', href: '#/shop' }])}
     <header class="container page-head">
       <div class="page-head__inner">
-        <span class="eyebrow" data-reveal>The full line — ${count()} objects</span>
         <div class="page-head__row">
           <h1 data-reveal style="--d:60ms">${
             active === 'all' ? 'Everything we make' : esc(catName(active))
@@ -651,8 +634,8 @@
 
         <div class="pdp__info">
           <div class="pdp__head">
-            <span class="eyebrow" data-reveal>${catName(p.category)} · ${esc(p.tagline)}</span>
             <h1 class="pdp__title" data-reveal style="--d:60ms">${esc(p.name)}</h1>
+            <p class="pdp__tagline small muted" data-reveal style="--d:85ms">${catName(p.category)} · ${esc(p.tagline)}</p>
             <div class="pdp__rating" data-reveal style="--d:110ms">
               ${stars(p.rating)} <b>${p.rating.toFixed(1)}</b>
               <span>· ${p.reviews} reviews</span>
@@ -661,8 +644,8 @@
                 p.stock === 0
                   ? '<b class="stock-out">Out of stock</b>'
                   : p.stock <= 10
-                  ? `<b class="stock-low">Only ${p.stock} left</b> — ships today`
-                  : 'In stock — ships today'
+                  ? `<b class="stock-low">Only ${p.stock} left</b> · ships today`
+                  : 'In stock · ships today'
               }</span>
             </div>
           </div>
@@ -705,11 +688,11 @@
           <div class="assurances" data-reveal style="--d:310ms">
             <span class="assurance">${icon('truck')} <span><b>Express arrives ${Store.etaLabel(
               'express'
-            )}</b> — order within <span data-countdown>6h 42m</span></span></span>
+            )}</b> · order within <span data-countdown>6h 42m</span></span></span>
             <span class="assurance">${icon('package')} <span><b>Standard arrives ${Store.etaLabel(
               'standard'
-            )}</b> — free over $150</span></span>
-            <span class="assurance">${icon('refresh')} <span><b>60-night trial</b> — free returns, no questions</span></span>
+            )}</b> · free over $150</span></span>
+            <span class="assurance">${icon('refresh')} <span><b>60-night trial</b> · free returns, no questions</span></span>
             <span class="assurance">${icon('shield')} <span><b>2-year warranty</b> + lifetime repair support</span></span>
           </div>
 
@@ -733,10 +716,10 @@
             <div class="acc">
               <button class="acc__btn" aria-expanded="false">Shipping, returns & repairs <span class="acc__icon"></span></button>
               <div class="acc__panel"><div class="acc__inner"><div class="acc__content">
-                <p>Ordered before 14:00 CET on a business day and it leaves Copenhagen the same afternoon — standard delivery is free above $150, express is a flat ${money(
+                <p>Ordered before 14:00 CET on a business day and it leaves Copenhagen the same afternoon. Standard delivery is free above $150, express is a flat ${money(
                   DATA.expressFee
                 )}. Duties and taxes are included at checkout for all 92 countries we ship to.</p>
-                <p>Sixty nights to change your mind, then two years of warranty — extendable to five at checkout. Out of warranty? We still sell the parts and publish the guide.</p>
+                <p>Sixty nights to change your mind, then two years of warranty, extendable to five at checkout. Out of warranty? We still sell the parts and publish the guide.</p>
               </div></div></div>
             </div>
           </div>
@@ -745,7 +728,7 @@
     </div>
 
     <section class="section section--tight container">
-      ${sectionHead({ eyebrow: 'Frequently bought together', title: 'Complete the <span class="accent">set.</span>' })}
+      ${sectionHead({ title: 'Complete the <span class="accent">set.</span>' })}
       <div class="fbt" data-fbt>
         <div class="fbt__items">
           ${bundle
@@ -776,18 +759,17 @@
     </section>
 
     <section class="section section--tight container">
-      ${sectionHead({ eyebrow: 'Included', title: 'What ownership <span class="accent">looks like.</span>' })}
+      ${sectionHead({ title: 'What ownership <span class="accent">looks like.</span>' })}
       <div class="feature-row">
         ${[
           ['wrench', 'Repairable, not disposable', 'Every part is replaceable with a T5 driver and a published guide. We stock spares for seven years.'],
           ['leaf', 'Lower-impact materials', 'Recycled aluminium, bio-resin and 68% renewable energy across both factories.'],
-          ['headset', 'Humans, not scripts', 'Talk to the same small team that built it — reply within one business day, always.'],
+          ['headset', 'Humans, not scripts', 'Talk to the same small team that built it; a human replies within one business day, always.'],
         ]
           .map(
             ([ic, t, d], i) => `
           <div class="feature" data-reveal style="--d:${i * 80}ms">
-            <span class="feature__icon">${icon(ic)}</span>
-            <span class="feature__t">${t}</span>
+            <span class="feature__head"><span class="feature__icon">${icon(ic)}</span><span class="feature__t">${t}</span></span>
             <span class="feature__d">${d}</span>
           </div>`
           )
@@ -798,8 +780,7 @@
     <section class="section section--flush-top container">
       <div class="section-head">
         <div class="section-head__text">
-          <span class="eyebrow" data-reveal>Reviews</span>
-          <h2 class="h2" data-reveal style="--d:70ms">${p.rating.toFixed(1)} out of 5 <span class="accent">— ${p.reviews} owners.</span></h2>
+          <h2 class="h2" data-reveal style="--d:70ms">${p.rating.toFixed(1)} out of 5, <span class="accent">from ${p.reviews} owners.</span></h2>
         </div>
         <span class="row row-3" data-reveal>${stars(p.rating)}<span class="small muted">Owners only · purchases verified</span></span>
       </div>
@@ -839,8 +820,7 @@
 
     <section class="section section--flush-top container">
       ${sectionHead({
-        eyebrow: 'Pairs well with',
-        title: 'Complete the <span class="accent">set.</span>',
+        title: `Pairs well with <span class="accent">${esc(p.name)}.</span>`,
         link: { href: '#/shop', label: 'Shop all' },
       })}
       <div class="grid-products grid-products--4">${related.map((x, i) => productCard(x, i)).join('')}</div>
@@ -906,7 +886,7 @@
 
   function reviewCards(list) {
     if (!list.length) {
-      return `<div class="review-empty">${icon('star')}<p>No written reviews yet — yours would be the first.</p></div>`;
+      return `<div class="review-empty">${icon('star')}<p>No written reviews yet. Yours would be the first.</p></div>`;
     }
     return list
       .map(
@@ -1013,7 +993,7 @@
       repaint();
       UI.toast({
         title: 'Review posted',
-        sub: purchased ? 'Thanks — marked as a verified purchase.' : 'Thanks for sharing with future owners.',
+        sub: purchased ? 'Thanks, marked as a verified purchase.' : 'Thanks for sharing with future owners.',
       });
       if (window.Cloud && Cloud.configured) {
         Cloud.pushReview(rec);
@@ -1149,7 +1129,7 @@
       }
       UI.toast({
         title: `${added} item${added === 1 ? '' : 's'} added to bag`,
-        sub: skipped ? `${skipped} skipped — out of stock` : `Bundle total ${Store.money(Store.subtotal())}`,
+        sub: skipped ? `${skipped} skipped, out of stock` : `Bundle total ${Store.money(Store.subtotal())}`,
         action: { label: 'Checkout', href: '#/checkout' },
       });
       setTimeout(() => UI.setLayer('cart', true), 420);
@@ -1224,7 +1204,7 @@
           <div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
             <div class="cart-empty__icon">${icon('bag')}</div>
             <h1 class="h2">Nothing to check out <span class="accent">yet.</span></h1>
-            <p class="muted" style="max-width:44ch">Your bag is empty. The full line is ${count()} objects deep — a good place to begin is the best sellers.</p>
+            <p class="muted" style="max-width:44ch">Your bag is empty. The full line is ${count()} objects deep. A good place to begin is the best sellers.</p>
             <div class="row row-4 wrap center">
               <a class="btn btn--primary" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
               <a class="btn btn--ghost" href="#/">Back home</a>
@@ -1239,7 +1219,6 @@
     ${crumbs([{ label: 'Shop', href: '#/shop' }, { label: 'Checkout', href: '#/checkout' }])}
     <header class="container page-head">
       <div class="page-head__inner">
-        <span class="eyebrow" data-reveal>Secure checkout · 256-bit encryption</span>
         <div class="page-head__row">
           <h1 data-reveal style="--d:60ms">Checkout<span class="accent">.</span></h1>
           <span class="row row-3 small muted" data-reveal style="--d:110ms">${icon('lock')} You won’t be charged until the last step</span>
@@ -1258,7 +1237,7 @@
               <span class="field__error">Enter a valid email address.</span>
             </label>
             <label class="field span-2">
-              <span class="field__label">Phone <span class="muted" style="font-weight:400">— for delivery updates</span></span>
+              <span class="field__label">Phone <span class="muted" style="font-weight:400">· for delivery updates</span></span>
               <input class="input" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 0100">
               <span class="field__error"></span>
             </label>
@@ -1331,17 +1310,17 @@
               <input class="input" name="cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" required data-validate="cvc" maxlength="4">
               <span class="field__error">3–4 digits.</span></label>
           </div>
-          <div class="cod-note" data-cod-note hidden>${icon('banknote')}<p><b>Pay the courier at your door</b> — cash or card on arrival, no surcharge. Standard delivery (3–5 business days); nothing is charged online.</p></div>
+          <div class="cod-note" data-cod-note hidden>${icon('banknote')}<p><b>Pay the courier at your door</b>: cash or card on arrival, no surcharge. Standard delivery (3–5 business days); nothing is charged online.</p></div>
           <div class="stack stack-3">
             <div class="promo">
               <input class="input" name="promo" placeholder="Discount code" value="${Store.promo || ''}" aria-label="Discount code">
               <button class="btn btn--ghost btn--sm" type="button" data-promo-apply>Apply</button>
             </div>
             <span class="promo__msg${Store.promo ? ' is-shown' : ''}" data-promo-msg>${
-      Store.promo ? `${Store.promo} applied — ${Math.round(DATA.promoCodes[Store.promo] * 100)}% off.` : ''
+      Store.promo ? `${Store.promo} applied, ${Math.round(DATA.promoCodes[Store.promo] * 100)}% off.` : ''
     }</span>
           </div>
-          <p class="xs muted row row-3">${icon('lock')} Payments are encrypted end-to-end. This is a demo — no card is charged.</p>
+          <p class="xs muted row row-3">${icon('lock')} Payments are encrypted end-to-end. This is a demo; no card is charged.</p>
         </fieldset>
 
         <button class="btn btn--primary btn--lg btn--block" type="submit" data-place-order>
@@ -1513,7 +1492,7 @@
         const input = form.querySelector('[name="promo"]');
         const code = input.value.trim().toUpperCase();
         if (Store.applyPromo(code)) {
-          promoMsg.textContent = `${code} applied — ${Math.round(DATA.promoCodes[code] * 100)}% off.`;
+          promoMsg.textContent = `${code} applied, ${Math.round(DATA.promoCodes[code] * 100)}% off.`;
           promoMsg.classList.add('is-shown');
           promoMsg.classList.remove('is-bad');
           refreshTotals();
@@ -1595,7 +1574,7 @@
       <span class="xs muted" style="display:inline-flex;gap:6px;align-items:center">${icon(
         'clock'
       )} Updated ${esc(when)} · ${
-      live ? 'live — this page refreshes itself' : 'add Firebase in js/firebase-config.js for cross-device updates'
+      live ? 'live: this page refreshes itself' : 'add Firebase in js/firebase-config.js for cross-device updates'
     }</span>`;
   }
 
@@ -1621,8 +1600,8 @@
     <div class="container">
       <div class="done">
         <span class="done__mark">${icon('check')}</span>
-        <span class="eyebrow" data-reveal>Order confirmed · a copy is on its way to ${esc(o.email)}</span>
         <h1 class="done__title" data-reveal style="--d:70ms">Thank you, <span class="accent">${esc(o.name.split(' ')[0])}.</span></h1>
+        <p class="small muted" data-reveal style="--d:100ms">A copy is on its way to ${esc(o.email)}.</p>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
         <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${esc(o.id)} ${UI.icon('copy')}</span>
 
@@ -1631,12 +1610,12 @@
         )}</div>
 
         <div class="done__card" data-reveal style="--d:230ms">
-          <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} — ${
+          <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} · ${
       o.method === 'express' ? 'Express (1–2 days)' : 'Standard (3–5 days)'
     }</span></span>
           ${
             o.payment === 'cod'
-              ? `<span class="done__eta">${icon('banknote')} <span><b>Cash on delivery</b> — keep ${money(
+              ? `<span class="done__eta">${icon('banknote')} <span><b>Cash on delivery</b>: keep ${money(
                   o.total
                 )} ready; the courier takes cash or card at the door.</span></span>`
               : ''
@@ -1666,7 +1645,7 @@
           <a class="btn btn--primary btn--lg" href="#/shop">Continue shopping ${icon('arrowRight')}</a>
           <button class="btn btn--ghost btn--lg" data-track>Track this order</button>
         </div>
-        <p class="xs muted" data-reveal>Questions? <a class="link link--underline" href="#/about?to=contact">Talk to a human</a> — we reply within one business day.</p>
+        <p class="xs muted" data-reveal>Questions? <a class="link link--underline" href="#/about?to=contact">Talk to a human</a>. We reply within one business day.</p>
       </div>
     </div>
     ${newsletterSection()}
@@ -1702,7 +1681,7 @@
   function trackHint() {
     return `<div class="empty-state" style="margin-block:10px">
       <div class="cart-empty__icon">${icon('truck')}</div>
-      <p class="muted" style="max-width:48ch">Type your order number above — it sits in the confirmation email and looks like <span class="mono">AET-2026-123456</span>. The timeline updates on its own once you track it.</p>
+      <p class="muted" style="max-width:48ch">Type your order number above. It sits in the confirmation email and looks like <span class="mono">AET-2026-123456</span>. The timeline updates on its own once you track it.</p>
     </div>`;
   }
 
@@ -1743,7 +1722,7 @@
           .join('')}
       </ul>
       <hr class="hairline">
-      <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} — ${
+      <span class="done__eta">${icon('truck')} <span><b>Estimated delivery:</b> ${etaText} · ${
       o.method === 'express' ? 'Express (1–2 days)' : 'Standard (3–5 days)'
     }</span></span>
       ${o.items
@@ -1766,8 +1745,8 @@
         'clock'
       )} ${
         live
-          ? 'Live — status changes appear here automatically, no refresh needed.'
-          : 'Local mode — add your Firebase config (js/firebase-config.js) to track from any device.'
+          ? 'Live: status changes appear here automatically, no refresh needed.'
+          : 'Local mode: add your Firebase config (js/firebase-config.js) to track from any device.'
       }</p>
     </div>`;
   }
@@ -1781,10 +1760,9 @@
     <div class="container">
       <header class="page-head">
         <div class="page-head__inner">
-          <span class="eyebrow" data-reveal>Order tracking</span>
           <div class="page-head__row">
             <h1 data-reveal style="--d:60ms">Where is my <span class="accent">order.</span></h1>
-            <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Enter your order number and watch it move — paid, packed, shipped, delivered — live, without refreshing.</p>
+            <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Enter your order number and watch it move through paid, packed, shipped and delivered, live, without refreshing.</p>
           </div>
         </div>
       </header>
@@ -1887,7 +1865,6 @@
       <div class="container">
         <div class="done">
           <span class="done__mark" style="background:var(--accent)">${icon('sparkle')}</span>
-          <span class="eyebrow">Error 404</span>
           <h1 class="done__title">This page went <span class="accent">quiet.</span></h1>
           <p class="lede" style="text-align:center">The link is broken or the product has been retired. ${count()} objects are still waiting in the shop.</p>
           <div class="row row-4 wrap center">
@@ -1907,7 +1884,6 @@
     ${crumbs([{ label: 'Journal', href: '#/journal' }])}
     <header class="container page-head">
       <div class="page-head__inner">
-        <span class="eyebrow" data-reveal>Journal — notes from the studio</span>
         <div class="page-head__row">
           <h1 data-reveal style="--d:60ms">Field notes<span class="accent">.</span></h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Design decisions, repair guides, and the occasional argument about two hundred hertz.</p>
@@ -1922,7 +1898,7 @@
           <span class="split__tag">${lead.tag} · ${lead.read}</span>
         </span>
         <span class="split__copy" style="display:grid;gap:18px;align-content:center">
-          <span class="mono">${lead.date} — latest</span>
+          <span class="mono">${lead.date} · latest</span>
           <h2 class="h2">${esc(lead.title)}</h2>
           <span class="lede">${esc(lead.excerpt)}</span>
           <span class="link">Read the story ${icon('arrowRight')}</span>
@@ -1957,7 +1933,6 @@
     ${crumbs([{ label: 'Our story', href: '#/about' }])}
     <header class="container page-head">
       <div class="page-head__inner">
-        <span class="eyebrow" data-reveal>Our story — est. 2019, Copenhagen</span>
         <div class="page-head__row">
           <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be <span class="accent">kept.</span></h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:44ch">AETHER began with one frustrating question: why does everything electronic eventually become rubbish?</p>
@@ -1969,13 +1944,12 @@
       <div class="split">
         <div class="split__media" data-reveal="left">
           <img src="assets/img/leaf-shadow.jpg" alt="Light through leaves on a studio wall" loading="lazy" width="1400" height="1600">
-          <span class="split__tag">Studio no. 4 — Copenhagen</span>
+          <span class="split__tag">Studio no. 4, Copenhagen</span>
         </div>
         <div class="split__copy">
-          <span class="eyebrow" data-reveal>The beginning</span>
           <h2 class="h2" data-reveal style="--d:70ms">${count()} products, <span class="accent">on purpose.</span></h2>
           <p class="lede" data-reveal style="--d:130ms">We started in a two-room studio off Refshaleveen with a single product and a rule we still keep: never release something we would not replace with itself.</p>
-          <p class="lede" data-reveal style="--d:180ms">Seven years later the catalogue is ${count()} items deep. Each one is drawn, prototyped and repaired in the same building — and every part is published for anyone who wants to keep theirs running.</p>
+          <p class="lede" data-reveal style="--d:180ms">Seven years later the catalogue is ${count()} items deep. Each one is drawn, prototyped and repaired in the same building, and every part is published for anyone who wants to keep theirs running.</p>
           <div class="stats" data-reveal style="--d:240ms">
             <div class="stat"><span class="stat__n" data-count="7">0</span><span class="stat__l">years, two releases a year</span></div>
             <div class="stat"><span class="stat__n" data-count="92">0</span><span class="stat__l">countries shipped to</span></div>
@@ -1992,11 +1966,10 @@
           <span class="split__tag">Repair bench — 4 min per unit</span>
         </div>
         <div class="split__copy">
-          <span class="eyebrow" data-reveal>How we build</span>
           <h2 class="h2" data-reveal style="--d:70ms">If it opens, it <span class="accent">lasts.</span></h2>
           <ul class="stack stack-2" data-reveal style="--d:130ms">
             ${[
-              ['wrench', 'Standard screws only — no glue, no ultrasonic welding'],
+              ['wrench', 'Standard screws only, no glue, no ultrasonic welding'],
               ['package', 'Published part numbers, sold at cost for seven years'],
               ['leaf', '68% renewable energy across both assembly partners'],
               ['refresh', 'Trade-in programme: we refurbish and resell, never shred'],
@@ -2015,12 +1988,12 @@
     </section>
 
     <section class="section section--tight container" id="contact">
-      ${sectionHead({ eyebrow: 'Say hello', title: 'Humans, not <span class="accent">tickets.</span>' })}
+      ${sectionHead({ title: 'Humans, not <span class="accent">tickets.</span>' })}
       <div class="feature-row">
         ${[
-          ['mail', 'Customer care', 'hello@aether.studio — replies within one business day, written by the people who pack the boxes.', '+45 33 12 44 08'],
+          ['mail', 'Customer care', 'hello@aether.studio · replies within one business day, written by the people who pack the boxes.', '+45 33 12 44 08'],
           ['sparkle', 'Press & partnerships', 'For samples, reviews and wholesale: press@aether.studio. High-resolution assets on request.', 'Press kit →'],
-          ['globe', 'Studio visits', 'Strandgade 14, Copenhagen. Thursdays 10–16, by appointment — coffee included.', 'Book a visit →'],
+          ['globe', 'Studio visits', 'Strandgade 14, Copenhagen. Thursdays 10–16, by appointment, coffee included.', 'Book a visit →'],
         ]
           .map(
             ([ic, t, d, extra], i) => `

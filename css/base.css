@@ -22,10 +22,11 @@
   --night-line: rgba(255, 255, 255, 0.12);
   --accent: #cf5b34;
   --accent-2: #b04a26;
+  --accent-ink: #b04a26;
   --accent-soft: rgba(207, 91, 52, 0.12);
   --ok: #1f7a4d;
-  --warn: #b4761c;
-  --star: #d98a2b;
+  --warn: #8a5a14;
+  --star: #b8741f;
 
   /* type */
   --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -150,7 +151,6 @@ h1, h2, h3, h4 {
 h1 .accent,
 h2 .accent {
   font-family: var(--serif);
-  font-style: italic;
   font-weight: 400;
   letter-spacing: -0.015em;
 }
@@ -298,7 +298,7 @@ h2 .accent {
   transition: color 0.2s var(--ease), gap 0.3s var(--ease), border-color 0.2s var(--ease);
 }
 .link svg { width: 15px; height: 15px; transition: transform 0.35s var(--ease); }
-.link:hover { color: var(--accent); gap: 11px; }
+.link:hover { color: var(--accent-ink); gap: 11px; }
 .link:hover svg { transform: translateX(2px); }
 .link--underline { border-bottom-color: var(--line-2); padding-bottom: 2px; }
 .link--muted { color: var(--ink-3); font-weight: 450; }
@@ -342,7 +342,7 @@ h2 .accent {
   height: 25px;
   padding-inline: 10px;
   border-radius: var(--r-pill);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -497,17 +497,19 @@ h2 .accent {
   transition-delay: var(--d, 0ms);
   will-change: opacity, transform;
 }
+html:not(.js) [data-reveal] { opacity: 1; transform: none; filter: none; }
 [data-reveal].is-in { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; transition: none; }
+  .float-card { animation: none !important; }
+  .skeleton { animation: none !important; }
+  .back-top, .card, .card__media, .cat, .post__media { transition: none; }
+}
 
 [data-reveal='fade'] { transform: none; }
 [data-reveal='left'] { transform: translateX(-22px); }
 [data-reveal='right'] { transform: translateX(22px); }
 [data-reveal='scale'] { transform: scale(0.965); }
-
-@keyframes marquee {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
 
 @keyframes pop {
   0% { transform: scale(1); }

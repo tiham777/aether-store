@@ -494,7 +494,7 @@
           <input class="input" name="name" value="${esc(d(p && p.name))}" placeholder="Halo Two" required></label>
         <label class="field"><span class="field__label">ID / slug</span>
           <input class="input" name="id" value="${esc(d(p && p.id))}" placeholder="halo-two" ${isEdit ? 'disabled' : ''} required>
-          <span class="field__hint">${isEdit ? 'IDs can’t change after creation.' : 'Used in the URL — lowercase, hyphens.'}</span></label>
+          <span class="field__hint">${isEdit ? 'IDs can’t change after creation.' : 'Used in the URL: lowercase, hyphens.'}</span></label>
         <label class="field"><span class="field__label">Category</span>
           <select class="select" name="category">
             ${DATA.categories.map((c) => `<option value="${c.id}"${p && p.category === c.id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}
@@ -505,7 +505,7 @@
           </select></label>
         <label class="field"><span class="field__label">Price (USD)</span>
           <input class="input" name="price" inputmode="decimal" value="${dollars(p && p.price)}" placeholder="349" required></label>
-        <label class="field"><span class="field__label">Compare-at (USD) <span class="muted" style="font-weight:400">— optional</span></span>
+        <label class="field"><span class="field__label">Compare-at (USD) <span class="muted" style="font-weight:400">· optional</span></span>
           <input class="input" name="compareAt" inputmode="decimal" value="${dollars(p && p.compareAt)}" placeholder="399"></label>
         <label class="field"><span class="field__label">Stock</span>
           <input class="input" name="stock" inputmode="numeric" value="${d(p && p.stock !== undefined ? p.stock : 60)}" required></label>
@@ -1268,10 +1268,10 @@
       })();
       sharedForm.elements.key.value = savedKey;
       const labels = {
-        live: 'Connected — Firebase live, syncing across devices',
+        live: 'Connected: Firebase live, syncing across devices',
         connecting: 'Connecting to Firebase…',
-        error: 'Firebase unreachable — writes are queued and retried',
-        off: 'Not configured — running on local storage',
+        error: 'Firebase unreachable: writes are queued and retried',
+        off: 'Not configured: running on local storage',
       };
       const queuedNote = () => {
         const n = window.Cloud && Cloud.pending ? Cloud.pending() : 0;
@@ -1285,7 +1285,7 @@
         }
         if (window.API) {
           const state = await API.probe();
-          sharedStatus.textContent = state === 'live' ? 'Legacy bridge connected — shared store reachable' : labels.off;
+          sharedStatus.textContent = state === 'live' ? 'Legacy bridge connected: shared store reachable' : labels.off;
           return;
         }
         sharedStatus.textContent = labels.off;
@@ -1303,7 +1303,7 @@
         if (!list)
           return void UI.toast({
             title: 'Sync failed',
-            sub: 'The shared store is unreachable — check your Firebase config in js/firebase-config.js.',
+            sub: 'The shared store is unreachable: check your Firebase config in js/firebase-config.js.',
           });
         const changed = Orders.mergeCloud(list);
         UI.toast({

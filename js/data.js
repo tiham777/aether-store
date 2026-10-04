@@ -3,6 +3,8 @@
    ========================================================================= */
 (function () {
   'use strict';
+  /* gate scroll-reveal styles: without JS the content must stay visible */
+  document.documentElement.classList?.add('js');
 
   const R = (id) => `assets/products/${id}.svg`;
 

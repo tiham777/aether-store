@@ -612,7 +612,7 @@
     '*Free shipping* on orders over $150',
     '60-night trial on everything',
     '2-year warranty · parts stocked 7 years',
-    '10% off *your first order* — code AETHER10',
+    '10% off *your first order* with code AETHER10',
     'Duties included to 92 countries',
   ];
 

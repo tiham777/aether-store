@@ -202,7 +202,7 @@
         <div class="cart-empty">
           <div class="cart-empty__icon">${icon('bag')}</div>
           <h3>Your bag is empty</h3>
-          <p>Nothing here yet — the collection is a good place to start.</p>
+          <p>Nothing here yet. The collection is a good place to start.</p>
           <a class="btn btn--primary btn--sm" href="#/shop" data-close-cart>Explore the collection ${icon('arrowRight')}</a>
         </div>`;
       foot.innerHTML = `
@@ -217,7 +217,7 @@
     const pct = Math.min(100, Math.round(((DATA.freeShipThreshold - remaining) / DATA.freeShipThreshold) * 100));
     $('[data-progress-text]').innerHTML = remaining
       ? `You're <b>${Store.money(remaining)}</b> away from free shipping`
-      : `<b>Free shipping unlocked</b> — arrives ${Store.etaLabel('standard')}`;
+      : `<b>Free shipping unlocked</b> · arrives ${Store.etaLabel('standard')}`;
     $('[data-progress-fill]').style.width = pct + '%';
 
     body.innerHTML = items.map(cartLine).join('');
@@ -241,7 +241,7 @@
       )}</b></span></div>
       ${
         Store.promo
-          ? `<div class="drawer__promo-done">${icon('check')} <span><b>${esc(Store.promo)}</b> applied — ${
+          ? `<div class="drawer__promo-done">${icon('check')} <span><b>${esc(Store.promo)}</b> applied · ${
               Math.round((DATA.promoCodes[Store.promo] || 0) * 100)
             }% off</span> <button class="linkish" type="button" data-promo-clear>Remove</button></div>`
           : `<form class="promo drawer__promo" data-promo-form novalidate>
@@ -482,7 +482,7 @@
         const before = Store.line(`${id}::${variant}`);
         const wasCapped = Boolean(before) && before.qty >= cap;
         if (!Store.add(id, 1)) {
-          toast({ title: `${p.name} is out of stock`, sub: 'Everything we make comes back — check the journal for restocks.' });
+          toast({ title: `${p.name} is out of stock`, sub: 'Everything we make comes back. Check the journal for restocks.' });
           return;
         }
         toast({
@@ -580,11 +580,11 @@
       if (window.Subs) Subs.add(input.value.trim(), 'footer');
       const applied = !Store.promo && Boolean(DATA.promoCodes.FIRST10) && Store.applyPromo('FIRST10');
       const note = form.parentElement.querySelector('[data-news-note]');
-      if (note) note.textContent = applied ? 'Thanks — FIRST10 is already in your bag.' : `Thanks — studio notes are on the way to ${input.value.trim()}.`;
+      if (note) note.textContent = applied ? 'Thanks, FIRST10 is already in your bag.' : `Thanks, studio notes are on the way to ${input.value.trim()}.`;
       input.value = '';
       toast({
         title: 'You’re on the list',
-        sub: applied ? 'FIRST10 applied — 10% off your first order.' : 'One letter a month, nothing else.',
+        sub: applied ? 'FIRST10 applied, 10% off your first order.' : 'One letter a month, nothing else.',
       });
     });
 

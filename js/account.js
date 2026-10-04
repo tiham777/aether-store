@@ -46,7 +46,7 @@
     if (/[^a-zA-Z0-9]/.test(pw)) s++;
     return Math.min(s, 4);
   }
-  const PW_TEXT = ['', 'Weak — add numbers or length', 'Fair — getting better', 'Good — 8+ with letters & numbers', 'Strong'];
+  const PW_TEXT = ['', 'Weak, add numbers or length', 'Fair, getting better', 'Good, 8+ with letters & numbers', 'Strong'];
 
   function meterHTML() {
     return `<div class="pw-meter" data-meter data-score="0"><span></span><span></span><span></span><span></span></div>
@@ -59,7 +59,7 @@
       <img src="assets/img/leaf-shadow.jpg" alt="">
       <div class="auth__art-card">
         <span class="mono">Why members</span>
-        <p>Order history, repair guides and a wishlist that follows you — one account, kept for decades.</p>
+        <p>Order history, repair guides and a wishlist that follows you. One account, kept for decades.</p>
         <div class="auth__art-stats">
           <span>${icon('refresh')} 60-night trial</span>
           <span>${icon('wrench')} 7-year parts</span>
@@ -88,7 +88,6 @@
     <section class="auth">
       <div class="container auth__grid">
         <div class="auth__panel" data-reveal>
-          <span class="eyebrow">Member access</span>
           <h1>Welcome <span class="accent">back.</span></h1>
           <p class="muted small" style="max-width:40ch">Order history, repair guides and everything you’ve saved.</p>
           ${authTabs('login', next)}
@@ -120,7 +119,7 @@
           </form>
 
           <p class="xs muted auth__fine">New here? <a href="#/register${q}">Create an account</a>.</p>
-          <p class="xs muted auth__fine">Demo storefront — accounts live in this browser only.</p>
+          <p class="xs muted auth__fine">Demo storefront: accounts live in this browser only.</p>
         </div>
         ${authArt()}
       </div>
@@ -151,7 +150,7 @@
         });
 
         root.querySelector('[data-forgot]').addEventListener('click', () => {
-          UI.toast({ title: 'Reset link sent', sub: 'Demo mode — password resets are simulated.' });
+          UI.toast({ title: 'Reset link sent', sub: 'Demo mode: password resets are simulated.' });
         });
 
         const validators = {
@@ -211,9 +210,8 @@
     <section class="auth">
       <div class="container auth__grid">
         <div class="auth__panel" data-reveal>
-          <span class="eyebrow">Join AETHER</span>
           <h1>Create your <span class="accent">account.</span></h1>
-          <p class="muted small" style="max-width:42ch">Track orders, save addresses, keep a wishlist — repair guides included.</p>
+          <p class="muted small" style="max-width:42ch">Track orders, save addresses, keep a wishlist; repair guides included.</p>
           ${authTabs('register', next)}
           <div class="auth__error" data-auth-err><span data-auth-err-text></span></div>
 
@@ -411,7 +409,6 @@
     ${crumbsLocal([{ label: 'Account' }])}
     <header class="container page-head">
       <div class="page-head__inner">
-        <span class="eyebrow" data-reveal>Signed in as @${esc(u.username)} · ${u.role === 'admin' ? 'Administrator' : 'Member'}</span>
         <div class="page-head__row acct__head">
           <h1 data-reveal style="--d:60ms">Hi, ${esc(firstName)}<span class="accent">.</span></h1>
           <span class="row row-4 wrap" data-reveal style="--d:110ms">
@@ -553,7 +550,7 @@
             if (!o) return;
             UI.toast({
               title: `Order ${id} cancelled`,
-              sub: 'Nothing was charged — any pre-auth drops within 3–5 days.',
+              sub: 'Nothing was charged. Any pre-auth drops within 3–5 days.',
             });
             AETHER.render();
           });
@@ -651,7 +648,7 @@
               <input class="input" name="username" value="${esc(u.username)}" autocomplete="username" autocapitalize="off" required></label>
             <label class="field"><span class="field__label">Email</span>
               <input class="input" name="email" type="email" value="${esc(u.email)}" autocomplete="email" required></label>
-            <label class="field"><span class="field__label">Phone <span class="muted" style="font-weight:400">— optional</span></span>
+            <label class="field"><span class="field__label">Phone <span class="muted" style="font-weight:400">· optional</span></span>
               <input class="input" name="phone" type="tel" value="${esc(u.phone || '')}" autocomplete="tel" placeholder="+1 555 0100"></label>
           </div>
           <div class="row row-4 wrap">
