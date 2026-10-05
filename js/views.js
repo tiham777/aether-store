@@ -842,10 +842,13 @@
           <span class="xs muted">${
             window.Auth && Auth.current()
               ? `Signed in as ${esc(Auth.current().name)}`
-              : 'Sign in to share how it’s holding up'
+              : 'Reviews are for customers who bought this product'
           }</span>
         </div>
-        <form class="review-write__form" data-review-form novalidate>
+        ${
+          window.Auth && Auth.current()
+            ? `<form class="review-write__form" data-review-form novalidate>
+          <p class="review-gate xs muted">${icon('check')} Reviews are for customers who bought this product — every post is checked against the order and carries a <b>Verified purchase</b> badge.</p>
           <div class="rrating" role="radiogroup" aria-label="Your rating">
             ${[1, 2, 3, 4, 5]
               .map(
@@ -861,10 +864,19 @@
             <textarea class="input textarea" name="text" rows="3" maxlength="500" placeholder="How is it holding up after a few weeks?" required></textarea>
           </label>
           <div class="row row-3 wrap">
-            <button class="btn btn--primary btn--sm" type="submit">Post review</button>
-            <span class="xs muted">Verified purchases get a badge.</span>
+            <button class="btn btn--primary btn--sm" type="submit">Post verified review</button>
+            <span class="xs muted">Posted with your order id — never shown publicly.</span>
           </div>
-        </form>
+        </form>`
+            : `<div class="review-gate">
+          <p class="small">Only customers who bought <b>${esc(p.name)}</b> can post a review — it keeps every rating honest.</p>
+          <p class="xs muted">Bought it as a guest? The order id and total on your confirmation page or receipt prove ownership once you sign in.</p>
+          <div class="review-gate__actions">
+            <a class="btn btn--primary btn--sm" href="#/login?next=${encodeURIComponent('/product/' + p.id)}">Sign in to review</a>
+            <a class="btn btn--ghost btn--sm" href="#/register?next=${encodeURIComponent('/product/' + p.id)}">Create an account</a>
+          </div>
+        </div>`
+        }
       </div>
     </section>
 
@@ -968,6 +980,15 @@
     return new Date(ts || Date.now()).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  /* The buyer's order containing this product, if any — mirrors the
+     server-side gate in api/reviews.js. */
+  function userPurchase(u, pid) {
+    if (!u || !window.Orders) return null;
+    return (
+      Orders.forUser(u).find((o) => (o.items || []).some((it) => (it.productId || it.id) === pid)) || null
+    );
+  }
+
   function reviewCards(list) {
     if (!list.length) {
       return `<div class="review-empty">${icon('star')}<p>No written reviews yet. Yours would be the first.</p></div>`;
@@ -1037,8 +1058,8 @@
       const u = window.Auth ? Auth.current() : null;
       if (!u) {
         UI.toast({
-          title: 'Sign in to review',
-          sub: 'Owners with an account can post reviews.',
+          title: 'Owners only',
+          sub: 'Sign in with the account you bought with to review this product.',
           action: { label: 'Sign in', href: '#/login?next=' + encodeURIComponent('/product/' + p.id) },
         });
         return;
@@ -1054,9 +1075,17 @@
         UI.toast({ title: 'You already reviewed this', sub: 'One review per owner keeps things honest.' });
         return;
       }
-      const purchased = window.Orders
-        ? Orders.forUser(u).some((o) => (o.items || []).some((it) => (it.productId || it.id) === p.id))
-        : false;
+      /* Verified-purchase gate — only an order in your history that
+         contains this product proves ownership. The order id and total
+         travel as proof for the shared store; they are never displayed. */
+      const order = userPurchase(u, p.id);
+      if (!order) {
+        UI.toast({
+          title: 'Only buyers can review',
+          sub: `No purchase of ${p.name} on this account — reviews stay honest when only customers post them.`,
+        });
+        return;
+      }
       const rec = Reviews.add({
         productId: p.id,
         userId: u.id,
@@ -1069,7 +1098,9 @@
           .toUpperCase(),
         rating,
         text,
-        verified: purchased,
+        verified: true,
+        orderId: order.id,
+        orderTotal: order.total,
       });
       ta.value = '';
       rating = 5;
@@ -1077,14 +1108,23 @@
       repaint();
       UI.toast({
         title: 'Review posted',
-        sub: purchased ? 'Thanks, marked as a verified purchase.' : 'Thanks for sharing with future owners.',
+        sub: 'Thanks — posted as a verified purchase.',
       });
       if (window.Cloud && Cloud.configured) {
         Cloud.pushReview(rec);
       } else if (window.API) {
         API.pushReview(rec)
           .then((r) => {
-            if (r.shared) Reviews.markShared(rec.id);
+            if (r.data && r.data.error === 'already-reviewed') {
+              Reviews.remove(rec.id);
+              UI.toast({ title: 'Already reviewed', sub: 'This order has a review on file.' });
+            } else if (r.data && r.data.error === 'not-verified') {
+              Reviews.remove(rec.id);
+              UI.toast({ title: 'Purchase not recognised', sub: 'Check the order id and total, then try again.' });
+            } else if (r.shared) {
+              Reviews.markShared(rec.id);
+            }
+            repaint();
           })
           .catch(() => {});
       }
@@ -1693,6 +1733,13 @@
             const p = Store.product(l.productId);
             return { id: p.id, productId: p.id, name: p.name, image: p.image, color: l.color, qty: l.qty, price: l.price };
           }),
+          /* product→line map lets firestore.rules verify review ownership
+             without a list scan — see the reviews block in firestore.rules */
+          itemsById: Store.items.reduce((m, l) => {
+            const p = Store.product(l.productId);
+            m[p.id] = { qty: l.qty, price: l.price };
+            return m;
+          }, {}),
           subtotal: Store.subtotal(),
           discount: Store.discount(),
           promo: Store.promo,
@@ -1775,6 +1822,7 @@
         <p class="small muted" data-reveal style="--d:100ms">A copy is on its way to ${esc(o.email)}.</p>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
         <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${esc(o.id)} ${UI.icon('copy')}</span>
+        <span class="xs muted" data-reveal style="--d:195ms">Keep this id — along with your order total it’s your key to posting verified reviews.</span>
 
         <div data-live-status data-reveal style="--d:205ms;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-block:14px">${liveStatusHTML(
           o

@@ -664,6 +664,23 @@
 }
 .review-write__head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
 .review-write__form { display: grid; gap: 14px; }
+.review-gate {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  background: rgba(13, 13, 14, 0.03);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+}
+.review-gate .small,
+.review-gate p { margin: 0; }
+.review-gate__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.review-write__form .review-gate svg {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+  margin-right: 2px;
+}
 .rrating { display: inline-flex; gap: 4px; }
 .rrating__star {
   width: 34px;

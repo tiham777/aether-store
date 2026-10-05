@@ -370,6 +370,13 @@
         write(REVIEWS_KEY, reviews);
       }
     },
+    remove(id) {
+      const i = reviews.findIndex((x) => x.id === id);
+      if (i >= 0) {
+        reviews.splice(i, 1);
+        write(REVIEWS_KEY, reviews);
+      }
+    },
     mergeCloud(list) {
       let added = 0;
       (list || []).forEach((r) => {
@@ -387,6 +394,9 @@
           rating: Math.min(5, Math.max(1, Math.round(Number(r.rating) || 5))),
           text: r.text.slice(0, 500),
           verified: Boolean(r.verified),
+          /* ownership proof — write-only metadata, never rendered */
+          orderId: typeof r.orderId === 'string' ? r.orderId.slice(0, 40) : undefined,
+          orderTotal: Number.isFinite(Number(r.orderTotal)) ? Number(r.orderTotal) : undefined,
           at: Number.isFinite(Number(r.at)) ? Number(r.at) : Date.now(),
         });
         added++;

@@ -69,7 +69,11 @@ Once configured, the site:
 - shows orders placed on any device in `#/admin`, live, without a sync button
 - lets customers follow an order at **`#/track?id=AET-2026-123456`** — the
   timeline moves when the admin advances the status, no refresh needed
-- mirrors product reviews between visitors
+- mirrors product reviews between visitors — and only verified purchasers can
+  post one: the shared store checks the order id **and** exact order total
+  against the order ledger before accepting a review, one review per order,
+  and the proof never appears on the site. This gate lives in both
+  [`api/reviews.js`](api/reviews.js) and [`firestore.rules`](firestore.rules)
 
 Leave `apiKey` empty and everything stays in local storage exactly as before.
 
@@ -85,7 +89,9 @@ order shape server-side. Re-publish the rules file after updating it.
 > number read that one order, and lets the dashboard list orders without a
 > sign-in — the same stance as the rest of this demo storefront. Before
 > taking real money, add Firebase Auth and restrict `list` / `update` to the
-> admin session.
+> admin session. The review gate is stronger: a review write must present a
+> real order id plus its exact total, so knowing an order number alone is
+> not enough to forge a review — both are required together.
 
 ## Deploy to Vercel
 

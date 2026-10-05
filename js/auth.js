@@ -435,6 +435,14 @@
       order.status = order.status || 'paid';
       order.history = order.history || [{ status: 'paid', at: order.placedAt || Date.now() }];
       order.updatedAt = order.updatedAt || Date.now();
+      /* product→line map so firestore.rules can verify review ownership
+         without scanning the items list (see the reviews block there) */
+      order.itemsById =
+        order.itemsById ||
+        (order.items || []).reduce((m, it) => {
+          m[it.productId || it.id] = { qty: it.qty, price: it.price };
+          return m;
+        }, {});
       /* cap what the cloud will accept so a long form value can never make
          a Firestore write bounce forever (see firestore.rules) */
       order.name = cap(order.name, 60);
