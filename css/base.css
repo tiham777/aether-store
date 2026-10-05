@@ -80,6 +80,33 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover { background-color: #bdb7ab; }
 
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* photography fades in as it decodes — the JS side adds .is-loaded on
+   load/error so a broken image never sits invisible */
+.pdp__main img,
+.hero__plate img,
+.journal figure img {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+}
+.pdp__main img.is-loaded,
+.hero__plate img.is-loaded,
+.journal figure img.is-loaded {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdp__main img,
+  .hero__plate img,
+  .journal figure img {
+    opacity: 1;
+    transition: none;
+  }
+}
+
 body {
   font-family: var(--sans);
   font-size: 16px;
@@ -271,7 +298,8 @@ h2 .accent {
   transition: transform 0.35s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease),
     border-color 0.25s var(--ease), box-shadow 0.35s var(--ease);
 }
-.btn svg { width: 17px; height: 17px; flex: none; }
+.btn svg { width: 17px; height: 17px; flex: none; transition: transform 0.3s var(--ease); }
+.btn:not(.btn--google):hover svg { transform: translateX(2px); }
 .btn:active { transform: translateY(1px) scale(0.99); }
 .btn[disabled], .btn[aria-disabled='true'] { opacity: 0.45; pointer-events: none; }
 

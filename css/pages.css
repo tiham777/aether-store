@@ -9,6 +9,46 @@
   to { opacity: 1; transform: none; }
 }
 
+/* ------------- native view transitions (progressive enhancement) --------
+   When the browser supports them, route changes cross-fade with a slight
+   rise while a clicked card's image morphs into the PDP hero. Browsers
+   without support keep the page-enter animation above. */
+::view-transition-old(root) {
+  animation: vt-out 0.22s var(--ease-io) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.36s var(--ease) both;
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.996);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+/* the product-image morph: fill the moving group instead of squashing
+   between the card's aspect ratio and the PDP's */
+::view-transition-old(product-hero),
+::view-transition-new(product-hero) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  overflow: clip;
+  object-fit: cover;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* --------------------------------- hero --------------------------------- */
 
 .hero {

@@ -155,6 +155,22 @@
   function render() {
     const { parts, params } = parseHash();
     if (ROUTE_CSS.has(parts[0] || '')) ensureRouteCss();
+    /* Native view transitions when the browser supports them and the visitor
+       allows motion: the DOM swap runs inside the transition's update callback
+       so the old and new states are captured automatically. Everything falls
+       back to the page-enter animation elsewhere. */
+    const canVT =
+      typeof document.startViewTransition === 'function' &&
+      !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (canVT) {
+      document.startViewTransition(() => applyRender(parts, params));
+      return;
+    }
+    applyRender(parts, params);
+  }
+
+  function applyRender(parts, params) {
+    const quietMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* release live subscriptions owned by the outgoing view */
     if (window.Views && Views.unmountLive) Views.unmountLive();
     /* structured data belongs to the view that rendered it */
@@ -175,7 +191,13 @@
       host.classList.remove('page-enter');
       void host.offsetWidth;
       host.innerHTML = view.html;
-      host.classList.add('page-enter');
+      /* shared-element handoff: when this navigation came from a product card
+         click, the PDP hero image takes over the card's snapshot and morphs
+         into place (see the view-transition rules in css/pages.css) */
+      const incomingHero = parts[0] === 'product' && window.__vtProductNav ? host.querySelector('[data-gallery-main] img') : null;
+      if (incomingHero) incomingHero.style.viewTransitionName = 'product-hero';
+      window.__vtProductNav = false;
+      if (quietMotion || typeof document.startViewTransition !== 'function') host.classList.add('page-enter');
       host.setAttribute('tabindex', '-1');
 
       document.title = view.title || 'Arena';
@@ -328,6 +350,61 @@
     render();
 
     window.addEventListener('hashchange', render);
+
+    /* shared-element handoff: name the clicked card's image before the route
+       changes, so the view transition can morph it into the PDP hero */
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (typeof document.startViewTransition !== 'function') return;
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const link = e.target && e.target.closest ? e.target.closest('a[href^="#/product/"]') : null;
+        if (!link) return;
+        const img = link.querySelector('.card__img:not(.card__img--alt)');
+        if (!img) return;
+        img.style.viewTransitionName = 'product-hero';
+        window.__vtProductNav = true;
+      },
+      true
+    );
+
+    /* magnetic pull on the large primary CTAs — pointer-fine devices only,
+       and it releases the instant you press so the click stays honest */
+    if (window.matchMedia && matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let magnet = null;
+      document.addEventListener(
+        'pointermove',
+        (e) => {
+          const btn = e.target && e.target.closest ? e.target.closest('.btn--primary.btn--lg') : null;
+          if (btn !== magnet && magnet) magnet.style.transform = '';
+          magnet = btn;
+          if (!btn) return;
+          const r = btn.getBoundingClientRect();
+          btn.style.transform = `translate(${((e.clientX - r.left) / r.width - 0.5) * 10}px, ${
+            ((e.clientY - r.top) / r.height - 0.5) * 7
+          }px)`;
+        },
+        { passive: true }
+      );
+      document.addEventListener(
+        'pointerdown',
+        () => {
+          if (magnet) magnet.style.transform = '';
+        },
+        true
+      );
+    }
+
+    /* photography fades in as it decodes; vector product renders are usually
+       cached and simply pop — the fade is scoped to the real photos */
+    const fadeHost = (img) => {
+      if (img && img.closest && img.closest('.pdp__main, .hero__plate, .journal figure')) img.classList.add('is-loaded');
+    };
+    document.addEventListener('load', (e) => fadeHost(e.target), true);
+    document.addEventListener('error', (e) => fadeHost(e.target), true); /* never leave a broken image blank */
+    document.querySelectorAll('.pdp__main img, .hero__plate img, .journal figure img').forEach((img) => {
+      if (img.complete && img.naturalWidth > 0) img.classList.add('is-loaded');
+    });
     window.addEventListener('resize', () => UI.headerScroll(), { passive: true });
 
     /* shared order store: live cloud listener + cross-tab refresh. Screens
