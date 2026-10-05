@@ -124,6 +124,7 @@
 .press__item {
   padding-inline: clamp(18px, 3vw, 40px);
   font-family: var(--serif);
+  font-style: italic;
   font-size: clamp(1.1rem, 1.9vw, 1.6rem);
   color: var(--ink-2);
   white-space: nowrap;
@@ -209,10 +210,12 @@
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-top: 8px; }
 .stat { display: grid; gap: 5px; }
 .stat__n {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.1rem, 3.6vw, 3rem);
+  letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums;
 }
 .stat__l { font-size: 0.8rem; color: var(--ink-3); line-height: 1.4; }
 
@@ -235,6 +238,13 @@
   transition: background 0.4s var(--ease), padding-left 0.4s var(--ease);
 }
 .principle:hover { background: var(--surface); padding-left: clamp(16px, 2.4vw, 34px); }
+.principle__n {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--accent-ink);
+  letter-spacing: 0.02em;
+}
 .principle__t { font-size: clamp(1.15rem, 2vw, 1.5rem); font-weight: 550; letter-spacing: -0.025em; }
 .principle__d { font-size: 0.95rem; line-height: 1.65; color: var(--ink-2); }
 @media (max-width: 780px) {
@@ -296,7 +306,7 @@
   transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
 }
 .quote:hover { transform: translateY(-4px); box-shadow: var(--sh-2); }
-.quote__text { font-family: var(--serif); font-size: 1.16rem; line-height: 1.5; color: var(--ink); }
+.quote__text { font-family: var(--serif); font-style: italic; font-size: 1.22rem; line-height: 1.5; color: var(--ink); }
 .quote__text::before { content: '“'; }
 .quote__text::after { content: '”'; }
 .quote__who { display: flex; align-items: center; gap: 12px; }

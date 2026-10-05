@@ -256,6 +256,7 @@
           .map(
             ([n, t, d], i) => `
           <div class="principle" data-reveal style="--d:${i * 90}ms">
+            <span class="principle__n" aria-hidden="true">${n}</span>
             <h3 class="principle__t">${t}</h3>
             <p class="principle__d">${d}</p>
           </div>`

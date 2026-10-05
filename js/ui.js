@@ -90,6 +90,14 @@
       if (p.compareAt) badges.push('<span class="badge badge--dark">Save ' + Math.round((1 - p.price / p.compareAt) * 100) + '%</span>');
     }
 
+    /* second gallery entry (a tighter crop) becomes the hover frame when it
+       differs from the lead shot — no swap when the crop is identical */
+    const alt = (p.gallery || [])[1];
+    const altFrame =
+      alt && (alt.src !== p.image || (alt.scale && alt.scale > 1.3))
+        ? `<img class="card__img card__img--alt" src="${alt.src}" alt="" style="object-position:${alt.pos || 'center'}" loading="lazy" decoding="async">`
+        : '';
+
     return `
     <article class="card" data-reveal style="--d:${(index || 0) * 65}ms">
       <div class="card__media">
@@ -98,7 +106,8 @@
       p.id
     )}">${icon('heart')}</button>
         <a href="${productUrl(p.id)}" class="card__link" aria-label="${esc(p.name)} — ${esc(p.tagline)}">
-          <img src="${p.image}" alt="${esc(p.name)} — ${esc(p.tagline)}" width="800" height="1000" loading="lazy" decoding="async">
+          <img class="card__img" src="${p.image}" alt="${esc(p.name)} — ${esc(p.tagline)}" width="800" height="1000" loading="lazy" decoding="async">
+          ${altFrame}
         </a>
         <button class="card__quick" data-add="${p.id}"${oos ? ' disabled' : ''}>${icon('bag')}<span>${oos ? 'Sold out' : 'Quick add · ' + Store.money(p.price)}</span></button>
       </div>
@@ -371,7 +380,11 @@
     const rows = $$('.search__result');
     if (!rows.length) return;
     searchCursor = (searchCursor + step + rows.length) % rows.length;
-    rows.forEach((r, i) => r.classList.toggle('is-cursor', i === searchCursor));
+    rows.forEach((r, i) => {
+      r.classList.toggle('is-cursor', i === searchCursor);
+      if (i === searchCursor) r.setAttribute('aria-selected', 'true');
+      else r.removeAttribute('aria-selected');
+    });
     rows[searchCursor].scrollIntoView({ block: 'nearest' });
   }
 
