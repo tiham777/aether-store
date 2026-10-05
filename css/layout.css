@@ -17,23 +17,16 @@
 .topbar__viewport {
   overflow: hidden;
   width: 100%;
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
-/* the announcement strip scrolls: four identical copies, shifting exactly one
-   group per loop so the seam never shows */
+/* static, centred copy — a scrolling promo bar is showroom noise; hover to
+   read still works, and it degrades identically for reduced motion */
 .topbar__track {
   display: flex;
-  flex-wrap: nowrap;
-  width: max-content;
-  will-change: transform;
-  animation: topbar-roll 26s linear infinite;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
 }
-.topbar:hover .topbar__track { animation-play-state: paused; }
-@keyframes topbar-roll {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-25%, 0, 0); }
-}
-.topbar__group { display: flex; align-items: center; flex-wrap: nowrap; flex: none; }
+.topbar__group { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; }
 .topbar__item {
   display: inline-flex;
   align-items: center;
@@ -54,21 +47,10 @@
   background: rgba(244, 243, 241, 0.32);
   margin-left: 18px;
 }
-/* no motion requested: one static, centred copy like the old layout */
-@media (prefers-reduced-motion: reduce) {
-  .topbar__track {
-    animation: none !important;
-    will-change: auto;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .topbar__group { flex-wrap: wrap; justify-content: center; }
-  .topbar__group:not(:first-child) { display: none; }
-  .topbar__item:last-child::after { display: none; }
-  @media (max-width: 1560px) { .topbar__item:nth-child(n + 5) { display: none; } }
-  @media (max-width: 1180px) { .topbar__item:nth-child(n + 4) { display: none; } }
-  @media (max-width: 720px) { .topbar__item:nth-child(n + 3) { display: none; } }
+.topbar__item:last-child::after { display: none; }
+@media (max-width: 720px) {
+  .topbar__item:nth-child(n + 3) { display: none; }
+  .topbar__item { font-size: 0.7rem; }
 }
 
 /* -------------------------------- header -------------------------------- */

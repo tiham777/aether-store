@@ -117,7 +117,7 @@
       <div class="container">
         <div class="done">
           <span class="done__mark" style="background:var(--accent)">${UI.icon('alert')}</span>
-          <h1 class="done__title">Something went <span class="accent">wrong.</span></h1>
+          <h1 class="done__title">Something went wrong</h1>
           <p class="lede" style="text-align:center">The page didn’t finish loading — nothing in your bag or account was lost.</p>
           <div class="row row-4 wrap center">
             <button class="btn btn--primary btn--lg" data-retry>Try again</button>
@@ -300,126 +300,21 @@
   /* ------------------------------ count-up -------------------------------- */
 
   function observeCounters(scope) {
+    /* numbers ship in the markup and stay put — a dashboard-gradled count-up
+       reads as marketing theatre, not as a store you can trust */
     const els = (scope || document).querySelectorAll('[data-count]');
-    if (!els.length) return;
-
-    const run = (el) => {
-      if (el.dataset.counted) return;
-      el.dataset.counted = '1';
+    els.forEach((el) => {
       const target = parseFloat(el.getAttribute('data-count'));
       if (!Number.isFinite(target)) return;
       const decimals = Number(el.getAttribute('data-decimals') || 0);
       const suffix = el.getAttribute('data-suffix') || '';
       const prefix = el.getAttribute('data-prefix') || '';
-      const dur = 1300;
-      const start = performance.now();
-      const fmt = (v) =>
-        v.toLocaleString('en-US', {
-          minimumFractionDigits: decimals,
-          maximumFractionDigits: decimals,
-        });
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        el.textContent = prefix + fmt(target) + suffix;
-      };
-      /* markup ships the real value (no-JS, SEO, screen readers); the count-up
-         is a JS-only flourish that may start from zero */
-      el.textContent = prefix + fmt(0) + suffix;
-      const step = (now) => {
-        if (done) return;
-        const t = Math.min(1, (now - start) / dur);
-        const eased = 1 - Math.pow(1 - t, 3);
-        const value = target * eased;
-        el.textContent = prefix + fmt(value) + suffix;
-        if (t < 1) requestAnimationFrame(step);
-        else finish();
-      };
-      requestAnimationFrame(step);
-      /* frames can stall in throttled webviews — never leave a literal 0 */
-      setTimeout(finish, dur + 500);
-    };
-
-    if (!('IntersectionObserver' in window)) {
-      els.forEach(run);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            run(e.target);
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-    /* start visible counters without waiting on IntersectionObserver, and
-       sweep once in case observer callbacks never arrive (stalled frames) */
-    els.forEach((el) => {
-      const r = el.getBoundingClientRect();
-      if (r.bottom > 0 && r.top < window.innerHeight * 0.95) run(el);
-      else io.observe(el);
-    });
-    setTimeout(() => {
-      els.forEach((el) => {
-        if (el.dataset.counted) return;
-        const r = el.getBoundingClientRect();
-        if (r.bottom > 0 && r.top < window.innerHeight) run(el);
-      });
-    }, 1100);
-    /* last-resort sweep: IntersectionObserver callbacks can stall in
-       background tabs and hidden webviews — re-check on scroll, resize and
-       when the tab becomes visible again so a counter never sits at 0 */
-    const sweep = () => {
-      let pending = false;
-      els.forEach((el) => {
-        if (el.dataset.counted || !el.isConnected) return;
-        const r = el.getBoundingClientRect();
-        if (r.bottom > 0 && r.top < window.innerHeight * 0.95) run(el);
-        else pending = true;
-      });
-      if (!pending) {
-        window.removeEventListener('scroll', sweep);
-        window.removeEventListener('resize', sweep);
-        document.removeEventListener('visibilitychange', onVisible);
-      }
-    };
-    const onVisible = () => {
-      if (!document.hidden) sweep();
-    };
-    window.addEventListener('scroll', sweep, { passive: true });
-    window.addEventListener('resize', sweep, { passive: true });
-    document.addEventListener('visibilitychange', onVisible);
-  }
-
-  /* ------------------------------- parallax ------------------------------- */
-
-  function bindParallax() {
-    const art = document.querySelector('[data-parallax]');
-    if (!art || window.matchMedia('(hover: none)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const render = art.querySelector('.hero__art-render');
-    const cards = art.querySelectorAll('.float-card');
-    art.addEventListener('pointermove', (e) => {
-      const r = art.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      if (render) render.style.transform = `translate3d(${x * -16}px, ${y * -14}px, 0) scale(1.19)`;
-      cards.forEach((c, i) => {
-        const d = i % 2 === 0 ? 1 : -1;
-        c.style.animation = 'none';
-        c.style.transform = `translate3d(${x * 22 * d}px, ${y * 18 * d}px, 0)`;
-      });
-    });
-    art.addEventListener('pointerleave', () => {
-      if (render) render.style.transform = '';
-      cards.forEach((c) => {
-        c.style.transform = '';
-        c.style.animation = '';
-      });
+      if (el.dataset.counted) return;
+      el.dataset.counted = '1';
+      el.textContent = prefix + target.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      }) + suffix;
     });
   }
 
@@ -431,7 +326,6 @@
     if (window.Store && Store.prune) Store.prune();
     UI.init();
     render();
-    bindParallax();
 
     window.addEventListener('hashchange', render);
     window.addEventListener('resize', () => UI.headerScroll(), { passive: true });

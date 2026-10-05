@@ -119,7 +119,7 @@
         title: 'Arena — Considered objects for modern life',
         html: `<div class="container"><div class="empty-state" style="margin-block:clamp(40px,8vw,110px)">
           <div class="cart-empty__icon">${icon('package')}</div>
-          <h1 class="h2">The shelves are bare. <span class="accent">On purpose.</span></h1>
+          <h1 class="h2">The shelves are bare for now</h1>
           <p class="muted" style="max-width:44ch">Every object is back in the studio for a restock. The journal stays open while we work.</p>
           <a class="btn btn--primary" href="#/journal">Read the journal ${icon('arrowRight')}</a>
         </div></div>`,
@@ -159,17 +159,13 @@
           </div>
         </div>
 
-        <div class="hero__art" data-reveal="scale" style="--d:140ms" data-parallax>
+        <figure class="hero__art" data-reveal="scale" style="--d:140ms">
           <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)}, ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
-          <div class="float-card float-card--tl">
-            <span class="float-card__icon">${icon('wrench')}</span>
-            <span class="float-card__text"><span class="float-card__v">Repairable by design</span></span>
-          </div>
-          <div class="float-card float-card--br">
-            <span class="float-card__icon float-card__icon--accent">${icon('truck')}</span>
-            <span class="float-card__text"><span class="float-card__k">Ordered before 14:00 CET</span><span class="float-card__v">Dispatched the same day</span></span>
-          </div>
-        </div>
+          <figcaption class="hero__plate">
+            <span class="hero__plate-name">${esc(hero.name)}</span>
+            <span class="hero__plate-note">${esc(hero.tagline)} · opens with a single driver</span>
+          </figcaption>
+        </figure>
       </div>
     </section>    <section class="press" aria-label="As featured in">
       <div class="press__viewport">
@@ -338,7 +334,7 @@
             <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
             <span>
               <span class="post__title">${esc(p.title)}</span>
-              <span class="post__excerpt" style="display:block;margin-top:7px">${esc(p.excerpt)}</span>
+              <span class="post__excerpt">${esc(p.excerpt)}</span>
             </span>
           </a>`
           )
@@ -1758,7 +1754,7 @@
         html: `${crumbs([{ label: 'Order', href: '#/order-confirmed' }])}
         <div class="container"><div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
           <div class="cart-empty__icon">${icon('package')}</div>
-          <h1 class="h2">No recent order <span class="accent">here.</span></h1>
+          <h1 class="h2">No recent order here</h1>
           <p class="muted" style="max-width:44ch">We couldn’t find an order from this session. If you just placed one, the confirmation is in your inbox.</p>
           <a class="btn btn--primary" href="#/shop">Continue shopping ${icon('arrowRight')}</a>
         </div></div>`,
@@ -1773,7 +1769,7 @@
       <div class="done">
         <span class="done__mark">${icon('check')}</span>
         <h1 class="done__title" data-reveal style="--d:70ms">${
-          firstName ? `Thank you, <span class="accent">${esc(firstName)}.</span>` : 'Thank you for your order.'
+          firstName ? `Thank you, ${esc(firstName)}.` : 'Thank you for your order.'
         }</h1>
         <p class="small muted" data-reveal style="--d:100ms">A copy is on its way to ${esc(o.email)}.</p>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
@@ -1862,7 +1858,7 @@
   function trackMissHTML(oid) {
     return `<div class="empty-state" style="margin-block:10px">
       <div class="cart-empty__icon">${icon('search')}</div>
-      <h1 class="h2">No order <span class="accent">${esc(oid)}.</span></h1>
+      <h1 class="h2">No order matching ${esc(oid)}</h1>
       <p class="muted" style="max-width:48ch">Check the number and the email you used at checkout, then try again. Still stuck? <a class="link link--underline" href="#/about?to=contact">Talk to a human</a> and we’ll find it.</p>
     </div>`;
   }
@@ -2091,7 +2087,7 @@
           <a class="post" href="${postHref(p)}" data-reveal style="--d:${i * 80}ms">
             <span class="post__media"><img src="${p.image}" alt="${esc(p.title)}" loading="lazy" width="1200" height="900"></span>
             <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
-            <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt" style="display:block;margin-top:7px">${esc(p.excerpt)}</span></span>
+            <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt">${esc(p.excerpt)}</span></span>
           </a>`
           )
           .join('')}
@@ -2140,7 +2136,7 @@
           <a class="post" href="${postHref(p)}" data-reveal style="--d:${j * 80}ms">
             <span class="post__media"><img src="${p.image}" alt="${esc(p.title)}" loading="lazy" width="1200" height="900"></span>
             <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
-            <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt" style="display:block;margin-top:7px">${esc(p.excerpt)}</span></span>
+            <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt">${esc(p.excerpt)}</span></span>
           </a>`
           )
           .join('')}
@@ -2177,7 +2173,7 @@
     <header class="container page-head">
       <div class="page-head__inner">
         <div class="page-head__row">
-          <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be <span class="accent">kept</span></h1>
+          <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be kept</h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:44ch">Arena began with one frustrating question: why does everything electronic eventually become rubbish?</p>
         </div>
       </div>

@@ -192,22 +192,12 @@ h2 .accent {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.17em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
-.eyebrow::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex: none;
-}
-.eyebrow--plain::before { display: none; }
 
 .mono {
   font-family: var(--mono);
@@ -510,26 +500,23 @@ h2 .accent {
 
 [data-reveal] {
   opacity: 0;
-  transform: translateY(18px);
-  filter: blur(7px);
-  transition: opacity 0.85s var(--ease), transform 0.85s var(--ease), filter 0.85s var(--ease);
+  transform: translateY(12px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
   transition-delay: var(--d, 0ms);
-  will-change: opacity, transform;
 }
-html:not(.js) [data-reveal] { opacity: 1; transform: none; filter: none; }
-[data-reveal].is-in { opacity: 1; transform: none; filter: none; }
+html:not(.js) [data-reveal] { opacity: 1; transform: none; }
+[data-reveal].is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; transition: none; }
-  .float-card { animation: none !important; }
   .skeleton { animation: none !important; }
   .hero__title .rise { animation: none !important; }
   .back-top, .card, .card__media, .cat, .post__media { transition: none; }
 }
 
 [data-reveal='fade'] { transform: none; }
-[data-reveal='left'] { transform: translateX(-22px); }
-[data-reveal='right'] { transform: translateX(22px); }
-[data-reveal='scale'] { transform: scale(0.965); }
+[data-reveal='left'] { transform: translateX(-16px); }
+[data-reveal='right'] { transform: translateX(16px); }
+[data-reveal='scale'] { transform: scale(0.985); }
 
 @keyframes pop {
   0% { transform: scale(1); }
@@ -538,11 +525,6 @@ html:not(.js) [data-reveal] { opacity: 1; transform: none; filter: none; }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-
-@keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
-}
 
 @keyframes shimmer {
   from { background-position: 200% 0; }

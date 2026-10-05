@@ -59,10 +59,11 @@
       <img src="assets/img/leaf-shadow.jpg" alt="">
       <div class="auth__art-card">
         <span class="mono">Why members</span>
-        <p>Order history, repair guides and a wishlist that follows you. One account, kept for decades.</p>
-        <div class="auth__art-stats">
-          <span>${icon('refresh')} 60-night trial</span>
-        </div>
+        <p>Order history, repair guides and a wishlist that follows you. One account, kept for decades.</p>          <div class="auth__art-stats">
+            <span>${icon('refresh')} 60-night trial</span>
+            <span>${icon('wrench')} Repair guides</span>
+            <span>${icon('package')} One-click reorders</span>
+          </div>
       </div>
     </aside>`;
   }
@@ -86,7 +87,7 @@
     <section class="auth">
       <div class="container auth__grid">
         <div class="auth__panel" data-reveal>
-          <h1>Welcome <span class="accent">back.</span></h1>
+          <h1>Welcome back</h1>
           <p class="muted small" style="max-width:40ch">Order history, repair guides and everything you’ve saved.</p>
           ${authTabs('login', next)}
           <div class="auth__error" data-auth-err>${icon('alert') || ''}<span data-auth-err-text></span></div>
@@ -208,7 +209,7 @@
     <section class="auth">
       <div class="container auth__grid">
         <div class="auth__panel" data-reveal>
-          <h1>Create your <span class="accent">account.</span></h1>
+          <h1>Create your account</h1>
           <p class="muted small" style="max-width:42ch">Track orders, save addresses, keep a wishlist; repair guides included.</p>
           ${authTabs('register', next)}
           <div class="auth__error" data-auth-err><span data-auth-err-text></span></div>
@@ -351,7 +352,7 @@
       html: `${crumbsLocal([{ label: '403' }])}
       <div class="container"><div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
         <div class="cart-empty__icon">${icon('lock')}</div>
-        <h1 class="h2">Admins only <span class="accent">in here.</span></h1>
+        <h1 class="h2">Admins only</h1>
         <p class="muted" style="max-width:46ch">Your account doesn’t have administrator access. If you think that’s wrong, ask a studio admin to upgrade your role.</p>
         <div class="row row-4 wrap center">
           <a class="btn btn--primary" href="#/account">Back to my account ${icon('arrowRight')}</a>
@@ -408,7 +409,7 @@
     <header class="container page-head">
       <div class="page-head__inner">
         <div class="page-head__row acct__head">
-          <h1 data-reveal style="--d:60ms">Hi, ${esc(firstName)}<span class="accent">.</span></h1>
+          <h1 data-reveal style="--d:60ms">Hi, ${esc(firstName)}</h1>
           <span class="row row-4 wrap" data-reveal style="--d:110ms">
             ${u.role === 'admin' ? `<a class="btn btn--ghost btn--sm" href="#/admin">${icon('shield')} Admin dashboard</a>` : ''}
             <button class="btn btn--ghost btn--sm" data-logout>Sign out</button>
