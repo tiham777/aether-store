@@ -132,7 +132,15 @@
 .press { border-block: 1px solid var(--line); padding-block: 26px; background: rgba(255, 255, 255, 0.5); }
 .press__track { display: flex; flex-wrap: wrap; justify-content: center; width: 100%; }
 .press__viewport { overflow: hidden; width: 100%; }
-.press__group { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+.press__group { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 0; }
+.press__kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-inline: clamp(18px, 3vw, 40px);
+}
 .press__item {
   padding-inline: clamp(18px, 3vw, 40px);
   font-family: var(--serif);
@@ -140,6 +148,17 @@
   color: var(--ink-2);
   white-space: nowrap;
 }
+
+/* ---------------------------- journal article ---------------------------- */
+
+.article { max-width: 760px; margin-inline: auto; padding-block: clamp(30px, 4vw, 56px); display: grid; gap: clamp(22px, 3vw, 34px); }
+.article__head { display: grid; gap: 14px; text-align: center; justify-items: center; }
+.article__head h1 { font-size: clamp(2rem, 4.4vw, 3.2rem); letter-spacing: -0.035em; line-height: 1.06; }
+.article__media { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--line); background: var(--paper-2); aspect-ratio: 16 / 9; }
+.article__media img { width: 100%; height: 100%; object-fit: cover; }
+.article__body { display: grid; gap: 22px; font-size: 1.02rem; line-height: 1.78; color: var(--ink-2); }
+.article__body p::first-letter { font-weight: 550; }
+.article__foot { display: flex; align-items: center; gap: 13px; padding-top: 6px; border-top: 1px solid var(--line); }
 
 /* ------------------------------ categories ------------------------------ */
 
@@ -979,6 +998,104 @@
 
 /* promo code inside the cart drawer */
 .drawer__promo { width: 100%; }
+
+/* empty-bag suggestions — a cart should never be a dead end */
+.cart-picks { display: grid; gap: 4px; margin-top: 22px; padding-top: 8px; }
+.cart-picks__row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.cart-picks__row:last-child { border-bottom: 0; }
+.cart-picks__thumb { width: 48px; height: 60px; border-radius: 9px; overflow: hidden; border: 1px solid var(--line); background: var(--paper-2); }
+.cart-picks__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.cart-picks__meta { display: grid; gap: 2px; font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; min-width: 0; }
+.cart-picks__meta a:hover { color: var(--accent-ink); }
+.cart-picks__meta .small { font-weight: 400; }
+.cart-picks__price { font-size: 0.88rem; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.cart-picks__add {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  transition: all 0.25s var(--ease);
+}
+.cart-picks__add:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.cart-picks__add svg { width: 15px; height: 15px; }
+
+/* reassurance strip (checkout / confirmation) */
+.perk__icon { color: var(--accent); display: inline-flex; }
+.perk__icon svg { width: 16px; height: 16px; }
+
+/* FAQ accordion (about page) — shares .acc styles with the PDP */
+.faq { border-bottom: 1px solid var(--line); max-width: 880px; }
+.faq .acc:first-child { border-top: 1px solid var(--line); }
+
+/* field hint (card brand) — small, calm, never in the error slot */
+.field__hint {
+  font-size: 0.76rem;
+  font-weight: 550;
+  color: var(--ok);
+  letter-spacing: 0.02em;
+}
+.field__hint[hidden] { display: none; }
+
+/* "Soon" marker on not-yet-live payment methods */
+.pill__soon {
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--paper-3);
+  color: var(--ink-3);
+}
+
+/* low-stock note on product cards */
+.card__low {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 550;
+  color: var(--warn);
+}
+.card__low svg { width: 12px; height: 12px; }
+
+/* sticky mobile buy bar (PDP) */
+.pdp-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(250, 249, 247, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -12px 30px -24px rgba(13, 13, 14, 0.5);
+}
+.pdp-bar[hidden] { display: none; }
+.pdp-bar img { width: 40px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); background: var(--paper-2); flex: none; }
+.pdp-bar__meta { display: grid; gap: 1px; min-width: 0; flex: 1; }
+.pdp-bar__meta b { font-size: 0.88rem; font-weight: 550; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdp-bar__meta .price { font-size: 0.84rem; color: var(--ink-2); }
+.pdp-bar .btn { flex: none; }
+@media (max-width: 960px) {
+  .pdp-bar:not([hidden]) { display: flex; }
+}
 .drawer__promo .input { flex: 1; min-width: 0; }
 .drawer__promo-done {
   display: flex;

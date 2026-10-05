@@ -160,39 +160,104 @@
     },
 
     /* --------------------------- delivery promise ------------------------ */
-    /* Business-day dispatch + transit windows: express 1–2 days, standard
-       3–5. Orders placed after 14:00 (or on a weekend) leave the next
-       business day — the same rule the countdown on the product page
-       quotes, so every ETA on the site agrees with every other one. */
+    /* The dispatch promise is made in one clock only: the Copenhagen studio's.
+       "Order before 14:00" means 14:00 Europe/Copenhagen, whatever timezone
+       the visitor is in, so the countdown, the ETAs and the shipping copy
+       can never disagree. Dispatch + transit skip weekends in CET too. */
+    DISPATCH_TZ: 'Europe/Copenhagen',
+    CUTOFF_HOUR: 14,
+    /* minutes between UTC and the wall clock of `tz` at that instant */
+    _tzOffsetMin(date, tz) {
+      try {
+        const dtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        const p = {};
+        dtf.formatToParts(date).forEach((x) => (p[x.type] = x.value));
+        const asUTC = Date.UTC(+p.year, p.month - 1, +p.day, (+p.hour) % 24, +p.minute, +p.second);
+        return (asUTC - date.getTime()) / 60000;
+      } catch (e) {
+        return -date.getTimezoneOffset(); /* very old engines: fall back to local */
+      }
+    },
+    /* shift an instant into the studio's wall clock (read with getUTC*) */
+    _wall(date) {
+      return new Date(date.getTime() + Store._tzOffsetMin(date, Store.DISPATCH_TZ) * 60000);
+    },
+    /* inverse of _wall — turn a wall-clock reading back into an instant */
+    _instant(wallDate) {
+      const guess = new Date(wallDate.getTime() - Store._tzOffsetMin(wallDate, Store.DISPATCH_TZ) * 60000);
+      const off = Store._tzOffsetMin(guess, Store.DISPATCH_TZ);
+      return new Date(wallDate.getTime() - off * 60000);
+    },
+    _isBizDay(wallDate) {
+      const dow = wallDate.getUTCDay();
+      return dow !== 0 && dow !== 6;
+    },
     eta(method, from) {
-      const isBiz = (d) => d.getDay() !== 0 && d.getDay() !== 6;
-      const addBiz = (d, n) => {
-        const x = new Date(d);
+      const addBiz = (x, n) => {
+        const y = new Date(x);
         let left = n;
         while (left > 0) {
-          x.setDate(x.getDate() + 1);
-          if (isBiz(x)) left--;
+          y.setUTCDate(y.getUTCDate() + 1);
+          if (Store._isBizDay(y)) left--;
         }
-        return x;
+        return y;
       };
-      const disp = new Date(from || Date.now());
-      if (!isBiz(disp) || disp.getHours() >= 14) {
+      const at = from instanceof Date ? from : new Date(from || Date.now());
+      const w = Store._wall(at);
+      const disp = new Date(w);
+      if (!Store._isBizDay(disp) || disp.getUTCHours() >= Store.CUTOFF_HOUR) {
         do {
-          disp.setDate(disp.getDate() + 1);
-        } while (!isBiz(disp));
+          disp.setUTCDate(disp.getUTCDate() + 1);
+        } while (!Store._isBizDay(disp));
       }
       const [loN, hiN] = method === 'express' ? [1, 2] : [3, 5];
-      return { from: addBiz(disp, loN), to: addBiz(disp, hiN) };
+      return { from: Store._instant(addBiz(disp, loN)), to: Store._instant(addBiz(disp, hiN)) };
+    },
+    /* ms until the next 14:00 Europe/Copenhagen dispatch cutoff — powers the
+       product-page countdown so it agrees with every ETA on the site */
+    msUntilCutoff(now) {
+      const n = now instanceof Date ? now.getTime() : now || Date.now();
+      const w = Store._wall(new Date(n));
+      const target = new Date(w);
+      target.setUTCHours(Store.CUTOFF_HOUR, 0, 0, 0);
+      if (w.getTime() >= target.getTime() || !Store._isBizDay(w)) {
+        do {
+          target.setUTCDate(target.getUTCDate() + 1);
+        } while (!Store._isBizDay(target));
+      }
+      return Math.max(0, Store._instant(target).getTime() - n);
     },
     etaLabel(method, from, long) {
       const r = Store.eta(method, from);
       const f = (d) => Store.dayLabel(d, long);
       return r.from.toDateString() === r.to.toDateString() ? f(r.to) : `${f(r.from)} – ${f(r.to)}`;
     },
+    /* shipping dates are promised in the studio's timezone, so label them
+       there too — a visitor in Auckland and one in Copenhagen see the same */
     dayLabel(d, long) {
-      return new Date(d).toLocaleDateString('en-US',
-        long ? { weekday: 'long', month: 'long', day: 'numeric' } : { weekday: 'short', month: 'short', day: 'numeric' }
-      );
+      try {
+        return new Date(d).toLocaleDateString(
+          'en-US',
+          Object.assign(
+            { timeZone: Store.DISPATCH_TZ },
+            long ? { weekday: 'long', month: 'long', day: 'numeric' } : { weekday: 'short', month: 'short', day: 'numeric' }
+          )
+        );
+      } catch (e) {
+        return new Date(d).toLocaleDateString(
+          'en-US',
+          long ? { weekday: 'long', month: 'long', day: 'numeric' } : { weekday: 'short', month: 'short', day: 'numeric' }
+        );
+      }
     },
 
     /* ------------------------------- promo ------------------------------ */
@@ -239,6 +304,23 @@
       state.promo = migratePromo(read(PROMO_KEY, null));
       emit('change');
       emit('wish');
+    },
+
+    /* drop bag lines whose product has since been deleted (admin removal)
+       and re-clamp quantities to current stock; runs once on boot */
+    prune() {
+      const before = state.items.length;
+      state.items = state.items.filter((l) => {
+        const p = product(l.productId);
+        if (!p) return false;
+        const cap = Store.stockCap(l.productId);
+        if (cap <= 0) return false;
+        if (l.qty > cap) l.qty = cap;
+        if (typeof p.price === 'number') l.price = p.price;
+        return true;
+      });
+      if (state.items.length !== before) persist();
+      return before - state.items.length;
     },
 
     /* ------------------------------- money ------------------------------ */

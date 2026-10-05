@@ -6,9 +6,10 @@ no framework, no node_modules.
 
 ## What's inside
 
-- **Storefront** — home, shop (filters + sort), product pages, cart drawer, checkout
-  (card + cash on delivery), order confirmation, live order tracking (`#/track`),
-  journal, about, 404
+- **Storefront** — home, shop (filters + sort), product pages (sticky mobile buy
+  bar, frequently-bought-together), cart drawer with empty-bag suggestions,
+  checkout (card + cash on delivery), order confirmation, live order tracking
+  (`#/track`), journal with full article pages, about + FAQ, 404
 - **Accounts** — registration, login, profile, addresses, order history
 - **Admin dashboard** (`#/admin`) — products CRUD, orders pipeline, customers,
   subscribers, analytics, settings, danger zone
@@ -19,8 +20,15 @@ no framework, no node_modules.
 - **Self-hosted fonts** (Schibsted Grotesk + Instrument Serif), authored SVG product renders
 - **Production hygiene** — per-route titles, descriptions and canonical URLs,
   `noindex` on account/admin/checkout, Open Graph + Twitter cards, JSON-LD
-  (Organization, WebSite, Product), `robots.txt`, `sitemap.xml`, PWA manifest,
-  and security + cache headers in `vercel.json`
+  (Organization, WebSite, Product, Article, FAQPage, BreadcrumbList),
+  `robots.txt`, `sitemap.xml`, PWA manifest, and security + cache headers in
+  `vercel.json`. The admin stylesheet is injected only on the admin route.
+- **Delivery promise in one clock** — the "order before 14:00" cutoff and every
+  ETA are computed in **Europe/Copenhagen**, whatever timezone the visitor is
+  in, so the countdown, shipping quotes and copy can never disagree
+- **Checkout validation** — Luhn card check (15 or 16 digits, Amex-aware),
+  brand hint, expired-date guard, phone validation and a double-submit lock,
+  shared with the test suite via `js/validate.js`
 
 ## Run locally
 
@@ -32,7 +40,7 @@ npm run serve          # dev server (tools/serve.mjs)
 ## Test
 
 ```bash
-npm test               # node --test, no dependencies — pricing, auth, throttle, catalogue
+npm test               # node --test, no dependencies — pricing, ETA, validators, auth, catalogue
 npm run renders        # regenerate the SVG product render set
 ```
 

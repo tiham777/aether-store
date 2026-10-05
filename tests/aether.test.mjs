@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SOURCES = ['js/data.js', 'js/store.js', 'js/auth.js'].map((p) => ({
+const SOURCES = ['js/data.js', 'js/store.js', 'js/validate.js', 'js/auth.js'].map((p) => ({
   filename: p,
   code: readFileSync(path.join(root, p), 'utf8'),
 }));
@@ -106,48 +106,135 @@ describe('pricing', () => {
 /* ------------------------------ delivery ETA ------------------------------ */
 
 describe('delivery ETA', () => {
-  const isBiz = (d) => d.getDay() !== 0 && d.getDay() !== 6;
+  /* the dispatch promise lives in one clock: Europe/Copenhagen. Inputs below
+     are built as UTC instants of CET wall times (Denmark is UTC+2 in October),
+     so the suite is deterministic on any machine timezone. */
+  const cet = (d) =>
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Europe/Copenhagen',
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(d);
+  const isBizWall = (d) => {
+    const dow = new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Copenhagen', weekday: 'short' }).format(d);
+    return dow !== 'Sat' && dow !== 'Sun';
+  };
 
-  test('a Tuesday morning order dispatches the same day', () => {
+  test('a Tuesday 10:00 CET order dispatches the same day', () => {
     const c = boot();
-    const r = c.Store.eta('standard', new Date(2026, 9, 6, 10)); // Tue 10:00
-    assert.equal(r.from.toDateString(), 'Fri Oct 09 2026', '3 business days of transit');
-    assert.equal(r.to.toDateString(), 'Tue Oct 13 2026', '5 business days of transit');
+    const at = new Date(Date.UTC(2026, 9, 6, 8)); // Tue 10:00 CEST
+    const r = c.Store.eta('standard', at);
+    assert.equal(cet(r.from), 'Fri, Oct 9', '3 business days of transit');
+    assert.equal(cet(r.to), 'Tue, Oct 13', '5 business days of transit');
   });
 
-  test('orders after 14:00 roll to the next business day', () => {
+  test('orders after 14:00 CET roll to the next business day', () => {
     const c = boot();
-    const r = c.Store.eta('standard', new Date(2026, 9, 6, 15)); // Tue 15:00
-    assert.equal(r.from.toDateString(), 'Mon Oct 12 2026', 'dispatch pushed to Wed 7th');
-    assert.equal(r.to.toDateString(), 'Wed Oct 14 2026');
+    const at = new Date(Date.UTC(2026, 9, 6, 13)); // Tue 15:00 CEST
+    const r = c.Store.eta('standard', at);
+    assert.equal(cet(r.from), 'Mon, Oct 12', 'dispatch pushed to Wed 7th');
+    assert.equal(cet(r.to), 'Wed, Oct 14');
   });
 
   test('weekend orders dispatch on Monday', () => {
     const c = boot();
-    const r = c.Store.eta('express', new Date(2026, 9, 10, 9)); // Sat 09:00
-    assert.equal(r.from.toDateString(), 'Tue Oct 13 2026', 'dispatch Mon 12th + 1 day');
-    assert.equal(r.to.toDateString(), 'Wed Oct 14 2026');
+    const at = new Date(Date.UTC(2026, 9, 10, 7)); // Sat 09:00 CEST
+    const r = c.Store.eta('express', at);
+    assert.equal(cet(r.from), 'Tue, Oct 13', 'dispatch Mon 12th + 1 day');
+    assert.equal(cet(r.to), 'Wed, Oct 14');
+  });
+
+  test('the cutoff is read in CET, not the visitor’s local time', () => {
+    const c = boot();
+    // Tue 06:00 in Copenhagen is already past cutoff in Auckland (Tue 17:00),
+    // and before cutoff in New York (Tue 00:00) — Copenhagen decides, so both
+    // must produce the same dispatch day.
+    const pastCutoffCET = new Date(Date.UTC(2026, 9, 6, 12)); // Tue 14:00 CEST sharp
+    const justBefore = new Date(Date.UTC(2026, 9, 6, 11, 59)); // Tue 13:59 CEST
+    const rLate = c.Store.eta('standard', pastCutoffCET);
+    const rEarly = c.Store.eta('standard', justBefore);
+    assert.equal(cet(rLate.from), 'Mon, Oct 12', '14:00 sharp rolls to next day');
+    assert.equal(cet(rEarly.from), 'Fri, Oct 9', '13:59 still ships the same day');
   });
 
   test('windows land on business days and express beats standard', () => {
     const c = boot();
-    const at = new Date(2026, 9, 6, 9);
+    const at = new Date(Date.UTC(2026, 9, 6, 7)); // Tue 09:00 CEST
     const exp = c.Store.eta('express', at);
     const std = c.Store.eta('standard', at);
     for (const d of [exp.from, exp.to, std.from, std.to]) {
-      assert.ok(isBiz(d), `delivery quoted on a weekend: ${d.toDateString()}`);
+      assert.ok(isBizWall(d), `delivery quoted on a weekend: ${cet(d)}`);
     }
     assert.ok(exp.to < std.from, 'express must arrive before standard');
   });
 
   test('etaLabel renders an honest short-date range', () => {
     const c = boot();
-    const at = new Date(2026, 9, 6, 10);
+    const at = new Date(Date.UTC(2026, 9, 6, 8)); // Tue 10:00 CEST
     assert.equal(c.Store.etaLabel('standard', at), 'Fri, Oct 9 – Tue, Oct 13');
     assert.equal(
       c.Store.etaLabel('standard', at, true),
       'Friday, October 9 – Tuesday, October 13'
     );
+  });
+
+  test('msUntilCutoff counts down to the next CET cutoff and skips weekends', () => {
+    const c = boot();
+    const justBefore = new Date(Date.UTC(2026, 9, 6, 11, 0)); // Tue 13:00 CEST
+    assert.ok(Math.abs(c.Store.msUntilCutoff(justBefore) - 3.6e6) < 6e4, 'one hour to cutoff');
+    // Friday 15:00 CEST → next cutoff is Monday 14:00 CEST (71h)
+    const fridayArvo = new Date(Date.UTC(2026, 9, 9, 13));
+    const ms = c.Store.msUntilCutoff(fridayArvo);
+    assert.ok(ms > 70 * 3.6e6 && ms < 72 * 3.6e6, `weekend adds two days: got ${ms / 3.6e6}h`);
+  });
+});
+
+/* ------------------------------- validators -------------------------------- */
+
+describe('checkout validators', () => {
+  test('card numbers pass Luhn and accept Amex 15-digit format', () => {
+    const c = boot();
+    const V = c.Validators;
+    assert.equal(V.card('4242 4242 4242 4242'), true, 'Visa test number');
+    assert.equal(V.card('378282246310005'), true, 'Amex, 15 digits');
+    assert.equal(V.card('4242 4242 4242 4243'), false, 'Luhn catches a wrong digit');
+    assert.equal(V.card('42424242424'), false, 'too short');
+    assert.equal(V.card(''), false);
+  });
+
+  test('card brand is detected from the IIN', () => {
+    const c = boot();
+    const V = c.Validators;
+    assert.equal(V.cardBrand('4242...'), 'Visa');
+    assert.equal(V.cardBrand('378282246310005'), 'Amex');
+    assert.equal(V.cardBrand('5555555555554444'), 'Mastercard');
+    assert.equal(V.cardBrand('9999...'), '');
+  });
+
+  test('expiry rejects past dates and accepts the current month', () => {
+    const c = boot();
+    const V = c.Validators;
+    const now = new Date(2026, 9, 5); // Oct 2026
+    assert.equal(V.exp('09 / 26', now), false, 'last month is expired');
+    assert.equal(V.exp('10 / 26', now), true, 'current month is fine');
+    assert.equal(V.exp('10/29', now), true, 'slashless variant');
+    assert.equal(V.exp('13 / 27', now), false, 'month 13 is nonsense');
+    assert.equal(V.exp('garbage', now), false);
+  });
+
+  test('email, zip, cvc and optional phone behave', () => {
+    const c = boot();
+    const V = c.Validators;
+    assert.equal(V.email('marta@studio.se'), true);
+    assert.equal(V.email('nope@nope'), false);
+    assert.equal(V.zip('1401'), true);
+    assert.equal(V.zip('AB'), false);
+    assert.equal(V.cvc('123'), true);
+    assert.equal(V.cvc('12'), false);
+    assert.equal(V.phone(''), true, 'phone stays optional');
+    assert.equal(V.phone('+45 33 12 44 08'), true);
+    assert.equal(V.phone('see bio'), false);
   });
 });
 

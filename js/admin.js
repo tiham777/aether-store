@@ -280,22 +280,22 @@
     <div class="kpis">
       <div class="kpi">
         <span class="kpi__label">Revenue</span>
-        <span class="kpi__n" data-count="${Math.round(stats.revenue / 100)}" data-prefix="$">$0</span>
+        <span class="kpi__n" data-count="${Math.round(stats.revenue / 100)}" data-prefix="$">$${Math.round(stats.revenue / 100).toLocaleString('en-US')}</span>
         <span class="kpi__sub"><b>${money(d14)}</b> in the last 14 days</span>
       </div>
       <div class="kpi">
         <span class="kpi__label">Orders</span>
-        <span class="kpi__n" data-count="${stats.count}">0</span>
+        <span class="kpi__n" data-count="${stats.count}">${stats.count}</span>
         <span class="kpi__sub">${stats.awaiting} awaiting shipment</span>
       </div>
       <div class="kpi">
         <span class="kpi__label">Customers</span>
-        <span class="kpi__n" data-count="${customers.length}">0</span>
+        <span class="kpi__n" data-count="${customers.length}">${customers.length}</span>
         <span class="kpi__sub"><b>${money(totalSpend)}</b> lifetime spend</span>
       </div>
       <div class="kpi">
         <span class="kpi__label">Avg. order</span>
-        <span class="kpi__n" data-count="${Math.round(stats.aov / 100)}" data-prefix="$">$0</span>
+        <span class="kpi__n" data-count="${Math.round(stats.aov / 100)}" data-prefix="$">$${Math.round(stats.aov / 100).toLocaleString('en-US')}</span>
         <span class="kpi__sub">across ${stats.liveCount} live orders</span>
       </div>
     </div>
@@ -668,12 +668,12 @@
 
     return `
     <div class="kpis">
-      <div class="kpi"><span class="kpi__label">Orders today</span><span class="kpi__n" data-count="${todayOrders.length}">0</span><span class="kpi__sub">${money(todayRev)} revenue today</span></div>
-      <div class="kpi"><span class="kpi__label">Awaiting shipment</span><span class="kpi__n" data-count="${awaiting}">0</span><span class="kpi__sub">paid or packed</span></div>
-      <div class="kpi"><span class="kpi__label">Delivered</span><span class="kpi__n" data-count="${delivered30}">0</span><span class="kpi__sub">${delivered30} of ${orders30} placed in 30 days</span></div>
+      <div class="kpi"><span class="kpi__label">Orders today</span><span class="kpi__n" data-count="${todayOrders.length}">${todayOrders.length}</span><span class="kpi__sub">${money(todayRev)} revenue today</span></div>
+      <div class="kpi"><span class="kpi__label">Awaiting shipment</span><span class="kpi__n" data-count="${awaiting}">${awaiting}</span><span class="kpi__sub">paid or packed</span></div>
+      <div class="kpi"><span class="kpi__label">Delivered</span><span class="kpi__n" data-count="${delivered30}">${delivered30}</span><span class="kpi__sub">${delivered30} of ${orders30} placed in 30 days</span></div>
       <div class="kpi"><span class="kpi__label">Gross</span><span class="kpi__n" data-count="${Math.round(
       all.filter((o) => o.placedAt >= now - 30 * day && o.status !== 'cancelled' && o.status !== 'refunded').reduce((n, o) => n + o.total, 0) / 100
-    )}" data-prefix="$">$0</span><span class="kpi__sub">excluding cancellations</span></div>
+    )}" data-prefix="$">$${Math.round(all.filter((o) => o.placedAt >= now - 30 * day && o.status !== 'cancelled' && o.status !== 'refunded').reduce((n, o) => n + o.total, 0) / 100).toLocaleString('en-US')}</span><span class="kpi__sub">excluding cancellations</span></div>
     </div>
 
     <div class="atools">
@@ -873,12 +873,12 @@
     const joined30 = customers.filter((u) => u.createdAt >= Date.now() - 30 * 864e5).length;
     return `
     <div class="kpis">
-      <div class="kpi"><span class="kpi__label">Customers</span><span class="kpi__n" data-count="${customers.length}">0</span><span class="kpi__sub">${joined30} joined in the last 30 days</span></div>
-      <div class="kpi"><span class="kpi__label">Admins</span><span class="kpi__n" data-count="${admins}">0</span><span class="kpi__sub">${admins} of ${users.length} accounts</span></div>
-      <div class="kpi"><span class="kpi__label">Suspended</span><span class="kpi__n" data-count="${banned}">0</span><span class="kpi__sub">restore anytime</span></div>
+      <div class="kpi"><span class="kpi__label">Customers</span><span class="kpi__n" data-count="${customers.length}">${customers.length}</span><span class="kpi__sub">${joined30} joined in the last 30 days</span></div>
+      <div class="kpi"><span class="kpi__label">Admins</span><span class="kpi__n" data-count="${admins}">${admins}</span><span class="kpi__sub">${admins} of ${users.length} accounts</span></div>
+      <div class="kpi"><span class="kpi__label">Suspended</span><span class="kpi__n" data-count="${banned}">${banned}</span><span class="kpi__sub">restore anytime</span></div>
       <div class="kpi"><span class="kpi__label">Avg. lifetime</span><span class="kpi__n" data-count="${
         customers.length ? Math.round(totalSpend / customers.length / 100) : 0
-      }" data-prefix="$">$0</span><span class="kpi__sub">across ${customers.length} customers</span></div>
+      }" data-prefix="$">$${(customers.length ? Math.round(totalSpend / customers.length / 100) : 0).toLocaleString('en-US')}</span><span class="kpi__sub">across ${customers.length} customers</span></div>
     </div>
 
     <div class="atools">

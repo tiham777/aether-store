@@ -628,9 +628,9 @@
       </div>
 
       <div class="acct-stats">
-        <div class="acct-stat"><b data-count="${orderCount}">0</b><span>orders placed</span></div>
-        <div class="acct-stat"><b data-count="${Math.round(spent / 100)}" data-prefix="$">$0</b><span>spent with Arena</span></div>
-        <div class="acct-stat"><b data-count="${wished}">0</b><span>objects saved</span></div>
+        <div class="acct-stat"><b data-count="${orderCount}">${orderCount}</b><span>orders placed</span></div>
+        <div class="acct-stat"><b data-count="${Math.round(spent / 100)}" data-prefix="$">$${Math.round(spent / 100).toLocaleString('en-US')}</b><span>spent with Arena</span></div>
+        <div class="acct-stat"><b data-count="${wished}">${wished}</b><span>objects saved</span></div>
       </div>
 
       <div class="panel-card">

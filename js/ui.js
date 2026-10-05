@@ -112,6 +112,11 @@
           <span>${p.rating.toFixed(1)} ${icon('star')}</span><span class="divider-dot"></span>
           <span>${p.reviews} reviews</span>
         </div>
+        ${
+          !oos && typeof p.stock === 'number' && p.stock <= 5
+            ? `<span class="card__low">${icon('alert')} Only ${p.stock} left</span>`
+            : ''
+        }
         <div class="card__swatches" aria-hidden="true">
           ${p.colors.map((c) => `<span class="swatch-dot" style="background:${c.hex}" title="${esc(c.name)}"></span>`).join('')}
         </div>
@@ -198,13 +203,38 @@
 
     if (!items.length) {
       progress.style.display = 'none';
+      const picks = DATA.products
+        .filter((p) => p.badge === 'Bestseller' || p.badge === 'New')
+        .filter((p) => p.stock !== 0)
+        .slice(0, 3);
       body.innerHTML = `
         <div class="cart-empty">
           <div class="cart-empty__icon">${icon('bag')}</div>
           <h3>Your bag is empty</h3>
           <p>Nothing here yet. The collection is a good place to start.</p>
           <a class="btn btn--primary btn--sm" href="#/shop" data-close-cart>Explore the collection ${icon('arrowRight')}</a>
-        </div>`;
+        </div>
+        ${
+          picks.length
+            ? `<div class="cart-picks">
+                <span class="search__hint">Start here</span>
+                ${picks
+                  .map(
+                    (p) => `
+                  <div class="cart-picks__row">
+                    <a class="cart-picks__thumb" href="${productUrl(p.id)}" data-close-cart><img src="${p.image}" alt="" width="48" height="60" loading="lazy"></a>
+                    <span class="cart-picks__meta">
+                      <a href="${productUrl(p.id)}" data-close-cart>${esc(p.name)}</a>
+                      <span class="small muted">${esc(p.tagline)}</span>
+                    </span>
+                    <span class="cart-picks__price">${Store.money(p.price)}</span>
+                    <button class="cart-picks__add" data-add="${p.id}" aria-label="Add ${esc(p.name)} to bag">${icon('plus')}</button>
+                  </div>`
+                  )
+                  .join('')}
+              </div>`
+            : ''
+        }`;
       foot.innerHTML = `
         <div class="drawer__row"><span class="muted small">Subtotal</span><span class="drawer__total">${Store.money(0)}</span></div>
         <button class="btn btn--primary btn--block" disabled>Checkout</button>
@@ -305,7 +335,11 @@
     }
 
     const hits = DATA.products.filter((p) => {
-      const hay = [p.name, p.tagline, p.category, catName(p.category), p.blurb].join(' ').toLowerCase();
+      /* search the specs too — “sapphire” or “IP67” should find their object */
+      const hay = [p.name, p.id, p.tagline, p.category, catName(p.category), p.blurb]
+        .concat(Object.values(p.specs || {}))
+        .join(' ')
+        .toLowerCase();
       return hay.includes(q);
     });
 
@@ -469,6 +503,10 @@
     refreshChrome();
     headerScroll();
     window.addEventListener('scroll', headerScroll, { passive: true });
+
+    /* the copyright never goes stale */
+    const year = document.querySelector('[data-year]');
+    if (year) year.textContent = new Date().getFullYear();
 
     const drawer = $('[data-layer="cart"]');
     if (drawer) drawer.setAttribute('aria-hidden', 'true');

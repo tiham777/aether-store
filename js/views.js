@@ -34,6 +34,16 @@
   }
   const inCat = (cat) => DATA.products.filter((p) => p.category === cat);
 
+  /* Countries we actually ship to — kept in sync with the "ships worldwide"
+     promise in the footer. US first (largest audience), then alphabetical. */
+  const SHIP_COUNTRIES = [
+    'United States', 'Argentina', 'Australia', 'Austria', 'Belgium', 'Canada', 'Chile', 'Czechia',
+    'Denmark', 'Estonia', 'Finland', 'France', 'Germany', 'Greece', 'Hong Kong', 'Iceland',
+    'Ireland', 'Italy', 'Japan', 'Latvia', 'Lithuania', 'Luxembourg', 'Netherlands', 'New Zealand',
+    'Norway', 'Poland', 'Portugal', 'Singapore', 'South Korea', 'Spain', 'Sweden', 'Switzerland',
+    'United Arab Emirates', 'United Kingdom',
+  ];
+
   /* recently viewed — remembered across visits, shown on the home page */
   const RECENT_KEY = 'aether.recent.v1';
   const recentIds = () => {
@@ -85,16 +95,19 @@
     </nav>`;
   }
 
+  /* end-of-page reassurance strip — kept on checkout + confirmation where it
+     answers the questions buyers actually have at that moment */
   function perkRow() {
-    return `<section class="container"><div class="marquee-note">${
+    return `<section class="container" aria-label="Order assurances"><div class="marquee-note">${
       DATA.perks
-        .map((p) => `<span class="row row-3"><span style="color:var(--accent)">${icon(p.icon)}</span><span>${
-          p.title
-        } : <span class="muted">${p.text}</span></span></span>`)
+        .map(
+          (p) =>
+            `<span class="row row-3"><span class="perk__icon">${icon(p.icon)}</span><span><b>${p.title}</b> <span class="muted">${p.text}</span></span></span>`
+        )
         .join('')
-    }<span class="row row-3"><span style="color:var(--accent)">${icon(
-      'globe'
-    )}</span><span>Ships to 92 countries</span></span></div></section>`;
+    }<span class="row row-3"><span class="perk__icon">${icon(
+      'wrench'
+    )}</span><span><b>Repairs at cost</b> <span class="muted">for as long as you own it</span></span></span></div></section>`;
   }
 
   /* ================================ HOME ================================= */
@@ -134,8 +147,8 @@
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__grid">
         <div class="hero__copy">
-          <h1 class="display hero__title" data-reveal style="--d:70ms"><span class="rise">Buy it for life. <span class="accent">Actually.</span></span></h1>
-          <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods drawn to be opened with a single driver: parts stocked for seven years, repairs at cost for the original owner, and two releases a year, never twenty.</p>
+          <h1 class="display hero__title" data-reveal style="--d:70ms"><span class="rise">Buy once, <span class="accent">repair forever.</span></span></h1>
+          <p class="lede" data-reveal style="--d:150ms">Audio, workspace and carry goods designed to be opened with a single driver. Parts stocked for seven years, repairs at cost for as long as you own it, and two releases a year — never twenty.</p>
           <div class="hero__actions" data-reveal style="--d:230ms">
             <a class="btn btn--primary btn--lg" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
             <a class="btn btn--ghost btn--lg" href="#/product/${hero.id}">Meet ${hero.name}</a>
@@ -143,7 +156,6 @@
           <div class="hero__trust" data-reveal style="--d:310ms">
             <span class="hero__trust-item">${stars(5)} <b>4.9</b> from ${num(reviewTotal())} reviews</span>
             <span class="hero__trust-item">${icon('truck')} Free shipping over $150 · 60-night returns</span>
-            <span class="hero__trust-item" style="color:var(--accent-ink)">${icon('sparkle')} 10% off your first order with code ARENA10</span>
           </div>
         </div>
 
@@ -151,30 +163,27 @@
           <img class="hero__art-render" src="${hero.image}" alt="${esc(hero.name)}, ${esc(hero.tagline)}" width="800" height="1000" fetchpriority="high">
           <div class="float-card float-card--tl">
             <span class="float-card__icon">${icon('wrench')}</span>
-            <span class="float-card__text"><span class="float-card__v">Repairable</span></span>
+            <span class="float-card__text"><span class="float-card__v">Repairable by design</span></span>
           </div>
           <div class="float-card float-card--br">
             <span class="float-card__icon float-card__icon--accent">${icon('truck')}</span>
-            <span class="float-card__text"><span class="float-card__k">Ordered before 14:00</span><span class="float-card__v">Leaves the same day</span></span>
+            <span class="float-card__text"><span class="float-card__k">Ordered before 14:00 CET</span><span class="float-card__v">Dispatched the same day</span></span>
           </div>
         </div>
       </div>
-    </section>    <section class="press" aria-label="What every order includes">
+    </section>    <section class="press" aria-label="As featured in">
       <div class="press__viewport">
-        <div class="press__group">${[
-                  '60 nights to decide',
-                  'Free shipping over $150',
-                  'Repairs at cost, for as long as you own it',
-                  'Two releases a year, no drop hype',
-                ]
-                  .map((n) => `<span class="press__item">${n}</span>`)
-                  .join('')}</div>
+        <div class="press__group">
+          <span class="press__kicker">As featured in</span>
+          ${DATA.press.map((n) => `<span class="press__item">${esc(n)}</span>`).join('')}
+        </div>
       </div>
     </section>
 
     <section class="section container" id="collections">
       ${sectionHead({
-        title: 'Three lines. <span class="accent">No filler.</span>',
+        eyebrow: 'The collection',
+        title: 'Three lines, one standard',
         text: `${count()} products in total. Each one exists because nothing on the market was good enough to keep.`,
         link: { href: '#/shop', label: 'View everything' },
       })}
@@ -199,8 +208,9 @@
 
     <section class="section section--flush-top container" id="featured">
       ${sectionHead({
-        title: 'Objects people <span class="accent">keep.</span>',
-        text: 'Best sellers, recent releases and the one camera we build entirely by hand.',
+        eyebrow: 'Bestsellers & new arrivals',
+        title: 'Where most people start',
+        text: 'The objects our customers come back for, plus the newest releases from the studio.',
         link: { href: '#/shop', label: `Shop all ${count()}` },
       })}
       <div class="grid-products grid-products--4">${featured.map((p, i) => productCard(p, i)).join('')}</div>
@@ -213,7 +223,7 @@
           <span class="split__tag">Studio no. 4, Copenhagen</span>
         </div>
         <div class="split__copy">
-          <h2 class="h2" data-reveal style="--d:70ms">Fewer things, <span class="accent">better</span> made.</h2>
+          <h2 class="h2" data-reveal style="--d:70ms">Fewer things, better made</h2>
           <p class="lede" data-reveal style="--d:130ms">We release two products a year, not twenty. Every object is drawn in one studio, prototyped in-house, and judged by a simple test: would we replace it with itself?</p>
           <ul class="stack stack-2" data-reveal style="--d:190ms">
             ${[
@@ -230,9 +240,9 @@
               .join('')}
           </ul>
           <div class="stats" data-reveal style="--d:250ms">
-            <div class="stat"><span class="stat__n" data-count="${count()}">0</span><span class="stat__l">products in the entire line</span></div>
-            <div class="stat"><span class="stat__n" data-count="4.9" data-decimals="1">0</span><span class="stat__l">average across ${num(reviewTotal())} reviews</span></div>
-            <div class="stat"><span class="stat__n" data-count="7" data-suffix="+">0</span><span class="stat__l">years of parts stocked after launch</span></div>
+            <div class="stat"><span class="stat__n" data-count="${count()}">${count()}</span><span class="stat__l">products in the entire line</span></div>
+            <div class="stat"><span class="stat__n" data-count="4.9" data-decimals="1">4.9</span><span class="stat__l">average across ${num(reviewTotal())} reviews</span></div>
+            <div class="stat"><span class="stat__n" data-count="7" data-suffix="+">7+</span><span class="stat__l">years of parts stocked after launch</span></div>
           </div>
           <a class="link" href="#/shop" data-reveal style="--d:310ms">Start with the best sellers ${icon('arrowRight')}</a>
         </div>
@@ -240,7 +250,7 @@
     </section>
 
     <section class="section section--tight container" id="principles">
-      ${sectionHead({ title: 'Three rules, <span class="accent">kept.</span>' })}
+      ${sectionHead({ eyebrow: 'How we work', title: 'Three rules we never break' })}
       <div class="principles">
         ${[
           ['01', 'Material honesty', 'Aluminium looks like aluminium, felt like felt. Nothing is painted to imitate something it is not, and every surface is one you will still like after a decade of hands.'],
@@ -261,12 +271,13 @@
     <section class="section night spotlight" id="spotlight">
       <div class="container spotlight__grid">
         <div class="spotlight__copy">
-          <h2 class="h2" data-reveal style="--d:70ms">${spotlight.name}, <span class="accent">room-filling</span> in one column.</h2>
+          <span class="eyebrow" data-reveal style="--d:40ms">In the spotlight</span>
+          <h2 class="h2" data-reveal style="--d:70ms">${esc(spotlight.name)}</h2>
           <p class="lede" data-reveal style="--d:130ms">${esc(spotlight.blurb)}</p>
           <div class="chip-row" data-reveal style="--d:180ms">
-            ${Object.values(spotlight.specs || {})
-              .slice(0, 4)
-              .map((c) => `<span class="chip">${esc(c)}</span>`)
+            ${Object.entries(spotlight.specs || {})
+              .slice(0, 3)
+              .map(([k, v]) => `<span class="chip">${esc(k)}: <b>${esc(v)}</b></span>`)
               .join('')}
           </div>
           <div class="spotlight__price" data-reveal style="--d:230ms">
@@ -291,7 +302,8 @@
 
     <section class="section container" id="reviews">
       ${sectionHead({
-        title: 'The review we <span class="accent">can’t buy.</span>',
+        eyebrow: 'Unpaid, unedited',
+        title: 'What owners say',
         link: { href: '#/shop', label: 'See the collection' },
       })}
       <div class="quotes">
@@ -313,14 +325,15 @@
 
     <section class="section section--flush-top container" id="journal-posts">
       ${sectionHead({
-        title: 'Notes from <span class="accent">the studio.</span>',
+        eyebrow: 'The journal',
+        title: 'From the studio',
         link: { href: '#/journal', label: 'All stories' },
       })}
       <div class="posts${DATA.journal.length === 2 ? ' posts--2' : ''}">
         ${DATA.journal
           .map(
             (p, i) => `
-          <a class="post" href="#/journal" data-reveal style="--d:${i * 80}ms">
+          <a class="post" href="#/journal/${esc(p.slug || p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}" data-reveal style="--d:${i * 80}ms">
             <span class="post__media"><img src="${p.image}" alt="${esc(p.title)}" loading="lazy" width="1200" height="900"></span>
             <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
             <span>
@@ -334,15 +347,13 @@
     </section>
 
     ${recentSection()}
-    ${newsletterSection()}
-    ${perkRow()}`;
+    ${newsletterSection()}`;
 
     return {
       html,
       title: 'Arena — Considered objects for modern life',
       mount() {
         bindNewsletter();
-        bindSpotlight();
       },
     };
   }
@@ -358,7 +369,8 @@
     return `
     <section class="section section--flush-top container" id="recently">
       ${sectionHead({
-        title: 'Pick up where <span class="accent">you left off.</span>',
+        eyebrow: 'Your history',
+        title: 'Recently viewed',
         link: { href: '#/shop', label: 'Back to the shop' },
       })}
       <div class="grid-products grid-products--4">${list.map((p, i) => productCard(p, i)).join('')}</div>
@@ -371,8 +383,9 @@
     return `
     <section class="section section--flush-top container" id="newsletter">
       <div class="news" data-reveal>
-        <h2 class="h2">Ten percent off your <span class="accent">first</span> object.</h2>
-        <p class="lede" style="color:rgba(244,243,241,.72);max-width:46ch">One considered letter a month: new releases, repair notes, and the occasional archive sale.</p>
+        <span class="eyebrow">Studio notes</span>
+        <h2 class="h2">10% off your first order</h2>
+        <p class="lede" style="color:rgba(244,243,241,.72);max-width:46ch">One considered letter a month: new releases, repair notes and the occasional archive sale. The code arrives with your first issue.</p>
         <form class="news__form" data-newsletter novalidate>
           <input class="input" type="email" name="email" placeholder="you@studio.com" aria-label="Email address" autocomplete="email" required>
           <button class="btn btn--accent" type="submit">Subscribe</button>
@@ -407,15 +420,6 @@
     });
   }
 
-  function bindSpotlight() {
-    const btn = document.querySelector('.spotlight [data-add]');
-    if (btn)
-      btn.addEventListener('click', () => {
-        btn.innerHTML = `${icon('check')} Added to bag`;
-        setTimeout(() => (btn.innerHTML = `${icon('bag')} Add to bag`), 1800);
-      });
-  }
-
   /* ================================ SHOP ================================= */
 
   function shop(params) {
@@ -430,13 +434,13 @@
       <div class="page-head__inner">
         <div class="page-head__row">
           <h1 data-reveal style="--d:60ms">${
-            query ? `“${esc(query)}”` : active === 'all' ? 'Everything we make' : esc(catName(active))
-          }<span class="accent">.</span></h1>
+            query ? `Results for “${esc(query)}”` : active === 'all' ? 'All products' : esc(catName(active))
+          }</h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:42ch">${
             query
-              ? `Matches for “${esc(query)}” across the ${count()}-object line. Combine them with the filters below.`
+              ? `Matches across the ${count()}-object line. Narrow them with the filters below.`
               : active === 'all'
-                ? `No seasons, no drops that vanish. ${count()} products, restocked continuously, warrantied for years.`
+                ? `The full line: ${count()} products, restocked continuously, warrantied for years.`
                 : esc((DATA.categories.find((c) => c.id === active) || {}).blurb || '')
           }</p>
         </div>
@@ -466,7 +470,7 @@
             .join('')}
         </div>
         <div class="toolbar__right">
-          <span class="toolbar__count" data-shopcount></span>
+          <span class="toolbar__count" data-shopcount aria-live="polite"></span>
           <label class="sr-only" for="sort">Sort products</label>
           <select class="select" id="sort" data-sort>
             <option value="featured">Featured</option>
@@ -527,8 +531,7 @@
       </div>
       <div style="height:clamp(60px,8vw,110px)"></div>
     </div>
-    ${newsletterSection()}
-    ${perkRow()}`;
+    ${newsletterSection()}`;
 
     return {
       html,
@@ -635,6 +638,20 @@
     const p = byId(id);
     if (!p) return notFound();
 
+    /* admin-created products may arrive without a gallery or colours —
+       degrade to the single image instead of crashing the route */
+    const gallery = p.gallery && p.gallery.length ? p.gallery : [{ src: p.image, pos: 'center', scale: 1 }];
+    const colors = p.colors && p.colors.length ? p.colors : [{ name: 'Graphite', hex: '#2b2b30' }];
+    const madeToOrder = p.fulfilment === 'made-to-order';
+    const stockLine =
+      p.stock === 0
+        ? '<b class="stock-out">Out of stock</b>'
+        : madeToOrder
+          ? '<b>Made to order</b> · ships in 2–3 weeks'
+          : p.stock <= 10
+            ? `<b class="stock-low">Only ${p.stock} left</b> · ships today`
+            : 'In stock · ships today';
+
     const related = DATA.products.filter((x) => x.id !== p.id && x.category === p.category)
       .concat(DATA.products.filter((x) => x.id !== p.id && x.category !== p.category))
       .slice(0, 4);
@@ -645,27 +662,28 @@
     const shareImg = [p.image]
       .concat((p.gallery || []).map((g) => g.src))
       .find((s) => /\.(png|jpe?g|webp|avif)$/i.test(s));
-
-    const html = `
-    ${crumbs([
+    const trail = [
       { label: 'Shop', href: '#/shop' },
       { label: catName(p.category), href: `#/shop?cat=${p.category}` },
       { label: p.name, href: `#/product/${p.id}` },
-    ])}
+    ];
+
+    const html = `
+    ${crumbs(trail)}
 
     <div class="container" style="padding-top:clamp(22px,3vw,40px)">
       <div class="pdp">
         <div class="pdp__gallery" data-gallery>
           <div class="pdp__main" data-gallery-main data-reveal="scale">
-            <img src="${p.gallery[0].src}" alt="${esc(p.name)}" width="800" height="1000" fetchpriority="high"
-                 style="object-position:${p.gallery[0].pos};--base:${p.gallery[0].scale}">
+            <img src="${gallery[0].src}" alt="${esc(p.name)}" width="800" height="1000" fetchpriority="high"
+                 style="object-position:${gallery[0].pos};--base:${gallery[0].scale}">
             <span class="badge" style="position:absolute;left:14px;bottom:14px">${icon('zoom')} Hover to zoom</span>
           </div>
           <div class="pdp__thumbs">
-            ${p.gallery
+            ${gallery
               .map(
                 (g, i) => `
-              <button class="pdp__thumb${i === 0 ? ' is-active' : ''}" data-thumb="${i}" aria-label="View ${i + 1} of ${p.gallery.length}">
+              <button class="pdp__thumb${i === 0 ? ' is-active' : ''}" data-thumb="${i}" aria-label="View ${i + 1} of ${gallery.length}">
                 <img src="${g.src}" alt="" loading="lazy" style="object-position:${g.pos};transform:scale(${g.scale})">
               </button>`
               )
@@ -681,13 +699,7 @@
               ${stars(p.rating)} <b>${p.rating.toFixed(1)}</b>
               <span>· ${p.reviews} reviews</span>
               <span class="divider-dot"></span>
-              <span>${
-                p.stock === 0
-                  ? '<b class="stock-out">Out of stock</b>'
-                  : p.stock <= 10
-                  ? `<b class="stock-low">Only ${p.stock} left</b> · ships today`
-                  : 'In stock · ships today'
-              }</span>
+              <span>${stockLine}</span>
             </div>
           </div>
 
@@ -699,12 +711,12 @@
           <p class="pdp__blurb" data-reveal style="--d:190ms">${esc(p.blurb)}</p>
 
           <div class="opt" data-reveal style="--d:230ms">
-            <span class="opt__label">Colour <b data-color-name>${esc(p.colors[0].name)}</b></span>
-            <div class="swatches" role="radiogroup" aria-label="Colour">
-              ${p.colors
+            <span class="opt__label">Colour <b data-color-name>${esc(colors[0].name)}</b></span>
+            <div class="swatches" role="radiogroup" aria-label="Colour" data-swatch-group>
+              ${colors
                 .map(
                   (c, i) =>
-                    `<button class="swatch${i === 0 ? ' is-active' : ''}" role="radio" aria-checked="${i === 0}" data-color="${esc(
+                    `<button class="swatch${i === 0 ? ' is-active' : ''}" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-color="${esc(
                       c.name
                     )}" aria-label="${esc(c.name)}"><span style="background:${c.hex}"></span></button>`
                 )
@@ -729,7 +741,7 @@
           <div class="assurances" data-reveal style="--d:310ms">
             <span class="assurance">${icon('truck')} <span><b>Express arrives ${Store.etaLabel(
               'express'
-            )}</b> · order within <span data-countdown>6h 42m</span></span></span>
+            )}</b> · order within <span data-countdown>…</span> for same-day dispatch</span></span>
             <span class="assurance">${icon('package')} <span><b>Standard arrives ${Store.etaLabel(
               'standard'
             )}</b> · free over $150</span></span>
@@ -768,7 +780,7 @@
     </div>
 
     <section class="section section--tight container">
-      ${sectionHead({ title: 'Complete the <span class="accent">set.</span>' })}
+      ${sectionHead({ eyebrow: 'Bundle & save', title: 'Frequently bought together' })}
       <div class="fbt" data-fbt>
         <div class="fbt__items">
           ${bundle
@@ -799,7 +811,7 @@
     </section>
 
     <section class="section section--tight container">
-      ${sectionHead({ title: 'What ownership <span class="accent">looks like.</span>' })}
+      ${sectionHead({ eyebrow: 'Why it lasts', title: 'What ownership looks like' })}
       <div class="feature-row">
         ${[
           ['wrench', 'Repairable, not disposable', 'Every part is replaceable with a T5 driver and a published guide. We stock spares for seven years.'],
@@ -820,7 +832,8 @@
     <section class="section section--flush-top container">
       <div class="section-head">
         <div class="section-head__text">
-          <h2 class="h2" data-reveal style="--d:70ms">${p.rating.toFixed(1)} out of 5, <span class="accent">from ${p.reviews} owners.</span></h2>
+          <span class="eyebrow" data-reveal style="--d:40ms">Owner reviews</span>
+          <h2 class="h2" data-reveal style="--d:70ms">${p.rating.toFixed(1)} out of 5, from ${p.reviews} owners</h2>
         </div>
         <span class="row row-3" data-reveal>${stars(p.rating)}<span class="small muted">Owners only · purchases verified</span></span>
       </div>
@@ -860,12 +873,20 @@
 
     <section class="section section--flush-top container">
       ${sectionHead({
-        title: `Pairs well with <span class="accent">${esc(p.name)}.</span>`,
+        eyebrow: 'Keep exploring',
+        title: `More from ${esc(catName(p.category) || 'the collection')}`,
         link: { href: '#/shop', label: 'Shop all' },
       })}
       <div class="grid-products grid-products--4">${related.map((x, i) => productCard(x, i)).join('')}</div>
     </section>
-    ${perkRow()}`;
+
+    <div class="pdp-bar" data-pdp-bar hidden aria-label="Quick add">
+      <img src="${p.image}" alt="" width="40" height="50">
+      <span class="pdp-bar__meta"><b>${esc(p.name)}</b><span class="price">${money(p.price)}</span></span>
+      <button class="btn btn--primary btn--sm" data-pdp-bar-add${p.stock === 0 ? ' disabled' : ''}>
+        ${p.stock === 0 ? 'Sold out' : `Add · ${money(p.price)}`}
+      </button>
+    </div>`;
 
     return {
       html,
@@ -873,51 +894,75 @@
       desc: `${p.name}: ${p.tagline}. ${p.blurb}`,
       image: shareImg,
       mount(root) {
-        bindGallery(root, p);
+        bindGallery(root, p, gallery);
         bindAccordions(root);
-        bindPdpBuy(root, p);
+        bindPdpBuy(root, p, colors);
         bindFbt(root);
         bindReviews(root, p);
+        bindPdpBar(root, p);
         pushRecent(p.id);
         const cd = root.querySelector('[data-countdown]');
         if (cd) tickCountdown(cd);
         injectProductLd(p);
+        injectLd(breadcrumbLd(trail));
       },
     };
   }
 
-  /* Product structured data — rich results for search engines. Removed by
-     the router on the next render (script[data-view-ld]). */
-  function injectProductLd(p) {
+  /* -------------------- structured data (rich results) -------------------- */
+
+  /* Anything appended here carries data-view-ld and is removed by the router
+     before the next render, so structured data always matches the view. */
+  function injectLd(obj) {
     try {
       const ld = document.createElement('script');
       ld.type = 'application/ld+json';
       ld.setAttribute('data-view-ld', '');
-      ld.textContent = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: p.name,
-        description: p.blurb,
-        image: p.image,
-        sku: p.id,
-        brand: { '@type': 'Brand', name: 'Arena' },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: String(p.rating),
-          reviewCount: String(p.reviews),
-        },
-        offers: {
-          '@type': 'Offer',
-          priceCurrency: 'USD',
-          price: (p.price / 100).toFixed(2),
-          availability: p.stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
-          itemCondition: 'https://schema.org/NewCondition',
-        },
-      });
+      ld.textContent = JSON.stringify(obj);
       document.head.appendChild(ld);
     } catch (e) {
       /* structured data is progressive enhancement */
     }
+  }
+
+  function breadcrumbLd(trail) {
+    const base = 'https://arena-store-omega.vercel.app';
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [{ Home: base + '/' }]
+        .concat(trail)
+        .map((t, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: t.Home ? 'Home' : t.label,
+          item: t.Home || base + '/' + t.href,
+        })),
+    };
+  }
+
+  function injectProductLd(p) {
+    injectLd({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: p.name,
+      description: p.blurb,
+      image: p.image,
+      sku: p.id,
+      brand: { '@type': 'Brand', name: 'Arena' },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: String(p.rating),
+        reviewCount: String(p.reviews),
+      },
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'USD',
+        price: (p.price / 100).toFixed(2),
+        availability: p.stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+        itemCondition: 'https://schema.org/NewCondition',
+      },
+    });
   }
 
   /* --------------------------- per-product reviews ------------------------ */
@@ -1049,14 +1094,16 @@
     });
   }
 
-  function bindGallery(root, p) {
+  function bindGallery(root, p, gallery) {
     const main = root.querySelector('[data-gallery-main]');
     const img = main && main.querySelector('img');
     if (!img) return;
+    const frames = gallery || (p.gallery && p.gallery.length ? p.gallery : [{ src: p.image, pos: 'center', scale: 1 }]);
 
     root.querySelectorAll('[data-thumb]').forEach((btn) =>
       btn.addEventListener('click', () => {
-        const g = p.gallery[Number(btn.getAttribute('data-thumb'))];
+        const g = frames[Number(btn.getAttribute('data-thumb'))];
+        if (!g) return;
         root.querySelectorAll('[data-thumb]').forEach((b) => b.classList.toggle('is-active', b === btn));
         img.style.opacity = '0';
         setTimeout(() => {
@@ -1090,9 +1137,10 @@
     );
   }
 
-  function bindPdpBuy(root, p) {
+  function bindPdpBuy(root, p, colors) {
+    const variants = colors && colors.length ? colors : [{ name: 'Graphite', hex: '#2b2b30' }];
     let qty = 1;
-    let color = p.colors[0].name;
+    let color = variants[0].name;
     const value = root.querySelector('[data-pdp-qty-value]');
     const addBtn = root.querySelector('[data-pdp-add]');
 
@@ -1105,18 +1153,39 @@
       })
     );
 
-    root.querySelectorAll('[data-color]').forEach((b) =>
+    /* radiogroup keyboard support: ←/→ moves between swatches like a native
+       radio group, per the WAI-ARIA authoring practices */
+    const swatches = Array.from(root.querySelectorAll('[data-color]'));
+    const focusSwatch = (i) => {
+      const next = (i + swatches.length) % swatches.length;
+      swatches.forEach((s, j) => {
+        s.setAttribute('tabindex', String(j === next ? 0 : -1));
+      });
+      swatches[next].focus();
+      swatches[next].click();
+    };
+    swatches.forEach((b, i) => {
       b.addEventListener('click', () => {
         color = b.getAttribute('data-color');
-        root.querySelectorAll('[data-color]').forEach((x) => {
+        swatches.forEach((x) => {
           x.classList.toggle('is-active', x === b);
           x.setAttribute('aria-checked', String(x === b));
+          x.setAttribute('tabindex', String(x === b ? 0 : -1));
         });
         root.querySelector('[data-color-name]').textContent = color;
-      })
-    );
+      });
+      b.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          focusSwatch(i + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          focusSwatch(i - 1);
+        }
+      });
+    });
 
-    addBtn.addEventListener('click', () => {
+    const add = () => {
       if (p.stock === 0 || addBtn.disabled) return;
       Store.add(p.id, qty, color);
       UI.toast({
@@ -1130,6 +1199,29 @@
         addBtn.textContent = `Add to bag · ${Store.money(p.price * qty)}`;
       }, 1600);
       setTimeout(() => UI.setLayer('cart', true), 420);
+    };
+    if (addBtn) addBtn.addEventListener('click', add);
+    return add;
+  }
+
+  /* sticky quick-add for small screens: appears once the main buy box has
+     scrolled out of view, so the price + CTA are never more than a thumb away */
+  function bindPdpBar(root, p) {
+    const bar = root.querySelector('[data-pdp-bar]');
+    const anchor = root.querySelector('.pdp__buy');
+    const barBtn = root.querySelector('[data-pdp-bar-add]');
+    if (!bar || !anchor || !barBtn) return;
+    const mq = window.matchMedia('(max-width: 960px)');
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        bar.hidden = !mq.matches || e.isIntersecting || p.stock === 0;
+      });
+    }) : null;
+    if (io) io.observe(anchor);
+    else bar.hidden = true;
+    barBtn.addEventListener('click', () => {
+      const main = root.querySelector('[data-pdp-add]');
+      if (main) main.click();
     });
   }
 
@@ -1179,20 +1271,24 @@
     sync();
   }
 
+  /* Countdown to the next 14:00 Europe/Copenhagen dispatch cutoff — the same
+     rule Store.eta() applies, so the timer and every ETA always agree.
+     Stops itself once the node leaves the DOM (route change) — no leaks. */
   function tickCountdown(el) {
-    const end = new Date();
-    end.setHours(14, 0, 0, 0);
-    if (end < new Date()) end.setDate(end.getDate() + 1);
+    let timer = null;
     const paint = () => {
-      const ms = end - new Date();
-      if (ms <= 0) return;
-      const h = Math.floor(ms / 3.6e6);
+      if (!el.isConnected) {
+        if (timer) clearInterval(timer);
+        return;
+      }
+      const ms = Store.msUntilCutoff();
+      const d = Math.floor(ms / 864e5);
+      const h = Math.floor((ms % 864e5) / 3.6e6);
       const m = Math.floor((ms % 3.6e6) / 6e4);
-      el.textContent = `${h}h ${m}m`;
+      el.textContent = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
     };
     paint();
-    clearInterval(window.__cdTimer);
-    window.__cdTimer = setInterval(paint, 30000);
+    timer = setInterval(paint, 30000);
   }
 
   /* Collision-free, unguessable order id — order numbers are readable by
@@ -1245,15 +1341,14 @@
         <div class="container">
           <div class="empty-state" style="margin-block:clamp(30px,6vw,80px)">
             <div class="cart-empty__icon">${icon('bag')}</div>
-            <h1 class="h2">Nothing to check out <span class="accent">yet.</span></h1>
-            <p class="muted" style="max-width:44ch">Your bag is empty. The full line is ${count()} objects deep. A good place to begin is the best sellers.</p>
+            <h1 class="h2">Your bag is empty</h1>
+            <p class="muted" style="max-width:44ch">Nothing to check out yet. The full line is ${count()} objects deep — the best sellers are a good place to begin.</p>
             <div class="row row-4 wrap center">
               <a class="btn btn--primary" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
               <a class="btn btn--ghost" href="#/">Back home</a>
             </div>
           </div>
-        </div>
-        ${perkRow()}`,
+        </div>`,
       };
     }
 
@@ -1262,8 +1357,8 @@
     <header class="container page-head">
       <div class="page-head__inner">
         <div class="page-head__row">
-          <h1 data-reveal style="--d:60ms">Checkout<span class="accent">.</span></h1>
-          <span class="row row-3 small muted" data-reveal style="--d:110ms">${icon('lock')} You won’t be charged until the last step</span>
+          <h1 data-reveal style="--d:60ms">Checkout</h1>
+          <span class="row row-3 small muted" data-reveal style="--d:110ms">${icon('lock')} Secure checkout — review everything before you place the order</span>
         </div>
       </div>
     </header>
@@ -1280,8 +1375,8 @@
             </label>
             <label class="field span-2">
               <span class="field__label">Phone <span class="muted" style="font-weight:400">· for delivery updates</span></span>
-              <input class="input" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 0100">
-              <span class="field__error"></span>
+              <input class="input" name="phone" type="tel" autocomplete="tel" placeholder="+1 555 0100" data-validate="phone">
+              <span class="field__error">That phone number doesn’t look right.</span>
             </label>
           </div>            <label class="checkbox"><input type="checkbox"> <span>Email me drop notices and repair notes. One letter a month.</span></label>
         </fieldset>
@@ -1306,9 +1401,7 @@
               <span class="field__error">3–10 characters, please.</span></label>
             <label class="field span-2"><span class="field__label">Country</span>
               <select class="select" name="country" autocomplete="country-name">
-                ${['United States', 'United Kingdom', 'Denmark', 'Germany', 'France', 'Netherlands', 'Japan', 'Australia', 'Canada']
-                  .map((c) => `<option${c === 'United States' ? ' selected' : ''}>${c}</option>`)
-                  .join('')}
+                ${SHIP_COUNTRIES.map((c) => `<option${c === 'United States' ? ' selected' : ''}>${c}</option>`).join('')}
               </select><span class="field__error"></span></label>
           </div>
 
@@ -1335,13 +1428,14 @@
           <div class="pay-methods" role="radiogroup" aria-label="Payment method">
             <button class="pill is-active" type="button" data-pay="card" role="radio" aria-checked="true">${icon('card')} Card</button>
             <button class="pill" type="button" data-pay="cod" role="radio" aria-checked="false">${icon('banknote')} Cash on delivery</button>
-            <span class="pill" aria-disabled="true">Apple Pay</span>
-            <span class="pill" aria-disabled="true">PayPal</span>
+            <span class="pill" aria-disabled="true">Apple Pay <i class="pill__soon">Soon</i></span>
+            <span class="pill" aria-disabled="true">PayPal <i class="pill__soon">Soon</i></span>
           </div>
           <div class="form-grid" data-card-fields>
             <label class="field span-2"><span class="field__label">Card number</span>
               <input class="input" name="card" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" required data-validate="card" data-format="card">
-              <span class="field__error">Enter a 16-digit card number.</span></label>
+              <span class="field__error">Enter a valid card number.</span>
+              <span class="field__hint" data-brand hidden></span></label>
             <label class="field span-2"><span class="field__label">Name on card</span>
               <input class="input" name="cardname" autocomplete="cc-name" placeholder="MARTA LINDQVIST" required data-validate="name" style="text-transform:uppercase">
               <span class="field__error">Required.</span></label>
@@ -1362,11 +1456,11 @@
       Store.promo ? `${Store.promo} applied, ${Math.round(DATA.promoCodes[Store.promo] * 100)}% off.` : ''
     }</span>
           </div>
-          <p class="xs muted row row-3">${icon('lock')} Payments are encrypted end-to-end. This is a demo; no card is charged.</p>
+          <p class="xs muted row row-3">${icon('lock')} Payments are encrypted end-to-end. Your card details are never stored.</p>
         </fieldset>
 
         <button class="btn btn--primary btn--lg btn--block" type="submit" data-place-order>
-          Place order · <span data-order-total>${money(Store.total('standard'))}</span>
+          <span data-place-label>Place order · <span data-order-total>${money(Store.total('standard'))}</span></span>
         </button>
         <p class="xs muted" style="text-align:center">By placing this order you agree to our terms, 60-night return policy and two-year warranty.</p>
       </form>
@@ -1378,6 +1472,7 @@
             ${Store.items
               .map((l) => {
                 const p = Store.product(l.productId);
+                if (!p) return ''; /* pruned on boot; belt and braces */
                 return `
                 <div class="summary__item">
                   <span class="summary__media"><img src="${p.image}" alt="${esc(p.name)}" width="58" height="72" loading="lazy"><span class="summary__qty">${l.qty}</span></span>
@@ -1485,22 +1580,40 @@
     );
     syncShip();
 
-    /* input formatting + inline validation */
-    const validators = {
+    /* input formatting + inline validation — the rules themselves live in
+       js/validate.js so tests exercise exactly what ships */
+    const validators = window.Validators || {
       email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
       name: (v) => v.trim().length >= 2,
       zip: (v) => v.trim().length >= 3 && v.trim().length <= 10,
+      phone: () => true,
       card: (v) => v.replace(/\D/g, '').length === 16,
       exp: (v) => /^(0[1-9]|1[0-2])\s*\/?\s*\d{2}$/.test(v.trim()),
       cvc: (v) => /^\d{3,4}$/.test(v.trim()),
     };
+
+    /* live card-brand hint — Amex is 15 digits, so the hint doubles as
+       reassurance before validation runs */
+    const brandEl = root.querySelector('[data-brand]');
+    const cardInput = form.querySelector('[name="card"]');
+    if (brandEl && cardInput && validators.cardBrand) {
+      cardInput.addEventListener('input', () => {
+        const brand = validators.cardBrand(cardInput.value);
+        brandEl.textContent = brand ? `${brand} accepted` : '';
+        brandEl.hidden = !brand;
+      });
+    }
 
     form.querySelectorAll('[data-format]').forEach((input) => {
       input.addEventListener('input', () => {
         const kind = input.getAttribute('data-format');
         if (kind === 'card') {
           const digits = input.value.replace(/\D/g, '').slice(0, 16);
-          input.value = digits.replace(/(.{4})/g, '$1 ').trim();
+          /* group Amex 4-6-5, everything else 4-4-4-4 */
+          input.value =
+            digits.length === 15 && /^3[47]/.test(digits)
+              ? `${digits.slice(0, 4)} ${digits.slice(4, 10)} ${digits.slice(10)}`.trim()
+              : digits.replace(/(.{4})/g, '$1 ').trim();
         }
         if (kind === 'exp') {
           const digits = input.value.replace(/\D/g, '').slice(0, 4);
@@ -1545,9 +1658,11 @@
         }
       });
 
-    /* submit */
+    /* submit — guarded so a double-click can never place two orders */
+    let placing = false;
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      if (placing) return;
       const fields = Array.from(form.querySelectorAll('[data-validate]')).filter(
         (f) => pay === 'card' || !f.closest('[data-card-fields]')
       );
@@ -1559,44 +1674,58 @@
         return;
       }
 
-      const data = new FormData(form);
-      const order = {
-        id: makeOrderId(),
-        email: data.get('email'),
-        name: `${data.get('first')} ${data.get('last')}`,
-        phone: data.get('phone') || '',
-        address: data.get('address') || '',
-        zip: data.get('zip') || '',
-        city: data.get('city'),
-        country: data.get('country'),
-        method,
-        payment: pay,
-        items: Store.items.map((l) => {
-          const p = Store.product(l.productId);
-          return { id: p.id, productId: p.id, name: p.name, image: p.image, color: l.color, qty: l.qty, price: l.price };
-        }),
-        subtotal: Store.subtotal(),
-        discount: Store.discount(),
-        promo: Store.promo,
-        shipping: Store.shipping(method),
-        tax: Store.tax(method),
-        total: Store.total(method),
-        placedAt: Date.now(),
-      };
-      const saved = window.Orders ? Orders.place(order) : order;
-      window.__lastOrder = saved;
-      /* best-effort mirror into the shared store. Orders.place already pushed
-         to Firebase when it is configured; without a config we fall back to
-         the legacy serverless bridge — and always to local-only otherwise. */
-      if ((!window.Cloud || !Cloud.configured) && window.API) {
-        API.placeOrder(saved)
-          .then((r) => {
-            if (r.shared && window.Orders) Orders.markShared(saved.id);
-          })
-          .catch(() => {});
+      placing = true;
+      const placeBtn = root.querySelector('[data-place-order]');
+      const placeLabel = root.querySelector('[data-place-label]');
+      if (placeBtn) placeBtn.setAttribute('disabled', '');
+      if (placeLabel) placeLabel.innerHTML = `${UI.icon('check')} Placing your order…`;
+      try {
+        const data = new FormData(form);
+        const order = {
+          id: makeOrderId(),
+          email: data.get('email'),
+          name: `${data.get('first')} ${data.get('last')}`.trim(),
+          phone: data.get('phone') || '',
+          address: data.get('address') || '',
+          zip: data.get('zip') || '',
+          city: data.get('city'),
+          country: data.get('country'),
+          method,
+          payment: pay,
+          items: Store.items.map((l) => {
+            const p = Store.product(l.productId);
+            return { id: p.id, productId: p.id, name: p.name, image: p.image, color: l.color, qty: l.qty, price: l.price };
+          }),
+          subtotal: Store.subtotal(),
+          discount: Store.discount(),
+          promo: Store.promo,
+          shipping: Store.shipping(method),
+          tax: Store.tax(method),
+          total: Store.total(method),
+          placedAt: Date.now(),
+        };
+        const saved = window.Orders ? Orders.place(order) : order;
+        window.__lastOrder = saved;
+        /* best-effort mirror into the shared store. Orders.place already pushed
+           to Firebase when it is configured; without a config we fall back to
+           the legacy serverless bridge — and always to local-only otherwise. */
+        if ((!window.Cloud || !Cloud.configured) && window.API) {
+          API.placeOrder(saved)
+            .then((r) => {
+              if (r.shared && window.Orders) Orders.markShared(saved.id);
+            })
+            .catch(() => {});
+        }
+        Store.clear();
+        location.hash = '#/order-confirmed?id=' + encodeURIComponent(saved.id);
+      } catch (err) {
+        /* the order was not placed — restore the button and say so */
+        placing = false;
+        if (placeBtn) placeBtn.removeAttribute('disabled');
+        if (placeLabel) placeLabel.innerHTML = `Place order · <span data-order-total>${money(Store.total(method))}</span>`;
+        UI.toast({ title: 'The order did not go through', sub: 'Nothing was charged — please try again.' });
+        if (window.console && console.error) console.error('[arena] order failed:', err);
       }
-      Store.clear();
-      location.hash = '#/order-confirmed?id=' + encodeURIComponent(saved.id);
     });
 
     refreshTotals();
@@ -1637,12 +1766,15 @@
     }
 
     const etaText = Store.etaLabel(o.method, new Date(o.placedAt), true);
+    const firstName = String(o.name || '').trim().split(/\s+/)[0] || '';
 
     const html = `
     <div class="container">
       <div class="done">
         <span class="done__mark">${icon('check')}</span>
-        <h1 class="done__title" data-reveal style="--d:70ms">Thank you, <span class="accent">${esc(o.name.split(' ')[0])}.</span></h1>
+        <h1 class="done__title" data-reveal style="--d:70ms">${
+          firstName ? `Thank you, <span class="accent">${esc(firstName)}.</span>` : 'Thank you for your order.'
+        }</h1>
         <p class="small muted" data-reveal style="--d:100ms">A copy is on its way to ${esc(o.email)}.</p>
         <p class="lede" data-reveal style="--d:130ms;text-align:center">Your objects are being wrapped in Copenhagen. You’ll get a tracking link the moment they leave the studio.</p>
         <span class="done__order" data-reveal style="--d:180ms">${icon('package')} ${esc(o.id)} ${UI.icon('copy')}</span>
@@ -1723,7 +1855,7 @@
   function trackHint() {
     return `<div class="empty-state" style="margin-block:10px">
       <div class="cart-empty__icon">${icon('truck')}</div>
-      <p class="muted" style="max-width:48ch">Type your order number above. It sits in the confirmation email and looks like <span class="mono">AET-2026-123456</span>. The timeline updates on its own once you track it.</p>
+      <p class="muted" style="max-width:48ch">Type your order number above. It sits in the confirmation email and looks like <span class="mono">AET-2026-QK3M9P-7XW2RT</span>. The timeline updates on its own once you track it.</p>
     </div>`;
   }
 
@@ -1803,7 +1935,7 @@
       <header class="page-head">
         <div class="page-head__inner">
           <div class="page-head__row">
-            <h1 data-reveal style="--d:60ms">Where is my <span class="accent">order.</span></h1>
+            <h1 data-reveal style="--d:60ms">Track your order</h1>
             <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Enter your order number and watch it move through paid, packed, shipped and delivered, live, without refreshing.</p>
           </div>
         </div>
@@ -1811,9 +1943,9 @@
 
       <form data-track-form data-reveal style="--d:160ms;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;max-width:820px;margin-bottom:30px">
         <label class="field" style="flex:1 1 220px"><span class="field__label">Order number</span>
-          <input class="input" name="id" placeholder="AET-2026-123456" value="${esc(
+          <input class="input" name="id" placeholder="AET-2026-XXXXXX-XXXXXX" value="${esc(
             startId
-          )}" autocomplete="off" spellcheck="false" required></label>
+          )}" autocomplete="off" spellcheck="false" maxlength="24" required></label>
         <label class="field" style="flex:1 1 240px"><span class="field__label">Email <span class="muted">(optional)</span></span>
           <input class="input" name="email" type="email" placeholder="you@example.com" value="${esc(startEmail)}" autocomplete="email"></label>
         <button class="btn btn--primary" type="submit">Track order ${icon('arrowRight')}</button>
@@ -1821,8 +1953,7 @@
 
       <div data-track-body style="padding-bottom:clamp(30px,6vw,80px)">${startId ? '<p class="muted">Looking that up…</p>' : trackHint()}</div>
     </div>
-    ${newsletterSection()}
-    ${perkRow()}`;
+    ${newsletterSection()}`;
 
     return {
       html,
@@ -1880,7 +2011,7 @@
           const oid = String(data.get('id') || '').trim().toUpperCase();
           const mail = String(data.get('email') || '').trim();
           if (!/^[A-Z0-9-]{6,}$/.test(oid)) {
-            UI.toast({ title: 'Check the order number', sub: 'It looks like AET-2026-123456.' });
+            UI.toast({ title: 'Check the order number', sub: 'It looks like AET-2026-QK3M9P-7XW2RT.' });
             return;
           }
           /* make the URL shareable/refreshable without re-rendering the page */
@@ -1908,8 +2039,8 @@
       html: `
       <div class="container">
         <div class="done">
-          <span class="done__mark" style="background:var(--accent)">${icon('sparkle')}</span>
-          <h1 class="done__title">This page went <span class="accent">quiet.</span></h1>
+          <span class="done__mark" style="background:var(--accent)">${icon('search')}</span>
+          <h1 class="done__title">Page not found</h1>
           <p class="lede" style="text-align:center">The link is broken or the product has been retired. ${count()} objects are still waiting in the shop.</p>
           <div class="row row-4 wrap center">
             <a class="btn btn--primary btn--lg" href="#/shop">Shop the collection ${icon('arrowRight')}</a>
@@ -1922,6 +2053,8 @@
 
   /* =============================== JOURNAL =============================== */
 
+  const postHref = (p) => `#/journal/${esc(p.slug || p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`;
+
   function journal() {
     const [lead, ...rest] = DATA.journal;
     const html = `
@@ -1929,14 +2062,14 @@
     <header class="container page-head">
       <div class="page-head__inner">
         <div class="page-head__row">
-          <h1 data-reveal style="--d:60ms">Field notes<span class="accent">.</span></h1>
-          <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Design decisions, repair guides, and the occasional argument about two hundred hertz.</p>
+          <h1 data-reveal style="--d:60ms">Journal</h1>
+          <p class="lede" data-reveal style="--d:120ms;max-width:46ch">Design decisions, repair stories, and the occasional argument about two hundred hertz.</p>
         </div>
       </div>
     </header>
 
     <section class="section section--flush-top container">
-      <a class="split" href="#/journal" data-reveal style="border:0">
+      <a class="split" href="${postHref(lead)}" data-reveal style="border:0">
         <span class="split__media">
           <img src="${lead.image}" alt="${esc(lead.title)}" loading="eager" width="1400" height="1600">
           <span class="split__tag">${lead.tag} · ${lead.read}</span>
@@ -1955,7 +2088,7 @@
         ${rest
           .map(
             (p, i) => `
-          <a class="post" href="#/journal" data-reveal style="--d:${i * 80}ms">
+          <a class="post" href="${postHref(p)}" data-reveal style="--d:${i * 80}ms">
             <span class="post__media"><img src="${p.image}" alt="${esc(p.title)}" loading="lazy" width="1200" height="900"></span>
             <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
             <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt" style="display:block;margin-top:7px">${esc(p.excerpt)}</span></span>
@@ -1964,10 +2097,76 @@
           .join('')}
       </div>
     </section>
-    ${newsletterSection()}
-    ${perkRow()}`;
+    ${newsletterSection()}`;
 
     return { html, title: 'Journal — Arena', desc: 'Notes from the Arena studio: repair stories, materials, and why we only release twice a year.', mount(root) { bindNewsletter(root); } };
+  }
+
+  function journalArticle(slug) {
+    const i = DATA.journal.findIndex((p) => (p.slug || p.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')) === slug);
+    if (i === -1) return notFound();
+    const post = DATA.journal[i];
+    const others = DATA.journal.filter((_, j) => j !== i);
+    const trail = [
+      { label: 'Journal', href: '#/journal' },
+      { label: post.title, href: postHref(post) },
+    ];
+    const html = `
+    ${crumbs(trail)}
+    <article class="article">
+      <header class="article__head" data-reveal style="--d:60ms">
+        <span class="mono">${post.tag} · ${post.date} · ${post.read} read</span>
+        <h1>${esc(post.title)}</h1>
+        <p class="lede">${esc(post.excerpt)}</p>
+      </header>
+      <div class="article__media" data-reveal="scale" style="--d:120ms">
+        <img src="${post.image}" alt="${esc(post.title)}" width="1400" height="900">
+      </div>
+      <div class="article__body" data-reveal style="--d:180ms">
+        ${post.body.map((para) => `<p>${esc(para)}</p>`).join('')}
+      </div>
+      <footer class="article__foot" data-reveal style="--d:220ms">
+        <span class="avatar">A</span>
+        <span class="small muted">Filed from Studio no. 4, Copenhagen. Questions about anything here? <a class="link link--underline" href="mailto:hello@arena.studio">hello@arena.studio</a></span>
+      </footer>
+    </article>
+
+    <section class="section section--flush-top container">
+      ${sectionHead({ eyebrow: 'Keep reading', title: 'More from the journal' })}
+      <div class="posts${others.length === 2 ? ' posts--2' : ''}">
+        ${others
+          .map(
+            (p, j) => `
+          <a class="post" href="${postHref(p)}" data-reveal style="--d:${j * 80}ms">
+            <span class="post__media"><img src="${p.image}" alt="${esc(p.title)}" loading="lazy" width="1200" height="900"></span>
+            <span class="post__meta"><span class="mono">${p.tag}</span><span class="divider-dot"></span><span class="xs muted">${p.date} · ${p.read}</span></span>
+            <span><span class="post__title">${esc(p.title)}</span><span class="post__excerpt" style="display:block;margin-top:7px">${esc(p.excerpt)}</span></span>
+          </a>`
+          )
+          .join('')}
+      </div>
+    </section>
+    ${newsletterSection()}`;
+
+    return {
+      html,
+      title: `${post.title} — Arena Journal`,
+      desc: post.excerpt,
+      image: /\.(png|jpe?g|webp|avif)$/i.test(post.image) ? post.image : undefined,
+      mount() {
+        injectLd({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.excerpt,
+          image: location.origin + '/' + post.image,
+          datePublished: post.date,
+          author: { '@type': 'Organization', name: 'Arena' },
+          publisher: { '@type': 'Organization', name: 'Arena' },
+        });
+        injectLd(breadcrumbLd(trail));
+      },
+    };
   }
 
   /* ================================ ABOUT ================================ */
@@ -1978,7 +2177,7 @@
     <header class="container page-head">
       <div class="page-head__inner">
         <div class="page-head__row">
-          <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be <span class="accent">kept.</span></h1>
+          <h1 class="display" data-reveal style="--d:60ms;max-width:14ch">Made to be <span class="accent">kept</span></h1>
           <p class="lede" data-reveal style="--d:120ms;max-width:44ch">Arena began with one frustrating question: why does everything electronic eventually become rubbish?</p>
         </div>
       </div>
@@ -1991,13 +2190,13 @@
           <span class="split__tag">Studio no. 4, Copenhagen</span>
         </div>
         <div class="split__copy">
-          <h2 class="h2" data-reveal style="--d:70ms">${count()} products, <span class="accent">on purpose.</span></h2>
+          <h2 class="h2" data-reveal style="--d:70ms">${count()} products, on purpose</h2>
           <p class="lede" data-reveal style="--d:130ms">We started in a two-room studio off Refshaleveen with a single product and a rule we still keep: never release something we would not replace with itself.</p>
           <p class="lede" data-reveal style="--d:180ms">Seven years later the catalogue is ${count()} items deep. Each one is drawn, prototyped and repaired in the same building, and every part is published for anyone who wants to keep theirs running.</p>
           <div class="stats" data-reveal style="--d:240ms">
-            <div class="stat"><span class="stat__n" data-count="7">0</span><span class="stat__l">years, two releases a year</span></div>
-            <div class="stat"><span class="stat__n" data-count="92">0</span><span class="stat__l">countries shipped to</span></div>
-            <div class="stat"><span class="stat__n" data-count="1.9" data-decimals="1" data-suffix="%">0</span><span class="stat__l">of units returned in 2025</span></div>
+            <div class="stat"><span class="stat__n" data-count="7">7</span><span class="stat__l">years, two releases a year</span></div>
+            <div class="stat"><span class="stat__n" data-count="92">92</span><span class="stat__l">countries shipped to</span></div>
+            <div class="stat"><span class="stat__n" data-count="1.9" data-decimals="1" data-suffix="%">1.9%</span><span class="stat__l">of units returned in 2025</span></div>
           </div>
         </div>
       </div>
@@ -2010,7 +2209,7 @@
           <span class="split__tag">Repair bench · 4 min per unit</span>
         </div>
         <div class="split__copy">
-          <h2 class="h2" data-reveal style="--d:70ms">If it opens, it <span class="accent">lasts.</span></h2>
+          <h2 class="h2" data-reveal style="--d:70ms">If it opens, it lasts</h2>
           <ul class="stack stack-2" data-reveal style="--d:130ms">
             ${[
               ['wrench', 'Standard screws only, no glue, no ultrasonic welding'],
@@ -2031,8 +2230,26 @@
       </div>
     </section>
 
+    <section class="section section--tight container" id="faq">
+      ${sectionHead({
+        eyebrow: 'Before you write to us',
+        title: 'Questions we get most',
+      })}
+      <div class="faq">
+        ${DATA.faqs
+          .map(
+            (f, i) => `
+          <div class="acc${i === 0 ? ' is-open' : ''}">
+            <button class="acc__btn" aria-expanded="${i === 0}">${esc(f.q)} <span class="acc__icon"></span></button>
+            <div class="acc__panel"><div class="acc__inner"><div class="acc__content"><p>${esc(f.a)}</p></div></div></div>
+          </div>`
+          )
+          .join('')}
+      </div>
+    </section>
+
     <section class="section section--tight container" id="contact">
-      ${sectionHead({ title: 'Humans, not <span class="accent">tickets.</span>' })}
+      ${sectionHead({ eyebrow: 'Customer care', title: 'Talk to us' })}
       <div class="feature-row">
         ${[
           ['mail', 'Customer care', 'hello@arena.studio · replies within one business day, written by the people who pack the boxes.', '+45 33 12 44 08'],
@@ -2052,7 +2269,7 @@
       </div>
     </section>
     <section class="section section--tight container" id="legal">
-      ${sectionHead({ title: 'The fine print. <span class="accent">Short.</span>' })}
+      ${sectionHead({ eyebrow: 'Policies', title: 'The fine print, in plain language' })}
       <div class="feature-row">
         ${[
           [
@@ -2086,8 +2303,7 @@
           .join('')}
       </div>
     </section>
-    ${newsletterSection()}
-    ${perkRow()}`;
+    ${newsletterSection()}`;
 
     return {
       html,
@@ -2095,9 +2311,21 @@
       desc: 'Why Arena exists, how the objects are drawn, built and repaired, and how to reach the Copenhagen studio.',
       mount(root) {
         bindNewsletter(root);
+        bindAccordions(root);
+        /* FAQ rich results — the questions and answers come straight from the
+           rendered accordion, so search engines and customers see the same */
+        injectLd({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: DATA.faqs.map((f) => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: { '@type': 'Answer', text: f.a },
+          })),
+        });
       },
     };
   }
 
-  window.Views = { home, shop, product, checkout, confirmed, track, notFound, journal, about, newsletterSection, perkRow, bindNewsletter, sectionHead, unmountLive };
+  window.Views = { home, shop, product, checkout, confirmed, track, notFound, journal, journalArticle, about, newsletterSection, perkRow, bindNewsletter, sectionHead, unmountLive };
 })();

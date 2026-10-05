@@ -191,6 +191,7 @@
       rating: 4.7,
       reviews: 88,
       badge: null,
+      stock: 4,
       colors: [
         { name: 'Graphite', hex: '#2b2b30' },
         { name: 'Chalk', hex: '#ebe8e1' },
@@ -405,6 +406,7 @@
       rating: 4.7,
       reviews: 176,
       badge: null,
+      stock: 0,
       colors: [
         { name: 'Graphite', hex: '#2b2b30' },
         { name: 'Sand', hex: '#d9cfc0' },
@@ -590,6 +592,7 @@
       rating: 5.0,
       reviews: 47,
       badge: 'Made to order',
+      fulfilment: 'made-to-order',
       colors: [{ name: 'Graphite', hex: '#2b2b30' }],
       tagline: 'Compact 35 mm rangefinder',
       blurb:
@@ -721,28 +724,47 @@
 
   const journal = [
     {
+      slug: 'designed-to-be-repaired',
       title: 'Designed to be repaired, not replaced',
       excerpt: 'Why every Arena product opens with a single driver — and what that changes about the way we design.',
       date: '12 Mar 2026',
       read: '6 min',
       image: 'assets/img/desk-flatlay.jpg',
       tag: 'Craft',
+      body: [
+        'Every object we ship opens with the same T5 driver. Not because it is charming marketing, but because a fastener is a promise: if you can see the screw, you are allowed inside. The alternative — glue, welds, ultrasonic welds, potted boards — is a decision that the object ends at its first fault.',
+        'The discipline starts earlier than the screw, though. A product that can be opened also has to be worth opening: parts must be orderable, diagrams published, and the person repairing it in 2033 has to find both. We keep a parts inventory for a minimum of seven years after a product is discontinued, and the repair guides live in the box, not behind a login.',
+        'Designing this way changes the drawing. Seams sit where a tool naturally reaches. Batteries disconnect instead of dangling. Boards are labelled in plain language, because the person reading them at midnight is our customer, not our factory. Repairability is not a feature we add at the end; it is the constraint we design inside.',
+        'There is a commercial argument too — repaired objects stay in use, owners come back for parts instead of replacements, and nothing we made ends up shredded. But honestly, the real reason is simpler: we would rather build the thing we would want to fix.',
+      ],
     },
     {
+      slug: 'inside-the-acoustic-lab',
       title: 'Inside the Copenhagen acoustic lab',
       excerpt: 'Fourteen hundred hours, one target curve, and an argument about two hundred hertz that lasted a month.',
       date: '28 Feb 2026',
       read: '9 min',
       image: 'assets/img/mesh.jpg',
       tag: 'Behind the scenes',
+      body: [
+        'The lab is one room in the studio with too much absorption on the walls and a strange habit of being coldest in the morning — which matters, because driver suspension stiffens slightly when it is cold, and a curve measured at 8 am is not the curve you hear at 8 pm.',
+        'Halo One took 1,400 hours of listening across classical, jazz, and recordings of actual commutes. We tuned to a deliberately neutral target: bass that stays polite until the recording asks for it, and a top end that does not add shimmer to things that have none.',
+        'The month-long argument was about 200 Hz. One of us heard a smear in string quartets; the rest of us heard nothing. It turned out to be a resonance in the ear-cup vent, three millimetres of extra felt behind it fixed it, and we have since made that felt a stocked spare part, because anything we tuned once we can retune forever.',
+      ],
     },
     {
+      slug: 'a-quieter-kind-of-luxury',
       title: 'A quieter kind of luxury',
       excerpt: 'The case for objects that whisper: material honesty, restrained colour, and the value of empty space.',
       date: '04 Feb 2026',
       read: '5 min',
       image: 'assets/img/leaf-shadow.jpg',
       tag: 'Point of view',
+      body: [
+        'Most objects are designed to be chosen and then apologised for. Loud logos, surfaces that photograph better than they feel, finishes that look new precisely because they will never be old. We are interested in the opposite trade: objects that look plain and age well.',
+        'Material honesty is the rule. Aluminium looks like aluminium, felt like felt, leather like leather. Nothing is painted to imitate something it is not, because paint is the first thing to fail and the hardest thing to forgive.',
+        'The last part is empty space. A product that does not beg for attention leaves room for the work on your desk and the music in your ears. We think that restraint is what people mean when they say something feels expensive — not the price, the quiet.',
+      ],
     },
   ];
 

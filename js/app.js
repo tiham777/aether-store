@@ -78,6 +78,7 @@
       case 'track':
         return Views.track ? Views.track(params) : Views.notFound();
       case 'journal':
+        if (arg) return Views.journalArticle ? Views.journalArticle(arg) : Views.notFound();
         return Views.journal ? Views.journal() : Views.notFound();
       case 'about':
         return Views.about ? Views.about() : Views.notFound();
@@ -110,13 +111,13 @@
   function renderFailure(host, err) {
     if (!host) return;
     console.error('[arena] render failed:', err);
-    document.title = 'Something came loose — Arena';
+    document.title = 'Something went wrong — Arena';
     document.body.classList.remove('is-admin');
     host.innerHTML = `
       <div class="container">
         <div class="done">
           <span class="done__mark" style="background:var(--accent)">${UI.icon('alert')}</span>
-          <h1 class="done__title">Something came <span class="accent">loose.</span></h1>
+          <h1 class="done__title">Something went <span class="accent">wrong.</span></h1>
           <p class="lede" style="text-align:center">The page didn’t finish loading — nothing in your bag or account was lost.</p>
           <div class="row row-4 wrap center">
             <button class="btn btn--primary btn--lg" data-retry>Try again</button>
@@ -134,8 +135,22 @@
     }
   }
 
+  /* --------------------------- admin stylesheet --------------------------- */
+
+  /* the admin dashboard is a separate ~10 kB stylesheet used on one route;
+     inject it on first admin render instead of blocking every page */
+  function ensureAdminCss() {
+    if (document.querySelector('link[data-admin-css]')) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'css/admin.css';
+    link.setAttribute('data-admin-css', '');
+    document.head.appendChild(link);
+  }
+
   function render() {
     const { parts, params } = parseHash();
+    if (parts[0] === 'admin') ensureAdminCss();
     /* release live subscriptions owned by the outgoing view */
     if (window.Views && Views.unmountLive) Views.unmountLive();
     /* structured data belongs to the view that rendered it */
@@ -300,6 +315,9 @@
         done = true;
         el.textContent = prefix + fmt(target) + suffix;
       };
+      /* markup ships the real value (no-JS, SEO, screen readers); the count-up
+         is a JS-only flourish that may start from zero */
+      el.textContent = prefix + fmt(0) + suffix;
       const step = (now) => {
         if (done) return;
         const t = Math.min(1, (now - start) / dur);
@@ -399,6 +417,9 @@
   /* --------------------------------- boot --------------------------------- */
 
   function boot() {
+    /* the catalogue may have changed since this bag was saved (admin edits,
+       sold-out lines) — drop anything that can no longer be fulfilled */
+    if (window.Store && Store.prune) Store.prune();
     UI.init();
     render();
     bindParallax();
