@@ -1095,6 +1095,8 @@
 .pdp-bar .btn { flex: none; }
 @media (max-width: 960px) {
   .pdp-bar:not([hidden]) { display: flex; }
+  /* keep the footer's last row readable above the fixed bar */
+  body:has(.pdp-bar:not([hidden])) .footer { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
 }
 .drawer__promo .input { flex: 1; min-width: 0; }
 .drawer__promo-done {

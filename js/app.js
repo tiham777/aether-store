@@ -262,6 +262,11 @@
         )
       : null;
 
+  /* views that repaint a region in place (shop sort/filter repaints) hand
+     their fresh nodes through this hook so they animate in instead of
+     sitting at opacity: 0 */
+  window.__reveal = observeReveal;
+
   function observeReveal(scope) {
     const els = (scope || document).querySelectorAll('[data-reveal]');
     if (!revealObserver) {
