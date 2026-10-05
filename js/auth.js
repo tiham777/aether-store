@@ -250,6 +250,49 @@
     del(K.session);
   }
 
+  /* ------------------------- Google sign-in ------------------------------ */
+  /* The popup itself is Cloud's job; this turns the returned profile into a
+     local account: link by email (passwordless, trusted because Google
+     verified it), otherwise create a customer with a random password no one
+     knows — the account can only ever be entered via Google. */
+  function completeGoogleSignIn(profile) {
+    if (!profile || !profile.ok) return { ok: false, error: profile && profile.error };
+    const email = lower(profile.email);
+    if (!rules.email(email)) return { ok: false, error: 'That Google account has no usable email.' };
+    let u = users.find((x) => lower(x.email) === email);
+    let created = false;
+    if (!u) {
+      let base = (profile.name || 'owner').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 12) || 'owner';
+      let username = base;
+      let n = 2;
+      while (users.some((x) => lower(x.username) === username)) username = base + n++;
+      u = {
+        id: uid('u'),
+        name: cap(profile.name || 'Google owner', 60),
+        username,
+        email,
+        phone: '',
+        role: 'customer',
+        banned: false,
+        addresses: [],
+        salt: null,
+        hash: null,
+        google: true,
+        photoURL: cap(profile.photoURL || '', 400),
+        createdAt: Date.now(),
+      };
+      users.push(u);
+      persistUsers();
+      created = true;
+    }
+    if (u.banned) return { ok: false, error: 'This account has been suspended. Contact hello@arena.studio.' };
+    if (!u.google) u.google = true;
+    if (profile.photoURL && !u.photoURL) u.photoURL = cap(profile.photoURL, 400);
+    persistUsers();
+    startSession(u.id);
+    return { ok: true, user: u, created };
+  }
+
   function updateProfile(patch) {
     const u = current();
     if (!u) return { ok: false, error: 'Sign in first.' };
@@ -872,6 +915,7 @@
     login,
     register,
     logout,
+    completeGoogleSignIn,
     updateProfile,
     changePassword,
     saveAddresses,

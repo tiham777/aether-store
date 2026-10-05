@@ -87,6 +87,46 @@
 .auth__fine { text-align: center; }
 .auth__fine a { text-decoration: underline; text-underline-offset: 3px; }
 
+/* ------------------------------ Google sign-in ------------------------- */
+.auth__google { display: grid; gap: 14px; margin-top: 6px; }
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink-3);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.auth__divider::before,
+.auth__divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--line);
+}
+.auth__divider span { white-space: nowrap; }
+.btn--google {
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid var(--line-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn--google:hover {
+  background: #f6f6f4;
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+.btn--google svg { flex: 0 0 auto; }
+.btn--google.is-busy {
+  opacity: 0.65;
+  pointer-events: none;
+}
+.auth__google-note { text-align: center; margin: 0; }
+
 .input-wrap { position: relative; display: block; }
 .input-wrap .input { padding-right: 46px; }
 .peek {

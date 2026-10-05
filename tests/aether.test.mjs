@@ -297,6 +297,34 @@ describe('auth', () => {
     assert.equal(c.Auth.login('admin', 'Password8989$$').ok, true);
   });
 
+  test('Google sign-in creates a passwordless account, then links by email', () => {
+    const c = boot();
+    const first = c.Auth.completeGoogleSignIn({ ok: true, name: 'Ada Lovelace', email: 'Ada@Example.com', photoURL: '' });
+    assert.equal(first.ok, true, 'first Google sign-in succeeds');
+    assert.equal(first.created, true, 'account is created on first visit');
+    assert.equal(first.user.google, true, 'account is flagged as Google-managed');
+    assert.equal(first.user.salt, null, 'no password hash exists to brute-force');
+    assert.match(first.user.username, /^adalovelace/);
+    assert.ok(c.Auth.current(), 'session starts immediately');
+
+    const second = c.Auth.completeGoogleSignIn({ ok: true, name: 'Ada L', email: 'ada@example.com' });
+    assert.equal(second.ok, true);
+    assert.equal(second.created, false, 'second sign-in links the same account');
+    assert.equal(second.user.id, first.user.id, 'same user id — one account per email');
+    assert.equal(c.Auth.listUsers().filter((u) => u.google).length, 1, 'no duplicate accounts');
+
+    const bad = c.Auth.completeGoogleSignIn({ ok: true, name: 'X', email: 'not-an-email' });
+    assert.equal(bad.ok, false, 'missing email is rejected');
+    const off = c.Auth.completeGoogleSignIn({ ok: false, error: 'cloud-off' });
+    assert.equal(off.ok, false, 'failed popup is refused');
+
+    c.Auth.login('admin', 'Password8989$$');
+    c.Auth.setBanned(first.user.id, true);
+    const banned = c.Auth.completeGoogleSignIn({ ok: true, name: 'Ada', email: 'ada@example.com' });
+    assert.equal(banned.ok, false, 'suspended accounts stay locked out');
+    assert.match(banned.error, /suspended/i);
+  });
+
   test('register rejects duplicate usernames', () => {
     const c = boot();
     c.DemoData.load();

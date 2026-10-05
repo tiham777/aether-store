@@ -127,6 +127,30 @@
     );
   }
 
+  /* Firebase Auth is loaded lazily on the first Google sign-in attempt —
+     most visitors never need the extra module. Reuses the app the main
+     loader initialised (getApp) so there is exactly one Firebase app. */
+  let authPromise = null;
+  function authReady() {
+    if (!configured()) return Promise.resolve(null);
+    if (authPromise) return authPromise;
+    const base = 'https://www.gstatic.com/firebasejs/' + SDK_VERSION;
+    authPromise = Promise.all([
+      import(base + '/firebase-app.js'),
+      import(base + '/firebase-auth.js'),
+    ])
+      .then(([app, a]) => {
+        const fb = app.getApps().length ? app.getApp() : app.initializeApp(config());
+        return {
+          getAuth: a.getAuth,
+          GoogleAuthProvider: a.GoogleAuthProvider,
+          signInWithPopup: a.signInWithPopup,
+        };
+      })
+      .catch(() => null);
+    return authPromise;
+  }
+
   function ready() {
     if (!configured()) {
       state = 'off';
@@ -415,6 +439,39 @@
     watchOrders,
     flush,
     pending: () => readQueue().length,
+    /* Google sign-in — resolves a plain profile the caller converts into
+       a local account via Auth.completeGoogleSignIn. */
+    async googleSignIn() {
+      const bundle = await authReady();
+      if (!bundle) return { ok: false, error: 'cloud-off' };
+      try {
+        const auth = bundle.getAuth();
+        const provider = new bundle.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const cred = await bundle.signInWithPopup(auth, provider);
+        const email = String(cred.user.email || '').toLowerCase();
+        if (!email) return { ok: false, error: 'no-email' };
+        return {
+          ok: true,
+          name: String(cred.user.displayName || email.split('@')[0]).slice(0, 60),
+          email,
+          photoURL: typeof cred.user.photoURL === 'string' ? cred.user.photoURL.slice(0, 400) : '',
+        };
+      } catch (e) {
+        const code = (e && String(e.code || '').replace('auth/', '')) || '';
+        if (code === 'popup-closed-by-user' || code === 'cancelled-popup-request') {
+          return { ok: false, error: 'cancelled', silent: true };
+        }
+        if (code === 'popup-blocked') return { ok: false, error: 'popup-blocked' };
+        if (code === 'unauthorized-domain') return { ok: false, error: 'unauthorized-domain' };
+        if (code === 'operation-not-allowed') return { ok: false, error: 'provider-disabled' };
+        if (code === 'configuration-not-found') return { ok: false, error: 'provider-disabled' };
+        /* unknown code — surface it in the console so the store owner can
+           diagnose setup problems (unauthorized domains, API keys, …) */
+        if (window.console && console.warn) console.warn('[arena] Google sign-in failed:', code || e);
+        return { ok: false, error: 'google-failed' };
+      }
+    },
     /* test seams — no production caller touches these */
     __setLoader(fn) {
       loader = fn;
@@ -423,6 +480,7 @@
       api = null;
       state = 'off';
       initPromise = null;
+      authPromise = null;
       started = false;
       flushing = false;
       handlers = {};

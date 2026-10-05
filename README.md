@@ -61,9 +61,15 @@ Firebase is absent or unreachable.
 4. Paste it into [`js/firebase-config.js`](js/firebase-config.js)
 5. Publish [`firestore.rules`](firestore.rules): **Firestore → Rules → paste
    and publish**, or `firebase deploy --only firestore:rules`
+6. For **Google sign-in**: **Authentication → Sign-in method → Google →
+   enable**, then **Authentication → Settings → Authorized domains → add
+   `arena-store-omega.vercel.app`** (localhost is pre-authorised)
 
 Once configured, the site:
 
+- offers **Continue with Google** on sign-in and registration — the Google
+  profile is converted into the same local account (linked by email), so
+  orders and reviews follow the person, not the browser
 - writes every order to `orders/{ORDER_ID}` — if the network drops, the write
   is queued in the browser and retried on reconnect, so an order is never lost
 - shows orders placed on any device in `#/admin`, live, without a sync button

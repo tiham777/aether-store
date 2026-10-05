@@ -504,6 +504,32 @@
   border-radius: var(--r-pill);
 }
 .pdp__blurb { font-size: 0.98rem; line-height: 1.66; color: var(--ink-2); }
+.pdp__stock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--ink-2);
+}
+.pdp__stock-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--warn, #b45309);
+  animation: stock-pulse 2.4s ease-in-out infinite;
+}
+@keyframes stock-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.pdp__stock--low { color: #8a4b08; font-weight: 500; }
+.pdp__stock--out { color: var(--ink-3); }
 
 .opt { display: grid; gap: 11px; }
 .opt__label { display: flex; align-items: baseline; gap: 8px; font-size: 0.8rem; font-weight: 550; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-3); }

@@ -707,6 +707,14 @@
 
           <p class="pdp__blurb" data-reveal style="--d:190ms">${esc(p.blurb)}</p>
 
+          ${
+            p.stock === 0
+              ? `<p class="pdp__stock pdp__stock--out" data-reveal style="--d:210ms">Out of stock · parts and repairs stay available</p>`
+              : p.stock <= 5
+                ? `<p class="pdp__stock pdp__stock--low" data-reveal style="--d:210ms"><span class="pdp__stock-dot"></span>Low stock · only ${p.stock} left</p>`
+                : ''
+          }
+
           <div class="opt" data-reveal style="--d:230ms">
             <span class="opt__label">Colour <b data-color-name>${esc(colors[0].name)}</b></span>
             <div class="swatches" role="radiogroup" aria-label="Colour" data-swatch-group>

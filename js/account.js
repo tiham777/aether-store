@@ -117,6 +117,8 @@
             <button class="btn btn--primary btn--lg btn--block" type="submit">Sign in ${icon('arrowRight')}</button>
           </form>
 
+          ${googleSectionHTML()}
+
           <p class="xs muted auth__fine">New here? <a href="#/register${q}">Create an account</a>.</p>
           <p class="xs muted auth__fine">Demo storefront: accounts live in this browser only.</p>
         </div>
@@ -147,6 +149,8 @@
           input.type = on ? 'text' : 'password';
           e.currentTarget.setAttribute('aria-label', on ? 'Hide password' : 'Show password');
         });
+
+        bindGoogleSignin(root, next);
 
         root.querySelector('[data-forgot]').addEventListener('click', () => {
           UI.toast({ title: 'Reset link sent', sub: 'Demo mode: password resets are simulated.' });
@@ -197,6 +201,70 @@
         });
       },
     };
+  }
+
+  /* --------------------------- Google sign-in ---------------------------- */
+  /* Cloud runs the popup and returns a verified profile; Auth turns it into
+     a local account (linked by email, created on first visit). */
+  function googleErrText(code) {
+    return (
+      {
+        'cloud-off': 'Google sign-in needs the store’s cloud backend, which isn’t reachable right now.',
+        'no-email': 'Your Google account has no email address to sign in with.',
+        'popup-blocked': 'Your browser blocked the Google window — allow popups for this site and try again.',
+        'unauthorized-domain': 'This domain isn’t authorised for Google sign-in in the Firebase console.',
+        'provider-disabled': 'Google sign-in isn’t enabled for this store yet.',
+        'google-failed': 'Google sign-in failed — please try again.',
+      }[code] || 'Google sign-in failed — please try again.'
+    );
+  }
+
+  function googleSectionHTML() {
+    return `
+          <div class="auth__google">
+            <div class="auth__divider" role="separator" aria-label="or continue with"><span>or</span></div>
+            <button class="btn btn--google btn--lg btn--block" type="button" data-google-signin>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.02.15 3.5 2.7.24.03c2.2-2.1 3.5-5.1 3.5-8.6z"/><path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.1 0-5.8-2.1-6.8-5l-.14.01-3.6 2.8-.05.13C3.4 21.3 7.4 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.24-.72-.38-1.5-.38-2.4s.14-1.68.37-2.4l-.01-.16-3.65-2.8-.12.06C.5 8.2 0 10 0 12s.5 3.8 1.4 5.3l3.8-2.9z"/><path fill="#EA4335" d="M12 4.6c2.2 0 3.7.9 4.5 1.7l3.3-3.2C17.9 1.2 15.2 0 12 0 7.4 0 3.4 2.7 1.4 6.7l3.8 2.9c1-2.9 3.7-5 6.8-5z"/></svg>
+              Continue with Google
+            </button>
+            <p class="xs muted auth__google-note">Fast checkout, order tracking and your saved bag — we never post anything.</p>
+          </div>`;
+  }
+
+  function bindGoogleSignin(root, next) {
+    const btn = root.querySelector('[data-google-signin]');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      if (btn.dataset.busy) return;
+      btn.dataset.busy = '1';
+      btn.classList.add('is-busy');
+      try {
+        const profile =
+          window.Cloud && Cloud.googleSignIn ? await Cloud.googleSignIn() : { ok: false, error: 'cloud-off' };
+        if (profile.ok) {
+          const res = Auth.completeGoogleSignIn(profile);
+          if (res.ok) {
+            UI.refreshChrome();
+            UI.toast({
+              title: `${res.created ? 'Welcome' : 'Welcome back'}, ${res.user.name.split(' ')[0]}`,
+              sub: 'Signed in with Google.',
+            });
+            location.hash = '#' + next;
+            return;
+          }
+        }
+        if (!profile.ok && profile.silent) return; /* user closed the popup — not an error */
+        const errBox = root.querySelector('[data-auth-err]');
+        const errText = root.querySelector('[data-auth-err-text]');
+        if (errBox && errText) {
+          errText.textContent = googleErrText((profile.ok ? (typeof res !== 'undefined' && res) || {} : profile).error);
+          errBox.classList.add('is-shown');
+        }
+      } finally {
+        delete btn.dataset.busy;
+        btn.classList.remove('is-busy');
+      }
+    });
   }
 
   /* =============================== REGISTER ============================== */
@@ -254,6 +322,8 @@
             <button class="btn btn--primary btn--lg btn--block" type="submit">Create account ${icon('arrowRight')}</button>
           </form>
 
+          ${googleSectionHTML()}
+
           <p class="xs muted auth__fine">Already have one? <a href="#/login${q}">Sign in instead.</a></p>
         </div>
         ${authArt()}
@@ -271,6 +341,8 @@
         const form = root.querySelector('[data-register]');
         const errBox = root.querySelector('[data-auth-err]');
         const errText = root.querySelector('[data-auth-err-text]');
+
+        bindGoogleSignin(root, next);
         const showErr = (msg) => {
           errText.textContent = msg;
           errBox.classList.add('is-shown');
