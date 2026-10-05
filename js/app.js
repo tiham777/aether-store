@@ -135,11 +135,15 @@
     }
   }
 
-  /* --------------------------- admin stylesheet --------------------------- */
+  /* --------------------- auth / account / admin stylesheet ----------------- */
 
-  /* the admin dashboard is a separate ~10 kB stylesheet used on one route;
-     inject it on first admin render instead of blocking every page */
-  function ensureAdminCss() {
+  /* css/admin.css carries the auth pages, the member account dashboard and
+     the admin dashboard, plus the order-status chrome used by tracking and
+     confirmation. None of the storefront pages need it, so it is injected
+     on first render of a route that does instead of blocking every page. */
+  const ROUTE_CSS = new Set(['admin', 'login', 'register', 'account', 'track', 'order-confirmed']);
+
+  function ensureRouteCss() {
     if (document.querySelector('link[data-admin-css]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -150,7 +154,7 @@
 
   function render() {
     const { parts, params } = parseHash();
-    if (parts[0] === 'admin') ensureAdminCss();
+    if (ROUTE_CSS.has(parts[0] || '')) ensureRouteCss();
     /* release live subscriptions owned by the outgoing view */
     if (window.Views && Views.unmountLive) Views.unmountLive();
     /* structured data belongs to the view that rendered it */

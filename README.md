@@ -22,7 +22,8 @@ no framework, no node_modules.
   `noindex` on account/admin/checkout, Open Graph + Twitter cards, JSON-LD
   (Organization, WebSite, Product, Article, FAQPage, BreadcrumbList),
   `robots.txt`, `sitemap.xml`, PWA manifest, and security + cache headers in
-  `vercel.json`. The admin stylesheet is injected only on the admin route.
+  `vercel.json`. The auth/account/admin stylesheet is injected only on the
+  routes that use it.
 - **Delivery promise in one clock** — the "order before 14:00" cutoff and every
   ETA are computed in **Europe/Copenhagen**, whatever timezone the visitor is
   in, so the countdown, shipping quotes and copy can never disagree
